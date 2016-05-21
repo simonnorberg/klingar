@@ -28,24 +28,24 @@ import net.simno.klingar.R;
 import net.simno.klingar.data.Extra;
 import net.simno.klingar.util.Urls;
 
-import butterknife.Bind;
 import butterknife.BindDimen;
+import butterknife.BindView;
 
-public final class AlbumViewHolder extends ClickableViewHolder {
+final class AlbumViewHolder extends ClickableViewHolder {
 
-  @Bind(R.id.album_thumb) ImageView thumb;
-  @Bind(R.id.album_title) TextView title;
-  @Bind(R.id.album_subtitle) TextView subtitle;
+  @BindView(R.id.album_thumb) ImageView thumb;
+  @BindView(R.id.album_title) TextView title;
+  @BindView(R.id.album_subtitle) TextView subtitle;
   @BindDimen(R.dimen.item_height) int height;
 
   private final RequestManager glide;
 
-  public AlbumViewHolder(View view, RequestManager glide, OnClickListener listener) {
+  AlbumViewHolder(View view, RequestManager glide, OnClickListener listener) {
     super(view, listener);
     this.glide = glide;
   }
 
-  public void bindModel(@NonNull MediaDescriptionCompat description) {
+  void bindModel(@NonNull MediaDescriptionCompat description) {
     title.setText(description.getTitle());
 
     Bundle extras = description.getExtras();

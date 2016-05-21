@@ -29,23 +29,23 @@ import net.simno.klingar.data.Extra;
 import net.simno.klingar.ui.widget.CircleImageViewTarget;
 import net.simno.klingar.util.Urls;
 
-import butterknife.Bind;
 import butterknife.BindDimen;
+import butterknife.BindView;
 
-public final class ArtistViewHolder extends ClickableViewHolder {
+final class ArtistViewHolder extends ClickableViewHolder {
 
-  @Bind(R.id.artist_thumb) ImageView thumb;
-  @Bind(R.id.artist_title) TextView title;
+  @BindView(R.id.artist_thumb) ImageView thumb;
+  @BindView(R.id.artist_title) TextView title;
   @BindDimen(R.dimen.item_height) int height;
 
   private final RequestManager glide;
 
-  public ArtistViewHolder(View view, RequestManager glide, OnClickListener listener) {
+  ArtistViewHolder(View view, RequestManager glide, OnClickListener listener) {
     super(view, listener);
     this.glide = glide;
   }
 
-  public void bindModel(@NonNull MediaDescriptionCompat description) {
+  void bindModel(@NonNull MediaDescriptionCompat description) {
     title.setText(description.getTitle());
 
     Bundle extras = description.getExtras();

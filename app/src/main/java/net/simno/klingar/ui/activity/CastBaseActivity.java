@@ -23,12 +23,11 @@ import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 
 import net.simno.klingar.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 
 public abstract class CastBaseActivity extends BaseActivity {
 
-  @Bind(R.id.toolbar)
-  Toolbar toolbar;
+  @BindView(R.id.toolbar) Toolbar toolbar;
 
   private VideoCastManager castManager;
 

@@ -20,17 +20,17 @@ import android.widget.TextView;
 
 import net.simno.klingar.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 
-public final class SettingsViewHolder extends ClickableViewHolder {
+final class SettingsViewHolder extends ClickableViewHolder {
 
-  @Bind(R.id.settings_text) TextView textView;
+  @BindView(R.id.settings_text) TextView textView;
 
-  public SettingsViewHolder(View view, OnClickListener listener) {
+  SettingsViewHolder(View view, OnClickListener listener) {
     super(view, listener);
   }
 
-  public void bindModel(String text) {
+  void bindModel(String text) {
     textView.setText(text);
   }
 }

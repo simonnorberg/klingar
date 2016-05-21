@@ -29,8 +29,8 @@ import net.simno.klingar.R;
 import net.simno.klingar.ui.activity.BrowserActivity;
 import net.simno.klingar.ui.activity.PlayerActivity;
 
-import butterknife.Bind;
 import butterknife.BindDrawable;
+import butterknife.BindView;
 import butterknife.OnClick;
 
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
@@ -42,9 +42,9 @@ import static android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
 
 public class MiniPlayerFragment extends BaseFragment {
 
-  @Bind(R.id.track) TextView track;
-  @Bind(R.id.artist) TextView artist;
-  @Bind(R.id.play_pause_button) ImageButton playPause;
+  @BindView(R.id.track) TextView track;
+  @BindView(R.id.artist) TextView artist;
+  @BindView(R.id.play_pause_button) ImageButton playPause;
   @BindDrawable(R.drawable.ic_play_circle_outline_white_36dp) Drawable playDrawable;
   @BindDrawable(R.drawable.ic_pause_circle_outline_white_36dp) Drawable pauseDrawable;
 

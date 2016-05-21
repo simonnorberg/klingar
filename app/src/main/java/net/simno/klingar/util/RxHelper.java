@@ -71,7 +71,7 @@ public final class RxHelper {
   public static final Func1<MediaContainer, Observable<Directory>> FLATMAP_DIRS =
       mediaContainer -> {
         if (mediaContainer.directories == null) {
-          return Observable.from(Collections.<Directory>emptyList());
+          return Observable.from(Collections.emptyList());
         }
         return Observable.from(mediaContainer.directories);
       };
@@ -79,7 +79,7 @@ public final class RxHelper {
   public static final Func1<MediaContainer, Observable<Track>> FLATMAP_TRACKS =
       mediaContainer -> {
         if (mediaContainer.tracks == null) {
-          return Observable.from(Collections.<Track>emptyList());
+          return Observable.from(Collections.emptyList());
         }
         return Observable.from(mediaContainer.tracks);
       };
@@ -87,7 +87,7 @@ public final class RxHelper {
   public static final Func1<MediaContainer, Observable<Playlist>> FLATMAP_PLAYLISTS =
       mediaContainer -> {
         if (mediaContainer.playlists == null) {
-          return Observable.from(Collections.<Playlist>emptyList());
+          return Observable.from(Collections.emptyList());
         }
         return Observable.from(mediaContainer.playlists);
       };

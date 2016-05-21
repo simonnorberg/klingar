@@ -40,12 +40,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
 import butterknife.BindDrawable;
+import butterknife.BindView;
 
 public class SettingsFragment extends BaseFragment implements SettingsAdapter.OnItemClickListener {
 
-  @Bind(R.id.recycler_view) RecyclerView recyclerView;
+  @BindView(R.id.recycler_view) RecyclerView recyclerView;
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
 
   @Inject ToolbarOwner toolbarOwner;

@@ -91,7 +91,7 @@ public class MusicProvider {
         return albumItems(serverId, getAlbumKey(child), mediaId);
     }
 
-    return Observable.just(Collections.<MediaItem>emptyList());
+    return Observable.just(Collections.emptyList());
   }
 
   private Observable<List<MediaItem>> mediaRoot() {

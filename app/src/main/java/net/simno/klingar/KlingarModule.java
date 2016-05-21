@@ -19,9 +19,11 @@ import android.content.Context;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.facebook.android.crypto.keychain.AndroidConceal;
 import com.facebook.android.crypto.keychain.SharedPrefsBackedKeyChain;
 import com.facebook.crypto.Crypto;
-import com.facebook.crypto.util.SystemNativeCryptoLibrary;
+import com.facebook.crypto.CryptoConfig;
+import com.facebook.crypto.keychain.KeyChain;
 
 import javax.inject.Singleton;
 
@@ -49,6 +51,7 @@ public class KlingarModule {
 
   @Provides @Singleton
   Crypto provideCrypto(Context context) {
-    return new Crypto(new SharedPrefsBackedKeyChain(context), new SystemNativeCryptoLibrary());
+    KeyChain keyChain = new SharedPrefsBackedKeyChain(context, CryptoConfig.KEY_256);
+    return AndroidConceal.get().createDefaultCrypto(keyChain);
   }
 }

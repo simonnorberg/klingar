@@ -58,10 +58,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
 import butterknife.BindColor;
 import butterknife.BindDimen;
 import butterknife.BindDrawable;
+import butterknife.BindView;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static net.simno.klingar.util.MediaItemHelper.getViewType;
@@ -73,9 +73,9 @@ public class DetailFragment extends BaseFragment implements MediaAdapter.OnItemC
   private static final String STATE_ITEMS = "state_items";
   private static final String STATE_SCROLLED_DISTANCE = "state_scrolled_distance";
 
-  @Bind(R.id.recycler_view) RecyclerView recyclerView;
-  @Bind(R.id.content_loading) ContentLoadingProgressBar contentLoading;
-  @Bind(R.id.detail_container) RelativeLayout detailContainer;
+  @BindView(R.id.recycler_view) RecyclerView recyclerView;
+  @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
+  @BindView(R.id.detail_container) RelativeLayout detailContainer;
   @BindColor(R.color.primary) int primaryColor;
   @BindDimen(R.dimen.background_height) int backgroundHeight;
   @BindDimen(R.dimen.background_image_width) int imageWidth;

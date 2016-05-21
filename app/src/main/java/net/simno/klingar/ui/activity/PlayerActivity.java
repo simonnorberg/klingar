@@ -50,8 +50,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
 import butterknife.BindDrawable;
+import butterknife.BindView;
 import butterknife.OnClick;
 import timber.log.Timber;
 
@@ -62,17 +62,17 @@ public class PlayerActivity extends CastBaseActivity {
 
   @Inject RequestManager glide;
 
-  @Bind(R.id.content_loading) ContentLoadingProgressBar contentLoading;
-  @Bind(R.id.player_background_image) SquareImageView background;
-  @Bind(R.id.player_track_title) TextView trackTitle;
-  @Bind(R.id.player_artist_title) TextView artistTitle;
-  @Bind(R.id.player_extra) TextView extra;
-  @Bind(R.id.player_seekbar) SeekBar seekBar;
-  @Bind(R.id.player_elapsed_time) TextView elapsedTime;
-  @Bind(R.id.player_total_time) TextView totalTime;
-  @Bind(R.id.playback_controls_play_pause) ImageView playPause;
-  @Bind(R.id.playback_controls_shuffle) ImageView shuffle;
-  @Bind(R.id.playback_controls_repeat) ImageView repeat;
+  @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
+  @BindView(R.id.player_background_image) SquareImageView background;
+  @BindView(R.id.player_track_title) TextView trackTitle;
+  @BindView(R.id.player_artist_title) TextView artistTitle;
+  @BindView(R.id.player_extra) TextView extra;
+  @BindView(R.id.player_seekbar) SeekBar seekBar;
+  @BindView(R.id.player_elapsed_time) TextView elapsedTime;
+  @BindView(R.id.player_total_time) TextView totalTime;
+  @BindView(R.id.playback_controls_play_pause) ImageView playPause;
+  @BindView(R.id.playback_controls_shuffle) ImageView shuffle;
+  @BindView(R.id.playback_controls_repeat) ImageView repeat;
   @BindDrawable(R.drawable.ic_play_arrow_white_36dp) Drawable playDrawable;
   @BindDrawable(R.drawable.ic_pause_white_36dp) Drawable pauseDrawable;
   @BindDrawable(R.drawable.ic_repeat_white_36dp) Drawable repeatDrawable;
@@ -222,7 +222,7 @@ public class PlayerActivity extends CastBaseActivity {
     stopSeekbarUpdate();
     if (!executorService.isShutdown()) {
       scheduleFuture = executorService.scheduleAtFixedRate(
-          (Runnable) () -> handler.post(updateProgressTask),
+          () -> handler.post(updateProgressTask),
           PROGRESS_UPDATE_INITIAL_INTERVAL,
           PROGRESS_UPDATE_INTERNAL,
           TimeUnit.MILLISECONDS);

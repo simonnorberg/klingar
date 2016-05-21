@@ -40,16 +40,16 @@ import net.simno.klingar.util.Strings;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
 import butterknife.BindString;
+import butterknife.BindView;
 import rx.android.schedulers.AndroidSchedulers;
 
 public class LoginActivity extends BaseActivity {
 
-  @Bind(R.id.login_form) LinearLayout loginForm;
-  @Bind(R.id.username_edit) AppCompatEditText usernameEdit;
-  @Bind(R.id.password_edit) AppCompatEditText passwordEdit;
-  @Bind(R.id.content_loading) ContentLoadingProgressBar contentLoading;
+  @BindView(R.id.login_form) LinearLayout loginForm;
+  @BindView(R.id.username_edit) AppCompatEditText usernameEdit;
+  @BindView(R.id.password_edit) AppCompatEditText passwordEdit;
+  @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
   @BindString(R.string.app_name) String appName;
   @BindString(R.string.invalid_username) String invalidUsername;
   @BindString(R.string.invalid_password) String invalidPassword;

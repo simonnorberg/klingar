@@ -65,7 +65,7 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.OnClick;
 import timber.log.Timber;
 
@@ -80,10 +80,10 @@ public class BrowserActivity extends CastBaseActivity implements ToolbarOwner.Ac
   private static final String STATE_CURRENT_DRAWER_ITEM = "state_current_drawer_item";
   private static final String STATE_LIBS = "state_libs";
 
-  @Bind(R.id.container) FrameLayout container;
-  @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-  @Bind(R.id.navigation) NavigationView navigation;
-  @Nullable @Bind(R.id.mini_player_container) View miniPlayerContainer;
+  @BindView(R.id.container) FrameLayout container;
+  @BindView(R.id.drawer_layout) DrawerLayout drawerLayout;
+  @BindView(R.id.navigation) NavigationView navigation;
+  @Nullable @BindView(R.id.mini_player_container) View miniPlayerContainer;
 
   @Inject ToolbarOwner toolbarOwner;
   @Inject ServerManager serverManager;

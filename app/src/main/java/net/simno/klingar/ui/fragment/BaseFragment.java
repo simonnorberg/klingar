@@ -26,11 +26,13 @@ import com.trello.rxlifecycle.components.support.RxFragment;
 import net.simno.klingar.util.RxHelper;
 
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import rx.subscriptions.CompositeSubscription;
 
 public abstract class BaseFragment extends RxFragment {
 
   CompositeSubscription subscriptions;
+  private Unbinder unbinder;
 
   abstract int getLayoutResource();
 
@@ -38,7 +40,7 @@ public abstract class BaseFragment extends RxFragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     View view = inflater.inflate(getLayoutResource(), container, false);
-    ButterKnife.bind(this, view);
+    unbinder = ButterKnife.bind(this, view);
     return view;
   }
 
@@ -57,6 +59,6 @@ public abstract class BaseFragment extends RxFragment {
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    ButterKnife.unbind(this);
+    unbinder.unbind();
   }
 }

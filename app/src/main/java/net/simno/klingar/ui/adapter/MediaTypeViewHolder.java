@@ -22,17 +22,17 @@ import android.widget.TextView;
 
 import net.simno.klingar.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 
-public final class MediaTypeViewHolder extends ClickableViewHolder {
+final class MediaTypeViewHolder extends ClickableViewHolder {
 
-  @Bind(R.id.media_type_title) TextView title;
+  @BindView(R.id.media_type_title) TextView title;
 
-  public MediaTypeViewHolder(View view, OnClickListener listener) {
+  MediaTypeViewHolder(View view, OnClickListener listener) {
     super(view, listener);
   }
 
-  public void bindModel(@NonNull MediaDescriptionCompat description) {
+  void bindModel(@NonNull MediaDescriptionCompat description) {
     title.setText(description.getTitle());
   }
 }

@@ -29,11 +29,11 @@ import net.simno.klingar.ui.ToolbarOwner;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 
 public class LicensesFragment extends BaseFragment {
 
-  @Bind(R.id.web_view) WebView webView;
+  @BindView(R.id.web_view) WebView webView;
 
   @Inject ToolbarOwner toolbarOwner;
 

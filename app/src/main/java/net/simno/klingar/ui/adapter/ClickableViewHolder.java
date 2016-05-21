@@ -23,9 +23,9 @@ import butterknife.ButterKnife;
 /**
  * ClickableViewHolder adds a click listener to the default ViewHolder
  */
-public class ClickableViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+class ClickableViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-  public interface OnClickListener {
+  interface OnClickListener {
     void onClick(int position);
   }
 

@@ -25,19 +25,19 @@ import android.widget.TextView;
 import net.simno.klingar.R;
 import net.simno.klingar.data.Extra;
 
-import butterknife.Bind;
+import butterknife.BindView;
 
-public final class TrackViewHolder extends ClickableViewHolder {
+final class TrackViewHolder extends ClickableViewHolder {
 
-  @Bind(R.id.track_title) TextView title;
-  @Bind(R.id.track_subtitle) TextView subtitle;
-  @Bind(R.id.track_duration) TextView duration;
+  @BindView(R.id.track_title) TextView title;
+  @BindView(R.id.track_subtitle) TextView subtitle;
+  @BindView(R.id.track_duration) TextView duration;
 
-  public TrackViewHolder(View view, OnClickListener listener) {
+  TrackViewHolder(View view, OnClickListener listener) {
     super(view, listener);
   }
 
-  public void bindModel(@NonNull MediaDescriptionCompat description) {
+  void bindModel(@NonNull MediaDescriptionCompat description) {
     title.setText(description.getTitle());
 
     Bundle extras = description.getExtras();

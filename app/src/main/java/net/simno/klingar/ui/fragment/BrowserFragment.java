@@ -50,8 +50,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
 import butterknife.BindDrawable;
+import butterknife.BindView;
 
 import static net.simno.klingar.util.MediaIdHelper.createBrowseMediaId;
 import static net.simno.klingar.util.MediaItemHelper.createMediaItem;
@@ -68,8 +68,8 @@ public class BrowserFragment extends BaseFragment implements EndlessScrollListen
   private static final String STATE_OFFSET_MEDIA_ID = "state_offset_media_id";
   private static final int PAGE_LIMIT = 50;
 
-  @Bind(R.id.recycler_view) RecyclerView recyclerView;
-  @Bind(R.id.content_loading) ContentLoadingProgressBar contentLoading;
+  @BindView(R.id.recycler_view) RecyclerView recyclerView;
+  @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
 
   @Inject ToolbarOwner toolbarOwner;

@@ -36,8 +36,8 @@ import timber.log.Timber;
 @Singleton
 public class LoginManager {
 
-  private static final Entity ENTITY_USERNAME = new Entity("entity_username");
-  private static final Entity ENTITY_AUTH_TOKEN = new Entity("entity_auth_token");
+  private static final Entity ENTITY_USERNAME = Entity.create("entity_username");
+  private static final Entity ENTITY_AUTH_TOKEN = Entity.create("entity_auth_token");
   private static final String PREF_USERNAME = "pref_username";
   private static final String PREF_AUTH_TOKEN = "pref_auth_token";
 

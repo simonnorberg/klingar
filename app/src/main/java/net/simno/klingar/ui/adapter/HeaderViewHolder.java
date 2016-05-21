@@ -23,19 +23,19 @@ import android.widget.TextView;
 
 import net.simno.klingar.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class HeaderViewHolder extends RecyclerView.ViewHolder {
+final class HeaderViewHolder extends RecyclerView.ViewHolder {
 
-  @Bind(R.id.header_title) TextView title;
+  @BindView(R.id.header_title) TextView title;
 
-  public HeaderViewHolder(View view) {
+  HeaderViewHolder(View view) {
     super(view);
     ButterKnife.bind(this, view);
   }
 
-  public void bindModel(@NonNull MediaDescriptionCompat description) {
+  void bindModel(@NonNull MediaDescriptionCompat description) {
     title.setText(description.getTitle());
   }
 }
