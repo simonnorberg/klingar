@@ -47,14 +47,9 @@ def gitTimestamp() {
 def isTravis = "true".equals(System.getenv("TRAVIS"))
 def preDexEnabled = "true".equals(System.getProperty("pre-dex", "true"))
 
-if (project.hasProperty("klingar.signing")
-    && new File(project.property("klingar.signing") + ".gradle").exists()) {
-  apply from: project.property("klingar.signing") + ".gradle";
-}
-
 android {
-  compileSdkVersion 23
-  buildToolsVersion '23.0.3'
+  compileSdkVersion 24
+  buildToolsVersion '24.0.0'
 
   dexOptions {
     preDexLibraries = preDexEnabled && !isTravis
@@ -63,7 +58,7 @@ android {
   defaultConfig {
     applicationId "net.simno.klingar"
     minSdkVersion 21
-    targetSdkVersion 23
+    targetSdkVersion 24
 
     versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
     versionName "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -99,10 +94,10 @@ android {
 }
 
 ext {
-  supportLibVersion = '23.4.0'
-  daggerVersion = '2.4'
-  okhttpVersion = '3.2.0'
-  retrofitVersion = '2.0.2'
+  supportLibVersion = '24.0.0'
+  daggerVersion = '2.5'
+  okhttpVersion = '3.3.1'
+  retrofitVersion = '2.1.0'
   mockitoVersion = '1.10.19'
 }
 
@@ -119,13 +114,13 @@ dependencies {
   compile 'com.github.bumptech.glide:glide:3.7.0'
   compile 'com.github.bumptech.glide:okhttp-integration:1.4.0'
 
-  compile 'com.google.android.gms:play-services-cast:9.0.0'
-  compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.8.3'
+  compile 'com.google.android.gms:play-services-cast:9.0.2'
+  compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.8.4'
   compile "com.google.dagger:dagger:${daggerVersion}"
   apt "com.google.dagger:dagger-compiler:${daggerVersion}"
 
-  compile 'com.jakewharton:butterknife:8.0.1'
-  apt 'com.jakewharton:butterknife-compiler:8.0.1'
+  compile 'com.jakewharton:butterknife:8.1.0'
+  apt 'com.jakewharton:butterknife-compiler:8.1.0'
   compile 'com.jakewharton.timber:timber:4.1.2'
 
   compile "com.squareup.okhttp3:okhttp:${okhttpVersion}"
@@ -140,8 +135,8 @@ dependencies {
 
   compile 'com.trello:rxlifecycle-components:0.6.1'
 
-  compile 'io.reactivex:rxandroid:1.2.0'
-  compile 'io.reactivex:rxjava:1.1.5'
+  compile 'io.reactivex:rxandroid:1.2.1'
+  compile 'io.reactivex:rxjava:1.1.6'
 
   provided 'javax.annotation:jsr250-api:1.0'
 
