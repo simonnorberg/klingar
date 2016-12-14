@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2015 Simon Norberg
+Copyright (C) 2016 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,61 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<RelativeLayout
+<com.bluelinelabs.conductor.ChangeHandlerFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/controller_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-  <android.support.v7.widget.AppCompatImageView
-      android:id="@+id/logo"
-      android:layout_width="match_parent"
-      android:layout_height="56dp"
-      android:layout_alignParentTop="true"
-      android:layout_marginTop="48dp"
-      android:scaleType="fitCenter"
-      android:src="@drawable/logo_160x56"
-      android:contentDescription="@string/description"/>
-
-  <LinearLayout
-      android:id="@+id/login_form"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/logo"
-      android:layout_margin="48dp"
-      android:orientation="vertical">
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-      <android.support.v7.widget.AppCompatEditText
-          android:id="@+id/username_edit"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:ems="10"
-          android:hint="@string/hint_username"
-          android:inputType="textEmailAddress"
-          android:maxLength="100"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-      <android.support.v7.widget.AppCompatEditText
-          android:id="@+id/password_edit"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:ems="10"
-          android:hint="@string/hint_password"
-          android:inputType="textPassword"
-          android:maxLength="100"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-  </LinearLayout>
-
-  <include layout="@layout/include_content_loading"/>
-
-</RelativeLayout>
+    android:layout_height="match_parent"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    tools:context="net.simno.klingar.ui.login.LoginActivity"/>

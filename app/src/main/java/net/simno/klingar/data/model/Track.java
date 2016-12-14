@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,51 +15,43 @@
  */
 package net.simno.klingar.data.model;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import android.support.annotation.Nullable;
 
-@Root(strict = false)
-public final class Track {
+import com.google.auto.value.AutoValue;
+import com.ryanharter.auto.value.parcel.ParcelAdapter;
 
-  @Attribute
-  public String ratingKey;
+import net.simno.klingar.data.HttpUrlTypeAdapter;
 
-  @Attribute
-  public String title;
+import okhttp3.HttpUrl;
 
-  @Attribute
-  public String parentTitle;
-
-  @Attribute
-  public String grandparentTitle;
-
-  @Attribute(required = false)
-  public String thumb;
-
-  @Attribute(required = false)
-  public int index;
-
-  @Attribute(required = false)
-  public long duration;
-
-  @Element
-  public Media media;
-
-  @Root(strict = false)
-  public static class Media {
-
-    @Element
-    public Part part;
+@AutoValue
+public abstract class Track implements PlexItem {
+  public static Builder builder() {
+    return new AutoValue_Track.Builder();
   }
 
-  @Root(strict = false)
-  public static class Part {
+  public abstract String title();
 
-    @Attribute
-    public String key;
+  public abstract String albumTitle();
 
-    @Attribute
-    public String container;
+  public abstract String artistTitle();
+
+  public abstract int index();
+
+  public abstract long duration();
+
+  @Nullable public abstract String thumb();
+
+  @ParcelAdapter(HttpUrlTypeAdapter.class) public abstract HttpUrl uri();
+
+  @AutoValue.Builder public abstract static class Builder {
+    public abstract Builder title(String name);
+    public abstract Builder artistTitle(String artistTitle);
+    public abstract Builder albumTitle(String albumTitle);
+    public abstract Builder index(int index);
+    public abstract Builder duration(long duration);
+    public abstract Builder thumb(String thumb);
+    public abstract Builder uri(HttpUrl uri);
+    public abstract Track build();
   }
 }

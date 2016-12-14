@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ public class BackgroundLayout extends RelativeLayout {
 
     // Fade background image
     if (distance <= visibleDistance) {
-      background.setImageAlpha((int) (ALPHA_MAX - (((float) distance / visibleDistance) * ALPHA_MAX)));
+      background.setImageAlpha(
+          (int) (ALPHA_MAX - (((float) distance / visibleDistance) * ALPHA_MAX)));
     }
   }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2015 Simon Norberg
+Copyright (C) 2016 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ limitations under the License.
 -->
 <resources>
 
-  <item type="id" name="album"/>
-  <item type="id" name="artist"/>
-  <item type="id" name="header"/>
-  <item type="id" name="library"/>
-  <item type="id" name="media_type"/>
-  <item type="id" name="playlist"/>
-  <item type="id" name="track"/>
+  <item name="album" type="id"/>
+  <item name="artist" type="id"/>
+  <item name="header" type="id"/>
+  <item name="library" type="id"/>
+  <item name="media_type" type="id"/>
+  <item name="playlist" type="id"/>
+  <item name="track" type="id"/>
 
 </resources>

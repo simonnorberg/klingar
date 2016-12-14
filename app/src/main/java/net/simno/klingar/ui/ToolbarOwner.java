@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,23 @@ package net.simno.klingar.ui;
 
 import android.content.Context;
 import android.graphics.Paint;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+
+import com.google.auto.value.AutoValue;
+import com.jakewharton.rxrelay.PublishRelay;
 
 import net.simno.klingar.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import rx.Observable;
+import timber.log.Timber;
 
 /**
  * Allows shared configuration of the toolbar
@@ -30,76 +41,114 @@ import javax.inject.Singleton;
 @Singleton
 public class ToolbarOwner {
 
+  public static final int TITLE_VISIBLE = 255;
+  public static final int TITLE_GONE = 0;
+  private final PublishRelay<Integer> spinnerRelay = PublishRelay.create();
   private final Paint titlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final int transparent;
   private final int primary;
-  private final int titleColor;
-  private Activity activity;
 
-  @Inject
-  public ToolbarOwner(Context context) {
+  private Activity activity;
+  private Config config;
+
+  @Inject public ToolbarOwner(Context context) {
     this.transparent = ContextCompat.getColor(context, android.R.color.transparent);
     this.primary = ContextCompat.getColor(context, R.color.primary);
-    this.titleColor = ContextCompat.getColor(context, android.R.color.white);
-    titlePaint.setColor(titleColor);
-    setActivity(null);
+    titlePaint.setColor(ContextCompat.getColor(context, android.R.color.white));
   }
 
-  public void setActivity(Activity activity) {
-    if (activity != null) {
-      this.activity = activity;
-    } else {
-      this.activity = new DummyActivity();
+  public void takeActivity(Activity activity) {
+    this.activity = activity;
+    update();
+  }
+
+  public void dropActivity() {
+    this.activity = null;
+  }
+
+  public Config getConfig() {
+    return config;
+  }
+
+  public void setConfig(Config config) {
+    this.config = config;
+    update();
+  }
+
+  public void spinnerItemSelected(int position) {
+    spinnerRelay.call(position);
+  }
+
+  public Observable<Integer> spinnerSelection() {
+    return spinnerRelay;
+  }
+
+  private void update() {
+    if (config == null || activity == null) {
+      return;
     }
-  }
+    Timber.d("UPDATE %s", config.toString());
+    activity.setToolbarBackgroundColor(config.background() ? primary : transparent);
 
-  public void setTitle(CharSequence title) {
-    activity.setToolbarTitle(title);
-  }
+    activity.setHomeAsUpEnabled(config.backNavigation());
 
-  public void setTitle(int resId) {
-    activity.setToolbarTitle(resId);
-  }
-
-  public void setTitleColorAlpha(int alpha) {
-    activity.setToolbarBackgroundColor(transparent);
-    titlePaint.setAlpha(alpha);
+    titlePaint.setAlpha(config.titleAlpha());
     activity.setToolbarTitleColor(titlePaint.getColor());
-  }
 
-  public void hideTitleAndBackground() {
-    activity.setToolbarBackgroundColor(transparent);
-    activity.setToolbarTitleColor(transparent);
-  }
-
-  public void showTitleAndBackground() {
-    activity.setToolbarBackgroundColor(primary);
-    activity.setToolbarTitleColor(titleColor);
-  }
-
-  private static class DummyActivity implements Activity {
-
-    @Override
-    public void setToolbarTitle(CharSequence title) {
+    if (config.title() != null) {
+      activity.setToolbarTitle(config.title());
+      activity.setShowTitleEnabled(true);
+    } else {
+      activity.setShowTitleEnabled(false);
     }
 
-    @Override
-    public void setToolbarTitle(int resId) {
-    }
-
-    @Override
-    public void setToolbarTitleColor(int color) {
-    }
-
-    @Override
-    public void setToolbarBackgroundColor(int color) {
+    ArrayList<String> options = config.options();
+    Integer selection = config.selection();
+    if (options != null && selection != null) {
+      activity.showToolbarSpinner(options, selection);
+    } else {
+      activity.hideToolbarSpinner();
     }
   }
 
-  public interface Activity {
+  interface Activity {
+    void setShowTitleEnabled(boolean enabled);
+    void setHomeAsUpEnabled(boolean enabled);
     void setToolbarTitle(CharSequence title);
-    void setToolbarTitle(int resId);
     void setToolbarTitleColor(int color);
     void setToolbarBackgroundColor(int color);
+    void showToolbarSpinner(List<String> options, int selection);
+    void hideToolbarSpinner();
+  }
+
+  @AutoValue
+  public abstract static class Config implements Parcelable {
+    public static Builder builder() {
+      return new AutoValue_ToolbarOwner_Config.Builder();
+    }
+
+    @Nullable public abstract String title();
+
+    @Nullable public abstract ArrayList<String> options();
+
+    @Nullable public abstract Integer selection();
+
+    public abstract int titleAlpha();
+
+    public abstract boolean background();
+
+    public abstract boolean backNavigation();
+
+    public abstract Builder toBuilder();
+
+    @AutoValue.Builder public abstract static class Builder {
+      public abstract Builder title(String title);
+      public abstract Builder options(ArrayList<String> options);
+      public abstract Builder selection(Integer selection);
+      public abstract Builder titleAlpha(int titleAlpha);
+      public abstract Builder background(boolean background);
+      public abstract Builder backNavigation(boolean backNavigation);
+      public abstract Config build();
+    }
   }
 }

@@ -18,9 +18,7 @@ package net.simno.klingar.util;
 import timber.log.Timber;
 
 public class DebugTree extends Timber.DebugTree {
-
-  @Override
-  protected String createStackElementTag(StackTraceElement element) {
+  @Override protected String createStackElementTag(StackTraceElement element) {
     return super.createStackElementTag(element) + ":" + element.getLineNumber();
   }
 }

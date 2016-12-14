@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2015 Simon Norberg
+Copyright (C) 2016 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@ limitations under the License.
 
   <dimen name="toolbar_height">56dp</dimen>
   <dimen name="toolbar_elevation">8dp</dimen>
-
-  <dimen name="miniplayer_height">64dp</dimen>
-  <dimen name="miniplayer_elevation">8dp</dimen>
 
   <dimen name="item_height">64dp</dimen>
   <dimen name="item_horizontal_padding">16dp</dimen>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2015 Simon Norberg
+Copyright (C) 2016 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@ limitations under the License.
 -->
 <android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/ItemContainer"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/item_height"
-    style="@style/ItemContainer">
+    android:layout_height="@dimen/item_height">
 
   <android.support.v7.widget.AppCompatTextView
       android:id="@+id/media_type_title"
+      style="@style/ItemTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_gravity="start|center_vertical"
-      style="@style/ItemTitle"/>
+      android:layout_gravity="start|center_vertical"/>
 
 </android.support.v7.widget.CardView>

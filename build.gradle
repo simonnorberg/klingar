@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,9 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.0-alpha3'
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.4'
-    classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
+    classpath 'com.android.tools.build:gradle:2.3.0-alpha2'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.1'
+    classpath 'me.tatarka:gradle-retrolambda:3.4.0'
     classpath 'me.tatarka.retrolambda.projectlombok:lombok.ast:0.2.3.a2'
   }
 

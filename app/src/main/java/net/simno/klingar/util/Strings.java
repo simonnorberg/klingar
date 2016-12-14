@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,12 @@ public final class Strings {
     // no instances
   }
 
-  // android.text.TextUtils.equals
-  public static boolean equals(CharSequence a, CharSequence b) {
-    if (a == b) return true;
-    int length;
-    if (a != null && b != null && (length = a.length()) == b.length()) {
-      if (a instanceof String && b instanceof String) {
-        return a.equals(b);
-      } else {
-        for (int i = 0; i < length; i++) {
-          if (a.charAt(i) != b.charAt(i)) {
-            return false;
-          }
-        }
-        return true;
-      }
-    }
-    return false;
-  }
-
   // https://github.com/JakeWharton/u2020
   public static boolean isBlank(CharSequence string) {
     return string == null || string.toString().trim().length() == 0;
+  }
+
+  public static String valueOrDefault(String string, String defaultString) {
+    return isBlank(string) ? defaultString : string;
   }
 }

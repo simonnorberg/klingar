@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package net.simno.klingar.data;
 import net.simno.klingar.R;
 
 public final class Type {
-
   public static final int ALBUM = R.id.album;
   public static final int ARTIST = R.id.artist;
   public static final int HEADER = R.id.header;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2015 Simon Norberg
+Copyright (C) 2016 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ limitations under the License.
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="net.simno.klingar">
 
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -26,11 +25,10 @@ limitations under the License.
 
   <application
       android:name=".KlingarApp"
-      android:supportsRtl="false"
       android:allowBackup="true"
-      android:fullBackupContent="true"
       android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
+      android:supportsRtl="true"
       android:theme="@style/AppTheme">
 
     <meta-data
@@ -38,7 +36,7 @@ limitations under the License.
         android:value="@integer/google_play_services_version"/>
 
     <activity
-        android:name=".ui.activity.MainActivity"
+        android:name=".ui.MainActivity"
         android:label="@string/app_name"
         android:launchMode="singleTop">
       <intent-filter>
@@ -48,51 +46,16 @@ limitations under the License.
     </activity>
 
     <activity
-        android:name=".ui.activity.LoginActivity"
-        android:label="@string/app_name"
-        android:launchMode="singleTop"
-        android:screenOrientation="sensorPortrait"
-        android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"/>
-
-    <activity
-        android:name=".ui.activity.BrowserActivity"
+        android:name=".ui.music.MusicActivity"
         android:label="@string/app_name"
         android:launchMode="singleTop"/>
 
     <activity
-        android:name=".ui.activity.PlayerActivity"
+        android:name=".ui.login.LoginActivity"
+        android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
         android:label="@string/app_name"
         android:launchMode="singleTop"
-        android:parentActivityName=".ui.activity.BrowserActivity">
-      <meta-data
-          android:name="android.support.PARENT_ACTIVITY"
-          android:value=".ui.activity.BrowserActivity"/>
-    </activity>
-
-    <service
-        android:name=".service.MyPlexServerFinder"
-        android:exported="false"/>
-
-    <service
-        android:name=".service.MusicService"
-        android:exported="true"
-        tools:ignore="ExportedService">
-      <intent-filter>
-        <action android:name="android.media.browse.MediaBrowserService"/>
-      </intent-filter>
-    </service>
-
-    <service
-        android:name="com.google.android.libraries.cast.companionlibrary.cast.reconnection.ReconnectionService"/>
-
-    <!-- A receiver that will receive media buttons and send as intents to your
-         MediaBrowserServiceCompat implementation. Required on pre-Lollipop. More information at
-         http://developer.android.com/reference/android/support/v4/media/session/MediaButtonReceiver.html -->
-    <receiver android:name="android.support.v4.media.session.MediaButtonReceiver" >
-      <intent-filter>
-        <action android:name="android.intent.action.MEDIA_BUTTON" />
-      </intent-filter>
-    </receiver>
+        android:screenOrientation="sensorPortrait"/>
 
   </application>
 

@@ -24,28 +24,23 @@ import android.view.inputmethod.InputMethodManager;
 import dagger.Module;
 import dagger.Provides;
 
-@Module
-public class AndroidModule {
+@Module class AndroidModule {
 
   private static final String PREFS = "klingar.prefs";
 
-  @Provides
-  Resources provideResources(Context context) {
+  @Provides Resources provideResources(Context context) {
     return context.getResources();
   }
 
-  @Provides
-  SharedPreferences provideSharedPreferences(Context context) {
+  @Provides SharedPreferences provideSharedPreferences(Context context) {
     return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
   }
 
-  @Provides
-  InputMethodManager provideInputMethodManager(Context context) {
+  @Provides InputMethodManager provideInputMethodManager(Context context) {
     return (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
   }
 
-  @Provides
-  ConnectivityManager provideConnectivityManager(Context context) {
+  @Provides ConnectivityManager provideConnectivityManager(Context context) {
     return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
   }
 }

@@ -15,7 +15,7 @@
  */
 package net.simno.klingar;
 
-import net.simno.klingar.data.plex.PlexModule;
+import net.simno.klingar.data.DataModule;
 
 import javax.inject.Singleton;
 
@@ -24,8 +24,7 @@ import dagger.Component;
 @Singleton
 @Component(modules = {
     AndroidModule.class,
-    PlexModule.class,
+    DataModule.class,
     KlingarModule.class
-})
-public interface KlingarComponent extends AppComponent {
+}) interface KlingarComponent extends AppComponent {
 }

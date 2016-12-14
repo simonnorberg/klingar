@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,8 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
     this.listener = listener;
   }
 
-  @Override
-  public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-    // get the same values as in AbsListView.OnScrollListener
+  @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+    // Get the same values as in AbsListView.OnScrollListener
     int first = layoutManager.findFirstVisibleItemPosition();
     int visible = recyclerView.getChildCount();
     int total = layoutManager.getItemCount();

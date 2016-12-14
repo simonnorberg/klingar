@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,27 @@
  */
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'checkstyle'
+
+task checkstyle(type: Checkstyle) {
+  group 'verification'
+  configFile rootProject.file('checkstyle.xml')
+  source 'src/main/java'
+  ignoreFailures false
+  showViolations true
+  include '**/*.java'
+  exclude '**/gen/**'
+
+  classpath = files()
+}
+
+afterEvaluate {
+  if (project.tasks.findByName('check')) {
+    check.dependsOn('checkstyle')
+  }
+}
 
 def versionMajor = 0
 def versionMinor = 1
@@ -44,12 +62,12 @@ def gitTimestamp() {
   return p.text.trim()
 }
 
-def isTravis = "true".equals(System.getenv("TRAVIS"))
-def preDexEnabled = "true".equals(System.getProperty("pre-dex", "true"))
+def isTravis = "true" == System.getenv("TRAVIS")
+def preDexEnabled = "true" == System.getProperty("pre-dex", "true")
 
 android {
-  compileSdkVersion 24
-  buildToolsVersion '24.0.0'
+  compileSdkVersion 25
+  buildToolsVersion '25.0.1'
 
   dexOptions {
     preDexLibraries = preDexEnabled && !isTravis
@@ -58,7 +76,7 @@ android {
   defaultConfig {
     applicationId "net.simno.klingar"
     minSdkVersion 21
-    targetSdkVersion 24
+    targetSdkVersion 25
 
     versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
     versionName "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -67,7 +85,7 @@ android {
     buildConfigField 'long', 'GIT_TIMESTAMP', "${gitTimestamp()}L"
     buildConfigField "String", "CAST_APP_ID", "\"01C414FF\""
 
-    testInstrumentationRunner "net.simno.klingar.MockTestRunner"
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -94,11 +112,10 @@ android {
 }
 
 ext {
-  supportLibVersion = '24.0.0'
-  daggerVersion = '2.5'
-  okhttpVersion = '3.3.1'
+  supportLibVersion = '25.0.1'
+  daggerVersion = '2.8'
+  okhttpVersion = '3.5.0'
   retrofitVersion = '2.1.0'
-  mockitoVersion = '1.10.19'
 }
 
 dependencies {
@@ -109,19 +126,24 @@ dependencies {
   compile "com.android.support:recyclerview-v7:${supportLibVersion}"
   compile "com.android.support:support-v13:${supportLibVersion}"
 
-  compile 'com.facebook.conceal:conceal:1.1.2@aar'
+  compile 'com.bluelinelabs:conductor:2.0.4'
 
   compile 'com.github.bumptech.glide:glide:3.7.0'
   compile 'com.github.bumptech.glide:okhttp-integration:1.4.0'
 
-  compile 'com.google.android.gms:play-services-cast:9.0.2'
-  compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.8.4'
-  compile "com.google.dagger:dagger:${daggerVersion}"
-  apt "com.google.dagger:dagger-compiler:${daggerVersion}"
+  provided 'com.google.auto.value:auto-value:1.4-rc1'
+  annotationProcessor 'com.google.auto.value:auto-value:1.4-rc1'
+  annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
+  compile 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5'
 
-  compile 'com.jakewharton:butterknife:8.1.0'
-  apt 'com.jakewharton:butterknife-compiler:8.1.0'
-  compile 'com.jakewharton.timber:timber:4.1.2'
+  compile 'com.google.android.gms:play-services-cast:10.0.1'
+  compile "com.google.dagger:dagger:${daggerVersion}"
+  annotationProcessor "com.google.dagger:dagger-compiler:${daggerVersion}"
+
+  compile 'com.jakewharton:butterknife:8.4.0'
+  annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+  compile 'com.jakewharton.timber:timber:4.4.0'
+  compile 'com.jakewharton.rxrelay:rxrelay:1.2.0'
 
   compile "com.squareup.okhttp3:okhttp:${okhttpVersion}"
   compile "com.squareup.okhttp3:logging-interceptor:${okhttpVersion}"
@@ -133,27 +155,8 @@ dependencies {
     exclude group: 'xpp3', module: 'xpp3'
   }
 
-  compile 'com.trello:rxlifecycle-components:0.6.1'
-
   compile 'io.reactivex:rxandroid:1.2.1'
-  compile 'io.reactivex:rxjava:1.1.6'
+  compile 'io.reactivex:rxjava:1.2.3'
 
   provided 'javax.annotation:jsr250-api:1.0'
-
-  androidTestCompile "com.android.support:support-annotations:${supportLibVersion}"
-  androidTestCompile 'com.android.support.test:rules:0.5'
-  androidTestCompile 'com.android.support.test:runner:0.5'
-  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
-
-  androidTestApt "com.google.dagger:dagger-compiler:${daggerVersion}"
-  androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
-  androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
-
-  androidTestCompile "com.squareup.okhttp3:mockwebserver:${okhttpVersion}"
-  androidTestCompile "com.squareup.retrofit2:retrofit-mock:${retrofitVersion}"
-
-  testCompile 'junit:junit:4.12'
-
-  testCompile "org.mockito:mockito-core:${mockitoVersion}"
-  androidTestCompile "org.mockito:mockito-core:${mockitoVersion}"
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,41 +17,20 @@ package net.simno.klingar;
 
 import android.content.Context;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
-import com.facebook.android.crypto.keychain.AndroidConceal;
-import com.facebook.android.crypto.keychain.SharedPrefsBackedKeyChain;
-import com.facebook.crypto.Crypto;
-import com.facebook.crypto.CryptoConfig;
-import com.facebook.crypto.keychain.KeyChain;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
 
-@Module
-public class KlingarModule {
+@Module class KlingarModule {
 
   private final KlingarApp app;
 
-  public KlingarModule(KlingarApp app) {
+  KlingarModule(KlingarApp app) {
     this.app = app;
   }
 
-  @Provides @Singleton
-  Context provideApplicationContext() {
+  @Provides @Singleton Context provideApplicationContext() {
     return app.getApplicationContext();
-  }
-
-  @Provides @Singleton
-  RequestManager provideGlide(Context context) {
-    return Glide.with(context);
-  }
-
-  @Provides @Singleton
-  Crypto provideCrypto(Context context) {
-    KeyChain keyChain = new SharedPrefsBackedKeyChain(context, CryptoConfig.KEY_256);
-    return AndroidConceal.get().createDefaultCrypto(keyChain);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,68 +15,29 @@
  */
 package net.simno.klingar.data.model;
 
-import net.simno.klingar.data.media.MediaService;
-import net.simno.klingar.data.media.MediaServiceHelper;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import com.google.auto.value.AutoValue;
 
 import okhttp3.HttpUrl;
 
-public final class Server {
-
-  private final String id;
-  private final String name;
-  private final MediaServiceHelper mediaHelper;
-  private final List<Connection> connections = new ArrayList<>();
-
-  public Server(String id, String name, MediaServiceHelper mediaHelper, Connection connection) {
-    this.id = id;
-    this.name = name;
-    this.mediaHelper = mediaHelper;
-    addConnection(connection);
+@AutoValue
+public abstract class Server {
+  public static Builder builder() {
+    return new AutoValue_Server.Builder();
   }
 
-  public String getId() {
-    return id;
-  }
+  public abstract String id();
 
-  public String getName() {
-    return name;
-  }
+  public abstract String name();
 
-  public MediaService media() {
-    return mediaHelper;
-  }
+  public abstract String accessToken();
 
-  public HttpUrl currentUri() {
-    if (connections.isEmpty()) {
-      return null;
-    }
-    return connections.get(0).uri;
-  }
+  public abstract HttpUrl uri();
 
-  public void addConnection(Connection connection) {
-    if (hasConnection(connection)) {
-      return;
-    }
-    connections.add(connection);
-    Collections.sort(connections);
-    mediaHelper.setUrl(connections.get(0).uri);
-  }
-
-  public int getConnectionCount() {
-    return connections.size();
-  }
-
-  private boolean hasConnection(Connection connection) {
-    for (Connection c : connections) {
-      if (Objects.equals(c.uri, connection.uri)) {
-        return true;
-      }
-    }
-    return false;
+  @AutoValue.Builder public abstract static class Builder {
+    public abstract Builder id(String id);
+    public abstract Builder name(String name);
+    public abstract Builder accessToken(String accessToken);
+    public abstract Builder uri(HttpUrl uri);
+    public abstract Server build();
   }
 }

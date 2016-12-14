@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,13 @@ import timber.log.Timber;
 
 public class SimpleSubscriber<T> extends Subscriber<T> {
 
-  @Override
-  public void onCompleted() {
+  @Override public void onCompleted() {
   }
 
-  @Override
-  public void onError(Throwable e) {
+  @Override public void onError(Throwable e) {
     Timber.e(e, e.getMessage());
   }
 
-  @Override
-  public void onNext(T t) {
+  @Override public void onNext(T t) {
   }
 }

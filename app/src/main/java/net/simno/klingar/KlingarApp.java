@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,7 @@ package net.simno.klingar;
 import android.app.Application;
 import android.content.Context;
 
-import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-
-import net.simno.klingar.ui.activity.PlayerActivity;
 import net.simno.klingar.util.DebugTree;
-import net.simno.klingar.util.ReleaseTree;
 
 import timber.log.Timber;
 
@@ -31,25 +26,16 @@ public class KlingarApp extends Application {
 
   private final AppComponent appComponent = createComponent();
 
-  @Override
-  public void onCreate() {
+  public static KlingarApp get(Context context) {
+    return (KlingarApp) context.getApplicationContext();
+  }
+
+  @Override public void onCreate() {
     super.onCreate();
 
     if (BuildConfig.DEBUG) {
       Timber.plant(new DebugTree());
-    } else {
-      Timber.plant(new ReleaseTree());
     }
-
-    CastConfiguration options = new CastConfiguration.Builder(BuildConfig.CAST_APP_ID)
-        .enableAutoReconnect()
-        .enableDebug()
-        .enableLockScreen()
-        .enableWifiReconnection()
-        .setTargetActivity(PlayerActivity.class)
-        .build();
-
-    VideoCastManager.initialize(this, options);
   }
 
   protected AppComponent createComponent() {
@@ -60,9 +46,5 @@ public class KlingarApp extends Application {
 
   public AppComponent component() {
     return appComponent;
-  }
-
-  public static KlingarApp get(Context context) {
-    return (KlingarApp) context.getApplicationContext();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,48 @@
 package net.simno.klingar.ui.widget;
 
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-/**
- * Based on https://gist.github.com/polbins/e37206fbc444207c0e92
- */
 public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
   private final Drawable divider;
+  private final Rect bounds = new Rect();
 
   public DividerItemDecoration(Drawable divider) {
     this.divider = divider;
   }
 
-  @Override
-  public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-     // Drawable width defines start/end padding. Drawable height defines divider height.
-    final int start = parent.getPaddingStart() + divider.getIntrinsicWidth();
-    final int end = parent.getWidth() - parent.getPaddingEnd() - divider.getIntrinsicWidth();
-    final int height = divider.getIntrinsicHeight();
-
-    for (int i = 0; i < parent.getChildCount(); ++i) {
-      View child = parent.getChildAt(i);
-      RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
-
-      int top = child.getBottom() + params.bottomMargin;
-      int bottom = top + height;
-
-      divider.setBounds(start, top, end, bottom);
-      divider.draw(c);
+  @Override public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+    if (parent.getLayoutManager() == null) {
+      return;
     }
+    drawVertical(c, parent);
+  }
+
+  private void drawVertical(Canvas canvas, RecyclerView parent) {
+    canvas.save();
+    // Drawable width defines left/right padding. Drawable height defines divider height.
+    final int left = parent.getPaddingStart() + divider.getIntrinsicWidth();
+    final int right = parent.getWidth() - parent.getPaddingEnd() - divider.getIntrinsicWidth();
+
+    final int childCount = parent.getChildCount();
+    for (int i = 0; i < childCount; i++) {
+      final View child = parent.getChildAt(i);
+      parent.getDecoratedBoundsWithMargins(child, bounds);
+      final int bottom = bounds.bottom + Math.round(ViewCompat.getTranslationY(child));
+      final int top = bottom - divider.getIntrinsicHeight();
+      divider.setBounds(left, top, right, bottom);
+      divider.draw(canvas);
+    }
+    canvas.restore();
+  }
+
+  @Override public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
+                                       RecyclerView.State state) {
+    outRect.set(0, 0, 0, divider.getIntrinsicHeight());
   }
 }

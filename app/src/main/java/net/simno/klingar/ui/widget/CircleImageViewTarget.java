@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ public class CircleImageViewTarget extends BitmapImageViewTarget {
   public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
     super.onResourceReady(bitmap, glideAnimation);
 
-    RoundedBitmapDrawable rounded = RoundedBitmapDrawableFactory.create(view.getResources(), bitmap);
+    RoundedBitmapDrawable rounded = RoundedBitmapDrawableFactory.create(view.getResources(),
+        bitmap);
     rounded.setCornerRadius(Math.max(bitmap.getWidth(), bitmap.getHeight()));
     rounded.setAntiAlias(true);
 

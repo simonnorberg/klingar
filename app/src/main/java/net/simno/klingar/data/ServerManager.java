@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,122 +15,89 @@
  */
 package net.simno.klingar.data;
 
-import android.support.v4.media.MediaBrowserCompat.MediaItem;
+import android.text.TextUtils;
 
-import net.simno.klingar.data.media.HostInterceptor;
-import net.simno.klingar.data.media.MediaService;
-import net.simno.klingar.data.media.MediaServiceHelper;
-import net.simno.klingar.data.model.Connection;
+import com.jakewharton.rxrelay.BehaviorRelay;
+
+import net.simno.klingar.data.api.MediaServiceHelper;
+import net.simno.klingar.data.api.PlexService;
+import net.simno.klingar.data.api.model.Device;
+import net.simno.klingar.data.api.model.Section;
+import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.Server;
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
-import net.simno.klingar.util.Strings;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 import rx.Observable;
-import rx.schedulers.Schedulers;
-import rx.subjects.BehaviorSubject;
-import timber.log.Timber;
 
 @Singleton
 public class ServerManager {
 
-  private final ConcurrentHashMap<String, Server> servers = new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, List<MediaItem>> libs = new ConcurrentHashMap<>();
-  private final BehaviorSubject<ArrayList<MediaItem>> libsObservable = BehaviorSubject.create();
-  private final OkHttpClient sharedClient;
-  private final SimpleXmlConverterFactory converterFactory;
+  private final BehaviorRelay<List<Library>> libsRelay = BehaviorRelay.create();
+  private final PlexService plex;
+  private final MediaServiceHelper media;
 
-  @Inject
-  public ServerManager(@Named("shared") OkHttpClient client,
-                       SimpleXmlConverterFactory converterFactory) {
-    this.sharedClient = client;
-    this.converterFactory = converterFactory;
+  @Inject ServerManager(PlexService plex, MediaServiceHelper media) {
+    this.plex = plex;
+    this.media = media;
   }
 
-  public synchronized void addConnection(String id, String name, Connection connection) {
-    if (servers.containsKey(id)) {
-      Server server = servers.get(id);
-      server.addConnection(connection);
-    } else {
-      MediaServiceHelper mediaHelper = createMediaServiceHelper(connection.uri);
-      servers.put(id, new Server(id, name, mediaHelper, connection));
-    }
-
-    updateLibs(id);
+  public Observable<List<Library>> libs() {
+    return libsRelay;
   }
 
-  private MediaServiceHelper createMediaServiceHelper(HttpUrl baseUrl) {
-    HostInterceptor hostInterceptor = new HostInterceptor();
-
-    OkHttpClient mediaClient = sharedClient.newBuilder()
-        .addInterceptor(hostInterceptor)
-        .build();
-
-    Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .callFactory(mediaClient)
-        .addConverterFactory(converterFactory)
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .build();
-
-    MediaService mediaService = retrofit.create(MediaService.class);
-
-    return MediaServiceHelper.create(hostInterceptor, mediaService);
-  }
-
-  public Server getServer(String id) {
-    return servers.get(id);
-  }
-
-  public Observable<ArrayList<MediaItem>> libs() {
-    return libsObservable;
-  }
-
-  private void updateLibs(final String id) {
-    final Server server = servers.get(id);
-    final String serverName = server.getName();
-
-    Timber.d("updateLibs %s", serverName);
-
-    server.media().sections()
-        .flatMap(RxHelper.FLATMAP_DIRS)
-        .filter(dir -> Strings.equals(dir.type, "artist"))
-        .map(RxHelper.mapLibrary(id, serverName))
+  public void refresh() {
+    plex.resources()
+        .flatMap(container -> Observable.from(container.devices))
+        .filter(device -> device.provides.contains("server"))
+        .map(this::parseServer)
+        .flatMap(server -> Observable.combineLatest(
+            Observable.just(server),
+            media.sections(server.uri())
+                .flatMap(container -> Observable.from(container.sections))
+                .filter(section -> TextUtils.equals(section.type, "artist")),
+            this::parseLibrary))
         .toList()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribe(new SimpleSubscriber<List<MediaItem>>() {
-          @Override
-          public void onNext(List<MediaItem> newLibs) {
-            Timber.d("onNext newLibs %s %s", id, newLibs.size());
-            libs.put(id, newLibs); // Overwrite all existing libs for this server
-            notifyLibsUpdate();
+        .compose(RxHelper.applySchedulers())
+        .subscribe(new SimpleSubscriber<List<Library>>() {
+          @Override public void onNext(List<Library> libs) {
+            libsRelay.call(libs);
           }
         });
   }
 
-  private void notifyLibsUpdate() {
-    Timber.d("notifyLibsUpdate");
-    // Make a list of all libs from all servers
-    ArrayList<MediaItem> allLibs = new ArrayList<>();
+  private Server parseServer(Device device) {
+    Server.Builder builder = Server.builder()
+        .id(device.clientIdentifier)
+        .name(device.name)
+        .accessToken(device.accessToken);
 
-    for (List<MediaItem> list : libs.values()) {
-      allLibs.addAll(list);
+    for (Device.Connection connection : device.connections) {
+      if (connection.local == 0) {
+        HttpUrl uri = HttpUrl.parse(connection.uri).newBuilder()
+            .addQueryParameter("X-Plex-Token", device.accessToken)
+            .build();
+        builder.uri(uri);
+        break;
+      }
     }
 
-    libsObservable.onNext(allLibs);
+    return builder.build();
+  }
+
+  private Library parseLibrary(Server server, Section section) {
+    return Library.builder()
+        .key(section.key)
+        .name(section.title)
+        .serverName(server.name())
+        .accessToken(server.accessToken())
+        .uri(server.uri())
+        .build();
   }
 }

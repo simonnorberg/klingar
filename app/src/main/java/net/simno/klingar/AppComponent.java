@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,18 @@
  */
 package net.simno.klingar;
 
-import net.simno.klingar.service.MusicService;
-import net.simno.klingar.service.MyPlexServerFinder;
-import net.simno.klingar.ui.activity.BrowserActivity;
-import net.simno.klingar.ui.activity.LoginActivity;
-import net.simno.klingar.ui.activity.MainActivity;
-import net.simno.klingar.ui.activity.PlayerActivity;
-import net.simno.klingar.ui.fragment.BrowserFragment;
-import net.simno.klingar.ui.fragment.DetailFragment;
-import net.simno.klingar.ui.fragment.LicensesFragment;
-import net.simno.klingar.ui.fragment.SettingsFragment;
+import net.simno.klingar.ui.MainActivity;
+import net.simno.klingar.ui.login.LoginActivity;
+import net.simno.klingar.ui.login.LoginController;
+import net.simno.klingar.ui.music.BrowserController;
+import net.simno.klingar.ui.music.DetailController;
+import net.simno.klingar.ui.music.MusicActivity;
 
 public interface AppComponent {
-  void inject(BrowserActivity activity);
-  void inject(LoginActivity activity);
   void inject(MainActivity activity);
-  void inject(PlayerActivity activity);
-
-  void inject(BrowserFragment fragment);
-  void inject(DetailFragment fragment);
-  void inject(LicensesFragment fragment);
-  void inject(SettingsFragment fragment);
-
-  void inject(MusicService service);
-  void inject(MyPlexServerFinder service);
-
-  void inject(MediaNotificationManager manager);
+  void inject(MusicActivity activity);
+  void inject(LoginActivity activity);
+  void inject(BrowserController controller);
+  void inject(DetailController controller);
+  void inject(LoginController controller);
 }

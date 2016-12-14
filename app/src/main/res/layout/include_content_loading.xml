@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2015 Simon Norberg
+Copyright (C) 2016 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 <android.support.v4.widget.ContentLoadingProgressBar
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/content_loading"
+    style="?android:attr/progressBarStyleLarge"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_centerInParent="true"
-    style="?android:attr/progressBarStyleLarge"/>
+    android:layout_centerInParent="true"/>

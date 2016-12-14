@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,37 @@
  */
 package net.simno.klingar.data.model;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Root;
+import android.support.annotation.Nullable;
 
-@Root(strict = false)
-public final class Playlist {
+import com.google.auto.value.AutoValue;
+import com.ryanharter.auto.value.parcel.ParcelAdapter;
 
-  @Attribute
-  public String title;
+import net.simno.klingar.data.HttpUrlTypeAdapter;
 
-  @Attribute
-  public String ratingKey;
+import okhttp3.HttpUrl;
 
-  @Attribute
-  public String composite;
+@AutoValue
+public abstract class Playlist implements PlexItem {
+  public static Builder builder() {
+    return new AutoValue_Playlist.Builder();
+  }
 
-  @Attribute
-  public int leafCount;
+  public abstract String title();
 
-  @Attribute
-  public long duration;
+  public abstract int size();
+
+  public abstract long duration();
+
+  @Nullable public abstract String art();
+
+  @ParcelAdapter(HttpUrlTypeAdapter.class) public abstract HttpUrl uri();
+
+  @AutoValue.Builder public abstract static class Builder {
+    public abstract Builder title(String name);
+    public abstract Builder size(int size);
+    public abstract Builder duration(long duration);
+    public abstract Builder art(String art);
+    public abstract Builder uri(HttpUrl uri);
+    public abstract Playlist build();
+  }
 }

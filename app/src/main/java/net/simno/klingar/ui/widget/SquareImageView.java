@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Antonio Leiva
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package net.simno.klingar.ui.widget;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
-public class SquareImageView  extends ImageView {
+public class SquareImageView extends AppCompatImageView {
 
   public SquareImageView(Context context) {
     super(context);
@@ -34,8 +34,7 @@ public class SquareImageView  extends ImageView {
     super(context, attrs, defStyleAttr);
   }
 
-  @Override
-  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+  @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
     int height = getMeasuredHeight();

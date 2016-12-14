@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Simon Norberg
+ * Copyright (C) 2016 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public final class Urls {
     // no instances
   }
 
-  public static String addPathToUrl(HttpUrl url, String path) {
+  public static HttpUrl addPathToUrl(HttpUrl url, String path) {
     if (url == null || Strings.isBlank(path)) {
       return null;
     }
@@ -34,7 +34,7 @@ public final class Urls {
       builder.addPathSegment(segment);
     }
 
-    return builder.build().toString();
+    return builder.build();
   }
 
   public static String getTranscodeUrl(HttpUrl url, String imageKey) {
