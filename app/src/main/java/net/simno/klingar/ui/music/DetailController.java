@@ -44,6 +44,7 @@ import net.simno.klingar.ui.music.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.BackgroundLayout;
 import net.simno.klingar.ui.widget.BackgroundScrollListener;
 import net.simno.klingar.ui.widget.CircleImageViewTarget;
+import net.simno.klingar.ui.widget.DistanceScrollListener;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.SquareImageView;
 import net.simno.klingar.util.RxHelper;
@@ -60,9 +61,12 @@ import butterknife.BindDrawable;
 import butterknife.BindView;
 import timber.log.Timber;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static net.simno.klingar.data.Key.PLEX_ITEM;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
+import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 
 public class DetailController extends BaseController implements
     MusicAdapter.OnPlexItemClickListener {
@@ -79,7 +83,7 @@ public class DetailController extends BaseController implements
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
   @Inject ToolbarOwner toolbarOwner;
   @Inject MusicRepository musicRepository;
-  private BackgroundScrollListener backgroundScrollListener;
+  private DistanceScrollListener scrollListener;
   private PlexItem plexItem;
   private boolean itemsLoaded;
 
@@ -104,6 +108,25 @@ public class DetailController extends BaseController implements
 
     plexItem = getArgs() != null ? getArgs().getParcelable(PLEX_ITEM) : null;
 
+    if (getResources() != null) {
+      if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
+        createPortraitView();
+      } else {
+        createLandscapeView();
+      }
+    }
+
+    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    recyclerView.setHasFixedSize(true);
+    recyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
+    recyclerView.setAdapter(adapter);
+
+    contentLoading.hide();
+
+    return view;
+  }
+
+  private void createPortraitView() {
     ToolbarOwner.Config.Builder builder = ToolbarOwner.Config.builder()
         .background(false)
         .backNavigation(true)
@@ -122,31 +145,36 @@ public class DetailController extends BaseController implements
           .build());
       showBackgroundImage(album.thumb(), Type.ALBUM);
     }
+  }
 
-//    if (getResources() != null) {
-//      if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//        toolbarOwner.showTitleAndBackground();
-//      } else {
-//        toolbarOwner.hideTitleAndBackground();
-//      }
-//    }
+  private void createLandscapeView() {
+    ToolbarOwner.Config.Builder builder = ToolbarOwner.Config.builder()
+        .background(true)
+        .backNavigation(true)
+        .titleAlpha(TITLE_VISIBLE);
 
-    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-    recyclerView.setHasFixedSize(true);
-    recyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
-    recyclerView.setAdapter(adapter);
+    if (plexItem instanceof Artist) {
+      Artist artist = (Artist) plexItem;
+      toolbarOwner.setConfig(builder
+          .title(artist.title())
+          .build());
+    } else if (plexItem instanceof Album) {
+      Album album = (Album) plexItem;
+      toolbarOwner.setConfig(builder
+          .title(album.title())
+          .build());
+    }
 
-    contentLoading.hide();
-
-    return view;
+    scrollListener = new DistanceScrollListener(ORIENTATION_LANDSCAPE);
+    recyclerView.addOnScrollListener(scrollListener);
   }
 
   @Override protected void onRestoreViewState(@NonNull View view, @NonNull Bundle savedViewState) {
     super.onRestoreViewState(view, savedViewState);
-    if (backgroundScrollListener != null) {
-      Bundle backgroundState = savedViewState.getParcelable("background");
+    if (scrollListener != null) {
+      Bundle backgroundState = savedViewState.getParcelable("scroll");
       if (backgroundState != null) {
-        backgroundScrollListener.onRestoreState(backgroundState);
+        scrollListener.onRestoreState(backgroundState);
       }
     }
   }
@@ -164,8 +192,8 @@ public class DetailController extends BaseController implements
 
   @Override protected void onSaveViewState(@NonNull View view, @NonNull Bundle outState) {
     super.onSaveViewState(view, outState);
-    if (backgroundScrollListener != null) {
-      outState.putParcelable("background", backgroundScrollListener.onSaveState());
+    if (scrollListener != null) {
+      outState.putParcelable("scroll", scrollListener.onSaveState());
     }
   }
 
@@ -207,9 +235,9 @@ public class DetailController extends BaseController implements
         recyclerView.getPaddingEnd(), recyclerView.getPaddingBottom());
 
     // Add scroll listener that handles toolbar fading and background parallax effects
-    backgroundScrollListener = new BackgroundScrollListener(backgroundLayout, toolbarOwner,
-        backgroundHeight, toolbarHeight);
-    recyclerView.addOnScrollListener(backgroundScrollListener);
+    scrollListener = new BackgroundScrollListener(ORIENTATION_PORTRAIT, backgroundLayout,
+        toolbarOwner, backgroundHeight, toolbarHeight);
+    recyclerView.addOnScrollListener(scrollListener);
   }
 
   private void getArtistItems(Artist artist) {

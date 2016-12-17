@@ -20,7 +20,7 @@ import android.support.v7.widget.RecyclerView;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 
-public class EndlessScrollListener extends RecyclerView.OnScrollListener {
+public class EndScrollListener extends RecyclerView.OnScrollListener {
 
   private final LinearLayoutManager layoutManager;
   private final EndListener listener;
@@ -28,12 +28,7 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
   private int visibleItemCount = NO_POSITION;
   private int totalItemCount = NO_POSITION;
 
-  /**
-   * This prevents calling endReached immediately after adding this scroll listener.
-   */
-  private boolean firstOnScrolled = true;
-
-  public EndlessScrollListener(LinearLayoutManager layoutManager, EndListener listener) {
+  public EndScrollListener(LinearLayoutManager layoutManager, EndListener listener) {
     this.layoutManager = layoutManager;
     this.listener = listener;
   }
@@ -45,17 +40,13 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
     int total = layoutManager.getItemCount();
 
     if (first != firstVisibleItem || visible != visibleItemCount || total != totalItemCount) {
-      if ((first + visible) >= (total - visible) && listener != null && !firstOnScrolled) {
+      if ((first + visible) >= (total - visible) && listener != null) {
         listener.endReached();
       }
 
       firstVisibleItem = first;
       visibleItemCount = visible;
       totalItemCount = total;
-
-      if (firstOnScrolled) {
-        firstOnScrolled = false;
-      }
     }
   }
 

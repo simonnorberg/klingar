@@ -33,7 +33,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import rx.Observable;
-import timber.log.Timber;
 
 /**
  * Allows shared configuration of the toolbar
@@ -87,7 +86,7 @@ public class ToolbarOwner {
     if (config == null || activity == null) {
       return;
     }
-    Timber.d("UPDATE %s", config.toString());
+
     activity.setToolbarBackgroundColor(config.background() ? primary : transparent);
 
     activity.setHomeAsUpEnabled(config.backNavigation());

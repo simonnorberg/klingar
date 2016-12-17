@@ -29,4 +29,6 @@ limitations under the License.
   <dimen name="background_image_width">192dp</dimen>
   <dimen name="background_image_height">192dp</dimen>
 
+  <dimen name="detail_top_margin">0dp</dimen>
+
 </resources>

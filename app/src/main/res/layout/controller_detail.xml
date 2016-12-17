@@ -25,6 +25,7 @@ limitations under the License.
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:clipToPadding="false"
+      android:paddingTop="@dimen/detail_top_margin"
       android:scrollbars="vertical"/>
 
   <include layout="@layout/include_content_loading"/>

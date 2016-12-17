@@ -67,7 +67,7 @@ def preDexEnabled = "true" == System.getProperty("pre-dex", "true")
 
 android {
   compileSdkVersion 25
-  buildToolsVersion '25.0.1'
+  buildToolsVersion '25.0.2'
 
   dexOptions {
     preDexLibraries = preDexEnabled && !isTravis
@@ -112,7 +112,7 @@ android {
 }
 
 ext {
-  supportLibVersion = '25.0.1'
+  supportLibVersion = '25.1.0'
   daggerVersion = '2.8'
   okhttpVersion = '3.5.0'
   retrofitVersion = '2.1.0'
@@ -126,7 +126,7 @@ dependencies {
   compile "com.android.support:recyclerview-v7:${supportLibVersion}"
   compile "com.android.support:support-v13:${supportLibVersion}"
 
-  compile 'com.bluelinelabs:conductor:2.0.4'
+  compile 'com.bluelinelabs:conductor:2.0.5'
 
   compile 'com.github.bumptech.glide:glide:3.7.0'
   compile 'com.github.bumptech.glide:okhttp-integration:1.4.0'

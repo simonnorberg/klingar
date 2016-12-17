@@ -18,4 +18,6 @@ limitations under the License.
 
   <dimen name="toolbar_height">48dp</dimen>
 
+  <dimen name="detail_top_margin">@dimen/toolbar_height</dimen>
+
 </resources>

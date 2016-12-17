@@ -15,7 +15,6 @@
  */
 package net.simno.klingar.ui.widget;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 
@@ -24,7 +23,7 @@ import net.simno.klingar.ui.ToolbarOwner;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 
-public class BackgroundScrollListener extends RecyclerView.OnScrollListener {
+public class BackgroundScrollListener extends DistanceScrollListener {
 
   private static final int ALPHA_MAX = 0xff;
 
@@ -46,24 +45,19 @@ public class BackgroundScrollListener extends RecyclerView.OnScrollListener {
    */
   private final float fadeStop;
 
-  /**
-   * Total distance scrolled (absolute value)
-   */
-  private int distance;
-
-  public BackgroundScrollListener(@NonNull BackgroundLayout backgroundLayout,
+  public BackgroundScrollListener(int orientation, @NonNull BackgroundLayout backgroundLayout,
                                   @NonNull ToolbarOwner toolbarOwner, int backgroundHeight,
                                   int toolbarHeight) {
+    super(orientation);
     this.backgroundLayout = backgroundLayout;
     this.toolbarOwner = toolbarOwner;
     this.visibleDistance = backgroundHeight - toolbarHeight;
     this.fadeStart = visibleDistance - toolbarHeight;
     this.fadeStop = visibleDistance - fadeStart;
-    this.distance = 0;
   }
 
   @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-    distance = Math.abs(distance + dy);
+    super.onScrolled(recyclerView, dx, dy);
 
     backgroundLayout.onScrolled(distance);
 
@@ -87,15 +81,5 @@ public class BackgroundScrollListener extends RecyclerView.OnScrollListener {
           .titleAlpha(TITLE_VISIBLE)
           .build());
     }
-  }
-
-  public Bundle onSaveState() {
-    Bundle outState = new Bundle();
-    outState.putInt("distance", distance);
-    return outState;
-  }
-
-  public void onRestoreState(@NonNull Bundle savedState) {
-    distance = savedState.getInt("distance", 0);
   }
 }

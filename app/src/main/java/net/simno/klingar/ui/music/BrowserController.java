@@ -41,7 +41,7 @@ import net.simno.klingar.ui.BaseController;
 import net.simno.klingar.ui.ToolbarOwner;
 import net.simno.klingar.ui.music.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
-import net.simno.klingar.ui.widget.EndlessScrollListener;
+import net.simno.klingar.ui.widget.EndScrollListener;
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
 
@@ -58,7 +58,7 @@ import static net.simno.klingar.data.Key.PLEX_ITEM;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 
 public class BrowserController extends BaseController implements
-    MusicAdapter.OnPlexItemClickListener, EndlessScrollListener.EndListener {
+    MusicAdapter.OnPlexItemClickListener, EndScrollListener.EndListener {
 
   private static final int PAGE_SIZE = 50;
   private final MusicAdapter adapter;
@@ -68,7 +68,7 @@ public class BrowserController extends BaseController implements
   @Inject ToolbarOwner toolbarOwner;
   @Inject ServerManager serverManager;
   @Inject MusicRepository musicRepository;
-  private EndlessScrollListener endlessScrollListener;
+  private EndScrollListener endScrollListener;
   private List<Library> libs = Collections.emptyList();
   private Library currentLib;
   private MediaType mediaType;
@@ -238,13 +238,13 @@ public class BrowserController extends BaseController implements
   }
 
   private void startEndlessScrolling() {
-    endlessScrollListener = new EndlessScrollListener(
-        (LinearLayoutManager) recyclerView.getLayoutManager(), this);
-    recyclerView.addOnScrollListener(endlessScrollListener);
+    endScrollListener = new EndScrollListener((LinearLayoutManager)
+        recyclerView.getLayoutManager(), this);
+    recyclerView.addOnScrollListener(endScrollListener);
   }
 
   private void stopEndlessScrolling() {
-    recyclerView.removeOnScrollListener(endlessScrollListener);
+    recyclerView.removeOnScrollListener(endScrollListener);
   }
 
   private void goToMediaType(MediaType mediaType) {
