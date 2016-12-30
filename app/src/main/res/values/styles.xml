@@ -27,15 +27,12 @@ limitations under the License.
 
   <style name="AppTheme" parent="BaseTheme"/>
 
-  <style name="ItemContainer" parent="CardView">
-    <item name="android:foreground">?android:attr/selectableItemBackground</item>
-    <item name="contentPaddingLeft">@dimen/item_horizontal_padding</item>
-    <item name="contentPaddingTop">@dimen/item_vertical_padding</item>
-    <item name="contentPaddingRight">@dimen/item_horizontal_padding</item>
-    <item name="contentPaddingBottom">@dimen/item_vertical_padding</item>
-    <item name="cardBackgroundColor">@android:color/transparent</item>
-    <item name="cardCornerRadius">0dp</item>
-    <item name="cardElevation">0dp</item>
+  <style name="ItemContainer">
+    <item name="android:background">?android:attr/selectableItemBackground</item>
+    <item name="android:paddingLeft">@dimen/item_horizontal_padding</item>
+    <item name="android:paddingTop">@dimen/item_vertical_padding</item>
+    <item name="android:paddingRight">@dimen/item_horizontal_padding</item>
+    <item name="android:paddingBottom">@dimen/item_vertical_padding</item>
   </style>
 
   <style name="ItemTitle">
