@@ -56,12 +56,12 @@ public class ToolbarOwner {
     titlePaint.setColor(ContextCompat.getColor(context, android.R.color.white));
   }
 
-  public void takeActivity(Activity activity) {
+  void takeActivity(Activity activity) {
     this.activity = activity;
     update();
   }
 
-  public void dropActivity() {
+  void dropActivity() {
     this.activity = null;
   }
 
@@ -74,11 +74,11 @@ public class ToolbarOwner {
     update();
   }
 
-  public void spinnerItemSelected(int position) {
+  void spinnerItemSelected(int position) {
     spinnerRelay.call(position);
   }
 
-  public Observable<Integer> spinnerSelection() {
+  Observable<Integer> spinnerSelection() {
     return spinnerRelay;
   }
 

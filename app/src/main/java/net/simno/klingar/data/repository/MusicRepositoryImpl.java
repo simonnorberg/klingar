@@ -30,7 +30,7 @@ import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.MediaType;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
-import net.simno.klingar.util.Urls;
+import net.simno.klingar.util.Strings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +41,7 @@ import rx.Observable;
 import rx.functions.Func1;
 
 import static net.simno.klingar.util.Strings.valueOrDefault;
+import static net.simno.klingar.util.Urls.addPathToUrl;
 import static net.simno.klingar.util.Urls.getTranscodeUrl;
 
 class MusicRepositoryImpl implements MusicRepository {
@@ -243,8 +244,8 @@ class MusicRepositoryImpl implements MusicRepository {
         .artistTitle(track.grandparentTitle)
         .index(track.index)
         .duration(track.duration)
-        .thumb(getTranscodeUrl(uri, track.thumb))
-        .uri(Urls.addPathToUrl(uri, track.media.part.key))
+        .thumb(Strings.isBlank(track.thumb) ? null : addPathToUrl(uri, track.thumb).toString())
+        .uri(addPathToUrl(uri, track.media.part.key))
         .build();
   }
 }

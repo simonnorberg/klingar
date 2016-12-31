@@ -22,7 +22,7 @@ limitations under the License.
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context="net.simno.klingar.ui.music.MusicActivity">
+    tools:context="net.simno.klingar.ui.KlingarActivity">
 
   <android.support.v7.widget.Toolbar
       android:id="@+id/toolbar"

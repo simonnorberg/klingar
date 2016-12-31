@@ -42,18 +42,22 @@ public class DistanceScrollListener extends RecyclerView.OnScrollListener {
     }
   }
 
-  public Bundle onSaveState() {
-    Bundle outState = new Bundle();
-    outState.putInt("distance", distance);
-    outState.putInt("portraitDistance", portraitDistance);
-    outState.putInt("landscapeDistance", landscapeDistance);
-    return outState;
+  public void onSaveViewState(@NonNull Bundle outState) {
+    Bundle scrollState = new Bundle();
+    scrollState.putInt("distance", distance);
+    scrollState.putInt("portraitDistance", portraitDistance);
+    scrollState.putInt("landscapeDistance", landscapeDistance);
+    outState.putBundle("scroll", scrollState);
   }
 
-  public void onRestoreState(@NonNull Bundle savedState) {
-    distance = savedState.getInt("distance");
-    portraitDistance = savedState.getInt("portraitDistance");
-    landscapeDistance = savedState.getInt("landscapeDistance");
+  public void onRestoreViewState(@NonNull Bundle savedViewState) {
+    Bundle scrollState = savedViewState.getBundle("scroll");
+    if (scrollState == null) {
+      return;
+    }
+    distance = scrollState.getInt("distance");
+    portraitDistance = scrollState.getInt("portraitDistance");
+    landscapeDistance = scrollState.getInt("landscapeDistance");
 
     if (orientation == ORIENTATION_PORTRAIT) {
       distance = Math.min(distance, portraitDistance);

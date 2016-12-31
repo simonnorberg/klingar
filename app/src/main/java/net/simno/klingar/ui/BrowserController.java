@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.simno.klingar.ui.music;
+package net.simno.klingar.ui;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -37,9 +37,7 @@ import net.simno.klingar.data.model.MediaType;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.data.repository.MusicRepository;
-import net.simno.klingar.ui.BaseController;
-import net.simno.klingar.ui.ToolbarOwner;
-import net.simno.klingar.ui.music.adapter.MusicAdapter;
+import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.EndScrollListener;
 import net.simno.klingar.util.RxHelper;
@@ -95,7 +93,7 @@ public class BrowserController extends BaseController implements
   protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
     View view = super.onCreateView(inflater, container);
 
-    PlexItem plexItem = getArgs() != null ? getArgs().getParcelable(PLEX_ITEM) : null;
+    PlexItem plexItem = getArgs().getParcelable(PLEX_ITEM);
     if (plexItem != null && plexItem instanceof MediaType) {
       mediaType = (MediaType) plexItem;
     }
@@ -260,6 +258,5 @@ public class BrowserController extends BaseController implements
   }
 
   private void playTrack(Track track) {
-    showToast(track.toString());
   }
 }

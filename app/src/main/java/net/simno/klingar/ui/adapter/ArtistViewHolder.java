@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.simno.klingar.ui.music.adapter;
+package net.simno.klingar.ui.adapter;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -23,33 +23,31 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import net.simno.klingar.R;
-import net.simno.klingar.data.model.Album;
+import net.simno.klingar.data.model.Artist;
+import net.simno.klingar.ui.widget.CircleImageViewTarget;
 import net.simno.klingar.util.Urls;
 
 import butterknife.BindDimen;
 import butterknife.BindView;
 
-final class AlbumViewHolder extends ClickableViewHolder {
+final class ArtistViewHolder extends ClickableViewHolder {
 
-  @BindView(R.id.album_thumb) ImageView thumb;
-  @BindView(R.id.album_title) TextView title;
-  @BindView(R.id.album_subtitle) TextView subtitle;
+  @BindView(R.id.artist_thumb) ImageView thumb;
+  @BindView(R.id.artist_title) TextView title;
   @BindDimen(R.dimen.item_height) int height;
 
-  AlbumViewHolder(View view, OnClickListener listener) {
+  ArtistViewHolder(View view, OnClickListener listener) {
     super(view, listener);
   }
 
-  void bindModel(@NonNull Album album) {
-    title.setText(album.title());
+  void bindModel(@NonNull Artist artist) {
+    title.setText(artist.title());
 
     //noinspection SuspiciousNameCombination
     Glide.with(itemView.getContext())
-        .load(Urls.addTranscodeParams(album.thumb(), height, height))
+        .load(Urls.addTranscodeParams(artist.thumb(), height, height))
+        .asBitmap()
         .centerCrop()
-        .crossFade()
-        .into(thumb);
-
-    subtitle.setText(album.artistTitle());
+        .into(new CircleImageViewTarget(thumb));
   }
 }

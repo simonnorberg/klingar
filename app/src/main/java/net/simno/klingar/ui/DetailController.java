@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.simno.klingar.ui.music;
+package net.simno.klingar.ui;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -38,9 +38,7 @@ import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.data.repository.MusicRepository;
-import net.simno.klingar.ui.BaseController;
-import net.simno.klingar.ui.ToolbarOwner;
-import net.simno.klingar.ui.music.adapter.MusicAdapter;
+import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.BackgroundLayout;
 import net.simno.klingar.ui.widget.BackgroundScrollListener;
 import net.simno.klingar.ui.widget.CircleImageViewTarget;
@@ -59,7 +57,6 @@ import butterknife.BindColor;
 import butterknife.BindDimen;
 import butterknife.BindDrawable;
 import butterknife.BindView;
-import timber.log.Timber;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -106,7 +103,7 @@ public class DetailController extends BaseController implements
   protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
     View view = super.onCreateView(inflater, container);
 
-    plexItem = getArgs() != null ? getArgs().getParcelable(PLEX_ITEM) : null;
+    plexItem = getArgs().getParcelable(PLEX_ITEM);
 
     if (getResources() != null) {
       if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
@@ -172,10 +169,7 @@ public class DetailController extends BaseController implements
   @Override protected void onRestoreViewState(@NonNull View view, @NonNull Bundle savedViewState) {
     super.onRestoreViewState(view, savedViewState);
     if (scrollListener != null) {
-      Bundle backgroundState = savedViewState.getParcelable("scroll");
-      if (backgroundState != null) {
-        scrollListener.onRestoreState(backgroundState);
-      }
+      scrollListener.onRestoreViewState(savedViewState);
     }
   }
 
@@ -193,7 +187,7 @@ public class DetailController extends BaseController implements
   @Override protected void onSaveViewState(@NonNull View view, @NonNull Bundle outState) {
     super.onSaveViewState(view, outState);
     if (scrollListener != null) {
-      outState.putParcelable("scroll", scrollListener.onSaveState());
+      scrollListener.onSaveViewState(outState);
     }
   }
 
@@ -279,7 +273,5 @@ public class DetailController extends BaseController implements
   }
 
   private void playTrack(Track track) {
-    Timber.d("URL %s", track.uri().toString());
-    showToast(track.toString());
   }
 }

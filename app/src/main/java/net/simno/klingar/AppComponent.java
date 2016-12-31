@@ -15,18 +15,14 @@
  */
 package net.simno.klingar;
 
-import net.simno.klingar.ui.MainActivity;
-import net.simno.klingar.ui.login.LoginActivity;
-import net.simno.klingar.ui.login.LoginController;
-import net.simno.klingar.ui.music.BrowserController;
-import net.simno.klingar.ui.music.DetailController;
-import net.simno.klingar.ui.music.MusicActivity;
+import net.simno.klingar.ui.BrowserController;
+import net.simno.klingar.ui.DetailController;
+import net.simno.klingar.ui.KlingarActivity;
+import net.simno.klingar.ui.LoginController;
 
 public interface AppComponent {
-  void inject(MainActivity activity);
-  void inject(MusicActivity activity);
-  void inject(LoginActivity activity);
   void inject(BrowserController controller);
   void inject(DetailController controller);
   void inject(LoginController controller);
+  void inject(KlingarActivity activity);
 }

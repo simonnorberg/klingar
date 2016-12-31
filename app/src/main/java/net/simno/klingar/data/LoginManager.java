@@ -24,45 +24,30 @@ import javax.inject.Singleton;
 @Singleton
 public class LoginManager {
 
-  private static final String PREF_USERNAME = "pref_username";
   private static final String PREF_AUTH_TOKEN = "pref_auth_token";
 
   private final AuthInterceptor authInterceptor;
   private final Prefs prefs;
-  private String username;
   private String authToken;
 
   @Inject LoginManager(AuthInterceptor authInterceptor, Prefs prefs) {
     this.authInterceptor = authInterceptor;
     this.prefs = prefs;
-    setUsername(prefs.getString(PREF_USERNAME, null));
     setAuthToken(prefs.getString(PREF_AUTH_TOKEN, null));
   }
 
-  public void login(String username, String authToken) {
-    setUsername(username);
+  public void login(String authToken) {
     setAuthToken(authToken);
-    prefs.putString(PREF_USERNAME, username);
     prefs.putString(PREF_AUTH_TOKEN, authToken);
   }
 
   public void logout() {
-    setUsername(null);
     setAuthToken(null);
-    prefs.remove(PREF_USERNAME);
     prefs.remove(PREF_AUTH_TOKEN);
   }
 
   public boolean isLoggedOut() {
-    return Strings.isBlank(username) || Strings.isBlank(authToken);
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  private void setUsername(String username) {
-    this.username = username;
+    return Strings.isBlank(authToken);
   }
 
   private void setAuthToken(String authToken) {

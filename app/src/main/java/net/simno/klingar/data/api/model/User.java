@@ -20,6 +20,5 @@ import org.simpleframework.xml.Root;
 
 @Root(strict = false)
 public final class User {
-  @Element public String username;
   @Element public String authenticationToken;
 }

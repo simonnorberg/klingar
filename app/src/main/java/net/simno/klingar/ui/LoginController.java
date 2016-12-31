@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.simno.klingar.ui.login;
+package net.simno.klingar.ui;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bluelinelabs.conductor.RouterTransaction;
 import com.squareup.okhttp.Credentials;
 
 import net.simno.klingar.KlingarApp;
@@ -36,8 +37,6 @@ import net.simno.klingar.R;
 import net.simno.klingar.data.LoginManager;
 import net.simno.klingar.data.api.PlexService;
 import net.simno.klingar.data.api.model.User;
-import net.simno.klingar.ui.BaseController;
-import net.simno.klingar.ui.music.MusicActivity;
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
 import net.simno.klingar.util.Strings;
@@ -48,6 +47,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnEditorAction;
 
+import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.util.Views.invisible;
 import static net.simno.klingar.util.Views.visible;
 
@@ -61,6 +61,7 @@ public class LoginController extends BaseController {
   @BindString(R.string.invalid_username) String invalidUsername;
   @BindString(R.string.invalid_password) String invalidPassword;
 
+  @Inject ToolbarOwner toolbarOwner;
   @Inject PlexService plex;
   @Inject LoginManager loginManager;
   @Inject InputMethodManager imm;
@@ -82,6 +83,11 @@ public class LoginController extends BaseController {
   @NonNull @Override
   protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
     View view = super.onCreateView(inflater, container);
+    toolbarOwner.setConfig(ToolbarOwner.Config.builder()
+        .background(false)
+        .backNavigation(false)
+        .titleAlpha(TITLE_GONE)
+        .build());
     usernameEdit.requestFocus();
     contentLoading.hide();
     return view;
@@ -131,8 +137,8 @@ public class LoginController extends BaseController {
           }
 
           @Override public void onNext(User user) {
-            loginManager.login(user.username, user.authenticationToken);
-            startMusic();
+            loginManager.login(user.authenticationToken);
+            getRouter().setRoot(RouterTransaction.with(new BrowserController(null)));
           }
         }));
   }
@@ -150,12 +156,5 @@ public class LoginController extends BaseController {
   private void hideInputMethod() {
     imm.hideSoftInputFromWindow(usernameEdit.getWindowToken(), 0);
     imm.hideSoftInputFromWindow(passwordEdit.getWindowToken(), 0);
-  }
-
-  private void startMusic() {
-    if (getActivity() != null) {
-      MusicActivity.newIntent(getActivity());
-      getActivity().finish();
-    }
   }
 }

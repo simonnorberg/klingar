@@ -28,10 +28,15 @@ import android.widget.ArrayAdapter;
 
 import com.bluelinelabs.conductor.Conductor;
 import com.bluelinelabs.conductor.Router;
+import com.bluelinelabs.conductor.RouterTransaction;
 
+import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
+import net.simno.klingar.data.LoginManager;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,28 +44,37 @@ import butterknife.ButterKnife;
 import static net.simno.klingar.util.Views.gone;
 import static net.simno.klingar.util.Views.visible;
 
-public abstract class BaseActivity extends AppCompatActivity implements ToolbarOwner.Activity,
+public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.Activity,
     AdapterView.OnItemSelectedListener {
 
-  protected Router router;
   @BindView(R.id.controller_container) ViewGroup container;
-  @BindView(R.id.toolbar) @Nullable Toolbar toolbar;
-  @BindView(R.id.toolbar_libs_spinner) @Nullable AppCompatSpinner spinner;
+  @BindView(R.id.toolbar) Toolbar toolbar;
+  @BindView(R.id.toolbar_libs_spinner) AppCompatSpinner spinner;
 
-  protected abstract void injectDependencies();
-  protected abstract int getLayoutResource();
-  protected abstract void initView();
+  @Inject LoginManager loginManager;
+  @Inject ToolbarOwner toolbarOwner;
+  private Router router;
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    injectDependencies();
-    setContentView(getLayoutResource());
+    KlingarApp.get(this).component().inject(this);
+    setContentView(R.layout.activity_klingar);
     ButterKnife.bind(this);
     initActionBar();
+    toolbarOwner.takeActivity(this);
     router = Conductor.attachRouter(this, container, savedInstanceState);
     if (savedInstanceState == null) {
-      initView();
+      if (loginManager.isLoggedOut()) {
+        router.setRoot(RouterTransaction.with(new LoginController(null)));
+      } else {
+        router.setRoot(RouterTransaction.with(new BrowserController(null)));
+      }
     }
+  }
+
+  @Override protected void onDestroy() {
+    toolbarOwner.dropActivity();
+    super.onDestroy();
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -78,9 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity implements ToolbarO
   }
 
   private void initActionBar() {
-    if (toolbar != null) {
-      setSupportActionBar(toolbar);
-    }
+    setSupportActionBar(toolbar);
   }
 
   @Override public void setShowTitleEnabled(boolean enabled) {
@@ -100,36 +112,29 @@ public abstract class BaseActivity extends AppCompatActivity implements ToolbarO
   }
 
   @Override public void setToolbarTitleColor(int color) {
-    if (toolbar != null) {
-      toolbar.setTitleTextColor(color);
-    }
+    toolbar.setTitleTextColor(color);
   }
 
   @Override public void setToolbarBackgroundColor(int color) {
-    if (toolbar != null) {
-      toolbar.setBackgroundColor(color);
-    }
+    toolbar.setBackgroundColor(color);
   }
 
   @Override public void showToolbarSpinner(List<String> options, int selection) {
-    if (toolbar != null && spinner != null) {
-      ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, options);
-      spinner.setAdapter(adapter);
-      spinner.setSelection(selection);
-      spinner.setOnItemSelectedListener(this);
-      visible(spinner);
-    }
+    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner, options);
+    spinner.setAdapter(adapter);
+    spinner.setSelection(selection);
+    spinner.setOnItemSelectedListener(this);
+    visible(spinner);
   }
 
   @Override public void hideToolbarSpinner() {
-    if (toolbar != null && spinner != null) {
-      gone(spinner);
-      spinner.setOnItemSelectedListener(null);
-      spinner.setAdapter(null);
-    }
+    gone(spinner);
+    spinner.setOnItemSelectedListener(null);
+    spinner.setAdapter(null);
   }
 
   @Override public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+    toolbarOwner.spinnerItemSelected(i);
   }
 
   @Override public void onNothingSelected(AdapterView<?> adapterView) {

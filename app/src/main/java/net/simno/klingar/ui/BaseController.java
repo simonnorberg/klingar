@@ -29,9 +29,9 @@ import rx.subscriptions.CompositeSubscription;
 
 import static net.simno.klingar.util.RxHelper.unsubscribe;
 
-public abstract class BaseController extends Controller {
+abstract class BaseController extends Controller {
 
-  protected CompositeSubscription subscriptions;
+  CompositeSubscription subscriptions;
 
   public BaseController(Bundle args) {
     super(args);
@@ -58,15 +58,9 @@ public abstract class BaseController extends Controller {
     unsubscribe(subscriptions);
   }
 
-  protected void showToast(int resId) {
+  void showToast(int resId) {
     if (getActivity() != null) {
       Toast.makeText(getActivity(), resId, Toast.LENGTH_SHORT).show();
-    }
-  }
-
-  protected void showToast(String text) {
-    if (getActivity() != null) {
-      Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
     }
   }
 }
