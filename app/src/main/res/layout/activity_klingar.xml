@@ -33,7 +33,7 @@ limitations under the License.
       android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
       app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-    <android.support.v7.widget.AppCompatSpinner
+    <Spinner
         android:id="@+id/toolbar_libs_spinner"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

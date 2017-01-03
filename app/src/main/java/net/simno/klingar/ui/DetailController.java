@@ -19,12 +19,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.ContentLoadingProgressBar;
-import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.bluelinelabs.conductor.RouterTransaction;
@@ -198,7 +198,7 @@ public class DetailController extends BaseController implements
 
   private void showBackgroundImage(String imageTranscodeUri, int viewType) {
     // Add background image and layout programmatically
-    AppCompatImageView background = new SquareImageView(getActivity());
+    ImageView background = new SquareImageView(getActivity());
     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(imageWidth, imageHeight);
     params.addRule(RelativeLayout.CENTER_IN_PARENT);
     background.setLayoutParams(params);

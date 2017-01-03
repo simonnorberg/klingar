@@ -20,7 +20,7 @@ limitations under the License.
     android:layout_width="match_parent"
     android:layout_height="@dimen/item_height">
 
-  <android.support.v7.widget.AppCompatTextView
+  <TextView
       android:id="@+id/header_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"

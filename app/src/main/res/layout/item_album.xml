@@ -39,13 +39,13 @@ limitations under the License.
         android:layout_gravity="start|center_vertical"
         android:orientation="vertical">
 
-      <android.support.v7.widget.AppCompatTextView
+      <TextView
           android:id="@+id/album_title"
           style="@style/ItemTitle"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"/>
 
-      <android.support.v7.widget.AppCompatTextView
+      <TextView
           android:id="@+id/album_subtitle"
           style="@style/ItemSubTitle"
           android:layout_width="wrap_content"

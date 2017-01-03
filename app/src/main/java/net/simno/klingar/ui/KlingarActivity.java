@@ -18,13 +18,13 @@ package net.simno.klingar.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.bluelinelabs.conductor.Conductor;
 import com.bluelinelabs.conductor.Router;
@@ -49,7 +49,7 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
 
   @BindView(R.id.controller_container) ViewGroup container;
   @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.toolbar_libs_spinner) AppCompatSpinner spinner;
+  @BindView(R.id.toolbar_libs_spinner) Spinner spinner;
 
   @Inject LoginManager loginManager;
   @Inject ToolbarOwner toolbarOwner;

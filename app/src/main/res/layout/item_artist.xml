@@ -33,7 +33,7 @@ limitations under the License.
         android:contentDescription="@string/description"
         android:scaleType="centerCrop"/>
 
-    <android.support.v7.widget.AppCompatTextView
+    <TextView
         android:id="@+id/artist_title"
         style="@style/ItemTitle"
         android:layout_width="wrap_content"

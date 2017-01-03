@@ -19,13 +19,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.ContentLoadingProgressBar;
-import android.support.v7.widget.AppCompatEditText;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -54,8 +54,8 @@ import static net.simno.klingar.util.Views.visible;
 public class LoginController extends BaseController {
 
   @BindView(R.id.login_form) LinearLayout loginForm;
-  @BindView(R.id.username_edit) AppCompatEditText usernameEdit;
-  @BindView(R.id.password_edit) AppCompatEditText passwordEdit;
+  @BindView(R.id.username_edit) EditText usernameEdit;
+  @BindView(R.id.password_edit) EditText passwordEdit;
   @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
   @BindString(R.string.app_name) String appName;
   @BindString(R.string.invalid_username) String invalidUsername;
