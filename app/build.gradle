@@ -40,7 +40,6 @@ afterEvaluate {
 def versionMajor = 0
 def versionMinor = 1
 def versionPatch = 0
-def versionBuild = 0
 
 def gitSha() {
   def p = 'git rev-parse --short HEAD'.execute([], project.rootDir)
@@ -78,7 +77,7 @@ android {
     minSdkVersion 21
     targetSdkVersion 25
 
-    versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+    versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
     versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 
     buildConfigField 'String', 'GIT_SHA', "\"${gitSha()}\""
