@@ -16,6 +16,7 @@
 package net.simno.klingar;
 
 import net.simno.klingar.data.DataModule;
+import net.simno.klingar.playback.PlaybackModule;
 
 import javax.inject.Singleton;
 
@@ -25,6 +26,7 @@ import dagger.Component;
 @Component(modules = {
     AndroidModule.class,
     DataModule.class,
-    KlingarModule.class
+    KlingarModule.class,
+    PlaybackModule.class
 }) interface KlingarComponent extends AppComponent {
 }

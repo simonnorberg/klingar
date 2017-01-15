@@ -37,6 +37,7 @@ import net.simno.klingar.data.model.MediaType;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.data.repository.MusicRepository;
+import net.simno.klingar.playback.PlaybackManager;
 import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.EndScrollListener;
@@ -66,6 +67,7 @@ public class BrowserController extends BaseController implements
   @Inject ToolbarOwner toolbarOwner;
   @Inject ServerManager serverManager;
   @Inject MusicRepository musicRepository;
+  @Inject PlaybackManager playbackManager;
   private EndScrollListener endScrollListener;
   private List<Library> libs = Collections.emptyList();
   private Library currentLib;
@@ -152,7 +154,7 @@ public class BrowserController extends BaseController implements
     }
   }
 
-  @Override public void onPlexItemClicked(PlexItem plexItem) {
+  @Override public void onPlexItemClicked(PlexItem plexItem, int position) {
     if (plexItem instanceof MediaType) {
       goToMediaType((MediaType) plexItem);
     } else if (plexItem instanceof Artist) {
@@ -160,7 +162,7 @@ public class BrowserController extends BaseController implements
     } else if (plexItem instanceof Album) {
       goToDetails(plexItem);
     } else if (plexItem instanceof Track) {
-      playTrack((Track) plexItem);
+      playTrack(position);
     }
   }
 
@@ -257,6 +259,15 @@ public class BrowserController extends BaseController implements
     getRouter().pushController(RouterTransaction.with(new DetailController(args)));
   }
 
-  private void playTrack(Track track) {
+  private void playTrack(int position) {
+    List<PlexItem> items = adapter.getItems();
+    List<Track> queue = new ArrayList<>();
+    for (int i = position; i < items.size() && queue.size() < 25; ++i) {
+      if (items.get(i) instanceof Track) {
+        queue.add((Track) items.get(i));
+      }
+    }
+    playbackManager.play(queue, 0);
+    getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
   }
 }

@@ -121,7 +121,6 @@ dependencies {
   compile "com.android.support:appcompat-v7:${supportLibVersion}"
   compile "com.android.support:recyclerview-v7:${supportLibVersion}"
   compile "com.android.support:design:${supportLibVersion}"
-//  compile "com.android.support:mediarouter-v7:${supportLibVersion}"
 
   compile 'com.bluelinelabs:conductor:2.0.5'
 
@@ -133,13 +132,12 @@ dependencies {
   annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
   compile 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5'
 
-//  compile 'com.google.android.gms:play-services-cast:10.0.1'
   compile "com.google.dagger:dagger:${daggerVersion}"
   annotationProcessor "com.google.dagger:dagger-compiler:${daggerVersion}"
 
   compile 'com.jakewharton:butterknife:8.4.0'
   annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
-  compile 'com.jakewharton.timber:timber:4.4.0'
+  compile 'com.jakewharton.timber:timber:4.5.0'
   compile 'com.jakewharton.rxrelay:rxrelay:1.2.0'
 
   compile "com.squareup.okhttp3:okhttp:${okhttpVersion}"
@@ -153,7 +151,10 @@ dependencies {
   }
 
   compile 'io.reactivex:rxandroid:1.2.1'
-  compile 'io.reactivex:rxjava:1.2.4'
+  compile 'io.reactivex:rxjava:1.2.5'
 
   provided 'javax.annotation:jsr250-api:1.0'
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.mockito:mockito-core:1.10.19'
 }

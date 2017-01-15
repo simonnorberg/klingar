@@ -22,7 +22,7 @@ limitations under the License.
   <color name="accent">#f7a703</color>
 
   <color name="header">#88898c</color>
-  <color name="title">#ffffff</color>
+  <color name="title">@android:color/white</color>
   <color name="subtitle">#adaeb3</color>
   <color name="divider">#2e2f33</color>
 

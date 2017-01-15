@@ -19,10 +19,12 @@ import net.simno.klingar.ui.BrowserController;
 import net.simno.klingar.ui.DetailController;
 import net.simno.klingar.ui.KlingarActivity;
 import net.simno.klingar.ui.LoginController;
+import net.simno.klingar.ui.PlayerController;
 
 public interface AppComponent {
   void inject(BrowserController controller);
   void inject(DetailController controller);
   void inject(LoginController controller);
+  void inject(PlayerController controller);
   void inject(KlingarActivity activity);
 }

@@ -35,12 +35,21 @@ limitations under the License.
     <item name="android:paddingBottom">@dimen/item_vertical_padding</item>
   </style>
 
+  <style name="ItemContainer.Playing">
+    <item name="android:background">@color/divider</item>
+  </style>
+
   <style name="ItemTitle">
     <item name="android:ellipsize">end</item>
     <item name="android:maxLines">1</item>
     <item name="android:textAllCaps">false</item>
     <item name="android:textColor">@color/title</item>
     <item name="android:textSize">16.0dp</item>
+  </style>
+
+  <style name="ItemTitle.Playing">
+    <item name="android:textColor">@color/accent</item>
+    <item name="android:textStyle">bold</item>
   </style>
 
   <style name="ItemSubTitle">

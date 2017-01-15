@@ -40,8 +40,8 @@ import static net.simno.klingar.data.Type.TRACK;
 
 public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-  private final ArrayList<PlexItem> items = new ArrayList<>();
   private final OnPlexItemClickListener listener;
+  private List<PlexItem> items = new ArrayList<>();
 
   public MusicAdapter(OnPlexItemClickListener listener) {
     this.listener = listener;
@@ -52,19 +52,19 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     switch (viewType) {
       case ARTIST:
         return new ArtistViewHolder(inflater.inflate(R.layout.item_artist, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+            position -> listener.onPlexItemClicked(items.get(position), position));
       case ALBUM:
         return new AlbumViewHolder(inflater.inflate(R.layout.item_album, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+            position -> listener.onPlexItemClicked(items.get(position), position));
       case TRACK:
         return new TrackViewHolder(inflater.inflate(R.layout.item_track, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+            position -> listener.onPlexItemClicked(items.get(position), position));
       case PLAYLIST:
         return new PlaylistViewHolder(inflater.inflate(R.layout.item_playlist, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+            position -> listener.onPlexItemClicked(items.get(position), position));
       case MEDIA_TYPE:
         return new MediaTypeViewHolder(inflater.inflate(R.layout.item_media_type, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+            position -> listener.onPlexItemClicked(items.get(position), position));
       case HEADER:
         return new HeaderViewHolder(inflater.inflate(R.layout.item_header, parent, false));
       default:
@@ -129,12 +129,15 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
   }
 
   public void set(List<PlexItem> items) {
-    this.items.clear();
-    this.items.addAll(items);
+    this.items = items;
     notifyDataSetChanged();
   }
 
+  public List<PlexItem> getItems() {
+    return items;
+  }
+
   public interface OnPlexItemClickListener {
-    void onPlexItemClicked(PlexItem plexItem);
+    void onPlexItemClicked(PlexItem plexItem, int position);
   }
 }

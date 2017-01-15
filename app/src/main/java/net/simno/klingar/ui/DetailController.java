@@ -38,6 +38,7 @@ import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.data.repository.MusicRepository;
+import net.simno.klingar.playback.PlaybackManager;
 import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.BackgroundLayout;
 import net.simno.klingar.ui.widget.BackgroundScrollListener;
@@ -49,6 +50,7 @@ import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
 import net.simno.klingar.util.Urls;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -80,6 +82,7 @@ public class DetailController extends BaseController implements
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
   @Inject ToolbarOwner toolbarOwner;
   @Inject MusicRepository musicRepository;
+  @Inject PlaybackManager playbackManager;
   private DistanceScrollListener scrollListener;
   private PlexItem plexItem;
   private boolean itemsLoaded;
@@ -258,11 +261,11 @@ public class DetailController extends BaseController implements
     );
   }
 
-  @Override public void onPlexItemClicked(PlexItem plexItem) {
+  @Override public void onPlexItemClicked(PlexItem plexItem, int position) {
     if (plexItem instanceof Album) {
       goToDetails(plexItem);
     } else if (plexItem instanceof Track) {
-      playTrack((Track) plexItem);
+      playTrack(position);
     }
   }
 
@@ -272,6 +275,21 @@ public class DetailController extends BaseController implements
     getRouter().pushController(RouterTransaction.with(new DetailController(args)));
   }
 
-  private void playTrack(Track track) {
+  private void playTrack(int position) {
+    List<PlexItem> items = adapter.getItems();
+
+    List<Track> queue = new ArrayList<>();
+    int startIndex = 0;
+    for (int i = 0; i < items.size(); ++i) {
+      if (items.get(i) instanceof Track) {
+        queue.add((Track) items.get(i));
+        if (i == position) {
+          startIndex = queue.size() - 1;
+        }
+      }
+    }
+
+    playbackManager.play(queue, startIndex);
+    getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
   }
 }

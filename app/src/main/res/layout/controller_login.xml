@@ -26,9 +26,8 @@ limitations under the License.
       android:layout_height="56dp"
       android:layout_alignParentTop="true"
       android:layout_marginTop="48dp"
-      android:contentDescription="@string/description"
       android:scaleType="fitCenter"
-      android:src="@drawable/logo_160x56"/>
+      app:srcCompat="@drawable/logo"/>
 
   <LinearLayout
       android:id="@+id/login_form"
