@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.bluelinelabs.conductor.Controller;
 
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import rx.subscriptions.CompositeSubscription;
 
 import static net.simno.klingar.util.RxHelper.unsubscribe;
@@ -32,6 +33,7 @@ import static net.simno.klingar.util.RxHelper.unsubscribe;
 abstract class BaseController extends Controller {
 
   CompositeSubscription subscriptions;
+  private Unbinder unbinder;
 
   public BaseController(Bundle args) {
     super(args);
@@ -44,7 +46,7 @@ abstract class BaseController extends Controller {
   protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
     injectDependencies();
     View view = inflater.inflate(getLayoutResource(), container, false);
-    ButterKnife.bind(this, view);
+    unbinder = ButterKnife.bind(this, view);
     return view;
   }
 
@@ -56,6 +58,12 @@ abstract class BaseController extends Controller {
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
     unsubscribe(subscriptions);
+  }
+
+  @Override protected void onDestroyView(@NonNull View view) {
+    super.onDestroyView(view);
+    unbinder.unbind();
+    unbinder = null;
   }
 
   void showToast(int resId) {
