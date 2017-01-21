@@ -24,8 +24,16 @@ limitations under the License.
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:clipToPadding="false"
+      android:paddingBottom="@dimen/miniplayer_height"
       android:paddingTop="@dimen/toolbar_height"
       android:scrollbars="vertical"/>
+
+  <FrameLayout
+      android:id="@+id/miniplayer_container"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:background="@color/primary"/>
 
   <include layout="@layout/include_content_loading"/>
 

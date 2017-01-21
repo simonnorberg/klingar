@@ -58,14 +58,8 @@ limitations under the License.
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:gravity="center"/>
-
-    <TextView
-        android:id="@+id/player_extra"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:textColor="@color/subtitle"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

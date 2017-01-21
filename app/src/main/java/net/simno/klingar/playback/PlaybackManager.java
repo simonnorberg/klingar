@@ -44,6 +44,7 @@ public class PlaybackManager implements Playback.Listener {
   private final BehaviorRelay<Long> progressRelay = BehaviorRelay.create();
   private final BehaviorRelay<PlayState> stateRelay = BehaviorRelay.create();
   private final BehaviorRelay<PlayQueue> queueRelay = BehaviorRelay.create();
+  private final BehaviorRelay<Boolean> playingRelay = BehaviorRelay.create();
 
   private final Playback playback;
   private PlayQueue queue;
@@ -64,6 +65,7 @@ public class PlaybackManager implements Playback.Listener {
         .build();
     notifyQueue();
     notifyState();
+    playingRelay.call(false);
   }
 
   public Observable<Long> progress() {
@@ -76,6 +78,10 @@ public class PlaybackManager implements Playback.Listener {
 
   public Observable<PlayQueue> queue() {
     return queueRelay;
+  }
+
+  public Observable<Boolean> isPlaying() {
+    return playingRelay;
   }
 
   public void play(List<Track> queue, int index) {
@@ -210,6 +216,7 @@ public class PlaybackManager implements Playback.Listener {
     playback.play(track);
     state = state.withPlayMode(PLAYING);
     notifyState();
+    playingRelay.call(true);
   }
 
   private void notifyQueue() {

@@ -24,9 +24,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
 import com.bumptech.glide.Glide;
 
@@ -59,6 +61,7 @@ import butterknife.BindColor;
 import butterknife.BindDimen;
 import butterknife.BindDrawable;
 import butterknife.BindView;
+import butterknife.OnClick;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -74,6 +77,7 @@ public class DetailController extends BaseController implements
   @BindView(R.id.recycler_view) RecyclerView recyclerView;
   @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
   @BindView(R.id.detail_container) RelativeLayout detailContainer;
+  @BindView(R.id.miniplayer_container) FrameLayout miniplayerContainer;
   @BindColor(R.color.primary) int primaryColor;
   @BindDimen(R.dimen.background_height) int backgroundHeight;
   @BindDimen(R.dimen.background_image_width) int imageWidth;
@@ -185,6 +189,7 @@ public class DetailController extends BaseController implements
         getAlbumItems((Album) plexItem);
       }
     }
+    observePlayback();
   }
 
   @Override protected void onSaveViewState(@NonNull View view, @NonNull Bundle outState) {
@@ -197,6 +202,19 @@ public class DetailController extends BaseController implements
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
     recyclerView.clearOnScrollListeners();
+  }
+
+  @Override public void onPlexItemClicked(PlexItem plexItem, int position) {
+    if (plexItem instanceof Album) {
+      goToDetails(plexItem);
+    } else if (plexItem instanceof Track) {
+      playTrack(position);
+    }
+  }
+
+  @OnClick(R.id.miniplayer_container)
+  void onMiniplayerClicked() {
+    getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
   }
 
   private void showBackgroundImage(String imageTranscodeUri, int viewType) {
@@ -261,12 +279,23 @@ public class DetailController extends BaseController implements
     );
   }
 
-  @Override public void onPlexItemClicked(PlexItem plexItem, int position) {
-    if (plexItem instanceof Album) {
-      goToDetails(plexItem);
-    } else if (plexItem instanceof Track) {
-      playTrack(position);
-    }
+  private void observePlayback() {
+    subscriptions.add(playbackManager.isPlaying()
+        .compose(RxHelper.applySchedulers())
+        .subscribe(new SimpleSubscriber<Boolean>() {
+          @Override public void onNext(Boolean isPlaying) {
+            if (isPlaying) {
+              Router miniplayerRouter = getChildRouter(miniplayerContainer);
+              if (!miniplayerRouter.hasRootController()) {
+                miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
+              }
+            } else {
+              for (Router router : getChildRouters()) {
+                removeChildRouter(router);
+              }
+            }
+          }
+        }));
   }
 
   private void goToDetails(PlexItem plexItem) {
@@ -290,6 +319,5 @@ public class DetailController extends BaseController implements
     }
 
     playbackManager.play(queue, startIndex);
-    getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
   }
 }

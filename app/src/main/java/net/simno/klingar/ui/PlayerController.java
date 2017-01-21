@@ -78,7 +78,6 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   @BindView(R.id.player_queue) RecyclerView queueRecyclerView;
   @BindView(R.id.player_track_title) TextView trackTitle;
   @BindView(R.id.player_artist_title) TextView artistTitle;
-  @BindView(R.id.player_extra) TextView extra;
   @BindView(R.id.player_seekbar) SeekBar seekBar;
   @BindView(R.id.player_elapsed_time) TextView elapsedTime;
   @BindView(R.id.player_total_time) TextView totalTime;

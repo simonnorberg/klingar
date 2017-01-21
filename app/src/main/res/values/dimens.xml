@@ -19,6 +19,8 @@ limitations under the License.
   <dimen name="toolbar_height">56dp</dimen>
   <dimen name="toolbar_elevation">8dp</dimen>
 
+  <dimen name="miniplayer_height">64dp</dimen>
+
   <dimen name="item_height">64dp</dimen>
   <dimen name="item_horizontal_padding">16dp</dimen>
   <dimen name="item_vertical_padding">5dp</dimen>
