@@ -15,6 +15,8 @@
  */
 package net.simno.klingar.playback;
 
+import android.content.Context;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -22,7 +24,7 @@ import dagger.Provides;
 
 @Module
 public class PlaybackModule {
-  @Provides @Singleton Playback providePlayback() {
-    return new MockPlayback();
+  @Provides @Singleton Playback providePlayback(Context context) {
+    return new ExoPlayback(context);
   }
 }

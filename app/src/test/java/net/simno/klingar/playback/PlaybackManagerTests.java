@@ -230,8 +230,8 @@ public class PlaybackManagerTests {
     playbackManager.next();
     playbackManager.previous();
 
-    verify(mockPlayback, times(1)).play(queue.get(0));
-    verify(mockPlayback, times(2)).seekTo(0);
+    verify(mockPlayback, times(2)).play(queue.get(0));
+    verify(mockPlayback, times(1)).seekTo(0);
     verify(mockPlayback, never()).play(queue.get(1));
     verify(mockPlayback, never()).play(queue.get(2));
 

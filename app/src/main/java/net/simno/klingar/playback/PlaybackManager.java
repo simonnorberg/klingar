@@ -102,7 +102,7 @@ public class PlaybackManager implements Playback.Listener {
   public void next() {
     @RepeatMode int repeatMode = state.repeatMode();
     if (repeatMode == REPEAT_ONE) {
-      seekTo(0);
+      playCurrentTrack();
       return;
     }
 
@@ -212,8 +212,7 @@ public class PlaybackManager implements Playback.Listener {
   }
 
   private void playCurrentTrack() {
-    Track track = queue.currentTrack();
-    playback.play(track);
+    playback.play(queue.currentTrack());
     state = state.withPlayMode(PLAYING);
     notifyState();
     playingRelay.call(true);

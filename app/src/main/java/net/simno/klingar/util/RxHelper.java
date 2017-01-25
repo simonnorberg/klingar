@@ -16,6 +16,7 @@
 package net.simno.klingar.util;
 
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -35,6 +36,12 @@ public final class RxHelper {
   public static void unsubscribe(CompositeSubscription subscriptions) {
     if (subscriptions != null && !subscriptions.isUnsubscribed()) {
       subscriptions.unsubscribe();
+    }
+  }
+
+  public static void unsubscribe(Subscription subscription) {
+    if (subscription != null && !subscription.isUnsubscribed()) {
+      subscription.unsubscribe();
     }
   }
 

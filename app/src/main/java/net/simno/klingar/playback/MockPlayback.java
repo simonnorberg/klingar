@@ -16,6 +16,7 @@
 package net.simno.klingar.playback;
 
 import net.simno.klingar.data.model.Track;
+import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
 
 import java.util.concurrent.TimeUnit;
@@ -26,10 +27,10 @@ import rx.schedulers.Schedulers;
 
 class MockPlayback implements Playback {
 
-  private Subscription subscription;
+  private Subscription progressSubscription;
   private Listener listener;
   private Track track;
-  private long progress;
+  private long currentPosition;
 
   @Override public void setListener(Listener listener) {
     this.listener = listener;
@@ -37,12 +38,11 @@ class MockPlayback implements Playback {
 
   @Override public void play(Track track) {
     this.track = track;
-    progress = 0;
-    resume();
+    currentPosition = 0;
+    startProgress();
   }
 
   @Override public void resume() {
-    stopProgress();
     startProgress();
   }
 
@@ -51,22 +51,22 @@ class MockPlayback implements Playback {
   }
 
   @Override public void seekTo(long milliseconds) {
-    boolean isPlaying = subscription != null && !subscription.isUnsubscribed();
+    boolean isPlaying = progressSubscription != null && !progressSubscription.isUnsubscribed();
     stopProgress();
-    progress = milliseconds;
+    currentPosition = milliseconds;
     if (isPlaying) {
       startProgress();
     }
   }
 
   private void startProgress() {
-    if (track == null) {
-      return;
-    }
+    final long duration = track.duration();
+    final long startPosition = currentPosition;
+    final int remainingSeconds = (int) ((duration - currentPosition) / 1000);
 
-    int remainingSeconds = 1 + (int) ((track.duration() - progress) / 1000);
-
-    subscription = Observable.interval(1, TimeUnit.SECONDS)
+    stopProgress();
+    listener.onProgress(currentPosition);
+    progressSubscription = Observable.interval(1, TimeUnit.SECONDS)
         .take(remainingSeconds)
         .subscribeOn(Schedulers.newThread())
         .subscribe(new SimpleSubscriber<Long>() {
@@ -77,17 +77,13 @@ class MockPlayback implements Playback {
           }
 
           @Override public void onNext(Long count) {
-            if (listener != null) {
-              listener.onProgress(progress);
-            }
-            progress += 1000;
+            currentPosition = ((count + 1) * 1000) + startPosition;
+            listener.onProgress(currentPosition);
           }
         });
   }
 
   private void stopProgress() {
-    if (subscription != null && !subscription.isUnsubscribed()) {
-      subscription.unsubscribe();
-    }
+    RxHelper.unsubscribe(progressSubscription);
   }
 }
