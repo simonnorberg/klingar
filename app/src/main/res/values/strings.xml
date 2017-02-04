@@ -18,6 +18,9 @@ limitations under the License.
 
   <string name="app_name">Klingar</string>
 
+  <string name="media_route_menu_title">Play on…</string>
+  <string name="touch_to_cast">Touch to connect to a Google Cast device</string>
+
   <plurals name="tracks">
     <item quantity="one">%d track</item>
     <item quantity="other">%d tracks</item>
@@ -42,5 +45,12 @@ limitations under the License.
   <string name="description_repeat_off">Repeat off</string>
   <string name="description_repeat_all">Repeat all</string>
   <string name="description_repeat_one">Repeat one</string>
+
+  <string name="label_previous">Previous</string>
+  <string name="label_pause">Pause</string>
+  <string name="label_play">Play</string>
+  <string name="label_next">Next</string>
+  <string name="casting_to_device">Casting to %1$s</string>
+  <string name="stop_casting">Stop Casting</string>
 
 </resources>

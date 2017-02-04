@@ -49,7 +49,7 @@ public class ServerManager {
   }
 
   public Observable<List<Library>> libs() {
-    return libsRelay;
+    return libsRelay.onBackpressureLatest();
   }
 
   public void refresh() {

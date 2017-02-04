@@ -16,6 +16,7 @@ limitations under the License.
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="net.simno.klingar">
 
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -32,6 +33,14 @@ limitations under the License.
       android:supportsRtl="true"
       android:theme="@style/AppTheme">
 
+    <meta-data
+        android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+        android:value="net.simno.klingar.CastOptionsProvider"/>
+
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version"/>
+
     <activity
         android:name=".ui.KlingarActivity"
         android:label="@string/app_name"
@@ -41,6 +50,21 @@ limitations under the License.
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+
+    <service
+        android:name=".playback.MusicService"
+        android:exported="true"
+        tools:ignore="ExportedService">
+      <intent-filter>
+        <action android:name="android.intent.action.MEDIA_BUTTON"/>
+      </intent-filter>
+    </service>
+
+    <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
+      <intent-filter>
+        <action android:name="android.intent.action.MEDIA_BUTTON"/>
+      </intent-filter>
+    </receiver>
 
   </application>
 

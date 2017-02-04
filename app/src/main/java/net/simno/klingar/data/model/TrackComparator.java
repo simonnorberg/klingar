@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.simno.klingar.playback;
+package net.simno.klingar.data.model;
 
-import android.content.Context;
+import java.util.Comparator;
 
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
-
-@Module
-public class PlaybackModule {
-  @Provides @Singleton Playback providePlayback(Context context) {
-    return new ExoPlayback(context);
+public class TrackComparator implements Comparator<Track> {
+  @Override public int compare(Track track1, Track track2) {
+    return Integer.compare(track1.index(), track2.index());
   }
 }

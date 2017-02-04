@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2014 The Android Open Source Project
  * Copyright (C) 2017 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,248 +16,243 @@
  */
 package net.simno.klingar.playback;
 
-import com.jakewharton.rxrelay.BehaviorRelay;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.media.session.PlaybackStateCompat.State;
 
+import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
-import net.simno.klingar.playback.PlayState.PlayMode;
-import net.simno.klingar.playback.PlayState.RepeatMode;
-import net.simno.klingar.playback.PlayState.ShuffleMode;
+import net.simno.klingar.playback.QueueManager.RepeatMode;
+import net.simno.klingar.playback.QueueManager.ShuffleMode;
 
-import java.util.Collections;
-import java.util.List;
+import timber.log.Timber;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+class PlaybackManager implements Playback.Callback {
 
-import rx.Observable;
+  static final String CUSTOM_ACTION_REPEAT = "net.simno.klingar.REPEAT";
+  static final String CUSTOM_ACTION_SHUFFLE = "net.simno.klingar.SHUFFLE";
 
-import static net.simno.klingar.playback.PlayState.PAUSED;
-import static net.simno.klingar.playback.PlayState.PLAYING;
-import static net.simno.klingar.playback.PlayState.REPEAT_ALL;
-import static net.simno.klingar.playback.PlayState.REPEAT_OFF;
-import static net.simno.klingar.playback.PlayState.REPEAT_ONE;
-import static net.simno.klingar.playback.PlayState.SHUFFLE_ALL;
-import static net.simno.klingar.playback.PlayState.SHUFFLE_OFF;
+  private final QueueManager queueManager;
+  private final MediaSessionCallback sessionCallback;
+  private final PlaybackServiceCallback serviceCallback;
+  private Playback playback;
 
-@Singleton
-public class PlaybackManager implements Playback.Listener {
-
-  private final BehaviorRelay<Long> progressRelay = BehaviorRelay.create();
-  private final BehaviorRelay<PlayState> stateRelay = BehaviorRelay.create();
-  private final BehaviorRelay<PlayQueue> queueRelay = BehaviorRelay.create();
-  private final BehaviorRelay<Boolean> playingRelay = BehaviorRelay.create();
-
-  private final Playback playback;
-  private PlayQueue queue;
-  private PlayState state;
-  private long progress;
-
-  @Inject PlaybackManager(Playback playback) {
+  PlaybackManager(QueueManager queueManager, PlaybackServiceCallback serviceCallback,
+                  Playback playback) {
+    this.queueManager = queueManager;
+    this.serviceCallback = serviceCallback;
     this.playback = playback;
-    this.playback.setListener(this);
-    this.state = PlayState.builder()
-        .playMode(PAUSED)
-        .shuffleMode(SHUFFLE_OFF)
-        .repeatMode(REPEAT_OFF)
-        .build();
-    this.queue = PlayQueue.builder()
-        .index(0)
-        .queue(Collections.emptyList())
-        .build();
-    notifyQueue();
-    notifyState();
-    playingRelay.call(false);
+    this.playback.setCallback(this);
+    this.sessionCallback = new MediaSessionCallback();
   }
 
-  public Observable<Long> progress() {
-    return progressRelay;
+  public Playback getPlayback() {
+    return playback;
   }
 
-  public Observable<PlayState> state() {
-    return stateRelay;
+  MediaSessionCompat.Callback getMediaSessionCallback() {
+    return sessionCallback;
   }
 
-  public Observable<PlayQueue> queue() {
-    return queueRelay;
-  }
-
-  public Observable<Boolean> isPlaying() {
-    return playingRelay;
-  }
-
-  public void play(List<Track> queue, int index) {
-    this.queue = PlayQueue.builder()
-        .index(index)
-        .queue(queue)
-        .build();
-    notifyQueue();
-    playCurrentTrack();
-  }
-
-  public void playFromQueue(int index) {
-    this.queue = queue.withIndex(index);
-    notifyQueue();
-    playCurrentTrack();
-  }
-
-  public void next() {
-    @RepeatMode int repeatMode = state.repeatMode();
-    if (repeatMode == REPEAT_ONE) {
-      playCurrentTrack();
-      return;
+  private void handlePlayRequest() {
+    Track currentQueueItem = queueManager.currentTrack();
+    if (currentQueueItem != null) {
+      serviceCallback.onPlaybackStart();
+      playback.play(currentQueueItem);
     }
-
-    int index = queue.index();
-
-    if ((index + 1) >= queue.queue().size()) {
-      if (repeatMode == REPEAT_ALL) {
-        index = 0;
-      } else {
-        index = Math.max(0, queue.queue().size() - 1);
-      }
-    } else {
-      ++index;
-    }
-
-    queue = queue.withIndex(index);
-    notifyQueue();
-
-    playCurrentTrack();
   }
 
-  public void previous() {
-    if (progress > 2000L) {
-      seekTo(0);
-      return;
-    }
-
-    @RepeatMode int repeatMode = state.repeatMode();
-    if (repeatMode == REPEAT_ONE) {
-      seekTo(0);
-      return;
-    }
-
-    int index = queue.index();
-
-    if ((index - 1) < 0) {
-      if (repeatMode == REPEAT_ALL) {
-        index = Math.max(0, queue.queue().size() - 1);
-      } else {
-        index = 0;
-      }
-    } else {
-      --index;
-    }
-
-    queue = queue.withIndex(index);
-    notifyQueue();
-
-    playCurrentTrack();
-  }
-
-  public void seekTo(long milliseconds) {
-    playback.seekTo(milliseconds);
-  }
-
-  public void playPause() {
-    @PlayMode int playMode = state.playMode();
-    if (playMode == PLAYING) {
+  private void handlePauseRequest() {
+    if (playback.isPlaying()) {
       playback.pause();
-      state = state.withPlayMode(PAUSED);
-    } else {
-      playback.resume();
-      state = state.withPlayMode(PLAYING);
-    }
-    notifyState();
-  }
-
-  public void shuffle() {
-    @ShuffleMode int shuffleMode = state.shuffleMode();
-    if (shuffleMode == SHUFFLE_OFF) {
-      shuffleQueue();
-      state = state.withShuffleMode(SHUFFLE_ALL);
-    } else {
-      sortQueue();
-      state = state.withShuffleMode(SHUFFLE_OFF);
-    }
-    notifyQueue();
-    notifyState();
-  }
-
-  public void repeat() {
-    @RepeatMode int repeatMode = state.repeatMode();
-    if (repeatMode == REPEAT_OFF) {
-      state = state.withRepeatMode(REPEAT_ALL);
-    } else if (repeatMode == REPEAT_ALL) {
-      state = state.withRepeatMode(REPEAT_ONE);
-    } else {
-      state = state.withRepeatMode(REPEAT_OFF);
-    }
-    notifyState();
-  }
-
-  @Override public void onProgress(long progress) {
-    this.progress = progress;
-    progressRelay.call(progress);
-  }
-
-  @Override public void onCompleted() {
-    @RepeatMode int repeatMode = state.repeatMode();
-    if ((queue.index() + 1) < queue.queue().size() || repeatMode == REPEAT_ONE
-        || repeatMode == REPEAT_ALL) {
-      next();
-    } else {
-      state = state.withPlayMode(PAUSED);
-      notifyState();
+      serviceCallback.onPlaybackStop();
     }
   }
 
-  private void playCurrentTrack() {
-    playback.play(queue.currentTrack());
-    state = state.withPlayMode(PLAYING);
-    notifyState();
-    playingRelay.call(true);
+  void handleStopRequest() {
+    playback.stop(true);
+    serviceCallback.onPlaybackStop();
+    updatePlaybackState();
   }
 
-  private void notifyQueue() {
-    queueRelay.call(queue);
+  void updatePlaybackState() {
+    long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+    if (playback != null && playback.isConnected()) {
+      position = playback.getCurrentStreamPosition();
+    }
+
+    PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+        .setActions(getAvailableActions());
+
+    addCustomActions(stateBuilder);
+
+    @State int state = playback.getState();
+    stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
+
+    serviceCallback.onPlaybackStateUpdated(stateBuilder.build());
+
+    if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
+      serviceCallback.onNotificationRequired();
+    }
   }
 
-  private void notifyState() {
-    stateRelay.call(state);
+  private void addCustomActions(PlaybackStateCompat.Builder stateBuilder) {
+    @ShuffleMode int shuffleMode = queueManager.getShuffleMode();
+    @RepeatMode int repeatMode = queueManager.getRepeatMode();
+
+    if (shuffleMode == QueueManager.SHUFFLE_OFF) {
+      stateBuilder.addCustomAction(CUSTOM_ACTION_SHUFFLE, "Shuffle", R.drawable.ic_shuffle_all);
+    } else {
+      stateBuilder.addCustomAction(CUSTOM_ACTION_SHUFFLE, "Shuffle", R.drawable.ic_shuffle_off);
+    }
+
+    if (repeatMode == QueueManager.REPEAT_OFF) {
+      stateBuilder.addCustomAction(CUSTOM_ACTION_REPEAT, "Repeat", R.drawable.ic_repeat_all);
+    } else if (repeatMode == QueueManager.REPEAT_ALL) {
+      stateBuilder.addCustomAction(CUSTOM_ACTION_REPEAT, "Repeat", R.drawable.ic_repeat_one);
+    } else {
+      stateBuilder.addCustomAction(CUSTOM_ACTION_REPEAT, "Repeat", R.drawable.ic_repeat_off);
+    }
   }
 
-  private void sortQueue() {
-    Track currentTrack = queue.currentTrack();
-    List<Track> sortedQueue = queue.queue();
-    Collections.sort(sortedQueue);
-    int index = 0;
-    for (int i = 0; i < sortedQueue.size(); ++i) {
-      if (currentTrack.equals(sortedQueue.get(i))) {
-        index = i;
+  private long getAvailableActions() {
+    long actions = PlaybackStateCompat.ACTION_PLAY_PAUSE
+        | PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
+        | PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH
+        | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+        | PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+    if (playback.isPlaying()) {
+      actions |= PlaybackStateCompat.ACTION_PAUSE;
+    } else {
+      actions |= PlaybackStateCompat.ACTION_PLAY;
+    }
+    return actions;
+  }
+
+  @Override public void onCompletion() {
+    Timber.d("onCompletion");
+    if (queueManager.hasNext()) {
+      queueManager.next();
+      handlePlayRequest();
+    } else {
+      handleStopRequest();
+    }
+  }
+
+  @Override public void onPlaybackStatusChanged() {
+    Timber.d("onPlaybackStatusChanged");
+    updatePlaybackState();
+  }
+
+  @Override public void setTrackFromRemote(Track remoteTrack) {
+    Timber.d("setTrackFromRemote %s", remoteTrack);
+    queueManager.setTrackFromRemote(remoteTrack);
+  }
+
+  /**
+   * Switch to a different Playback instance, maintaining all playback state, if possible.
+   *
+   * @param newPlayback switch to this playback
+   */
+  void switchToPlayback(@NonNull Playback newPlayback, boolean resumePlaying) {
+    Timber.d("switchToPlayback %s resume %s", newPlayback.getClass().getSimpleName(),
+        resumePlaying);
+    // Suspend the current one
+    @State int oldState = playback.getState();
+    int position = playback.getCurrentStreamPosition();
+    Track currentMediaId = playback.getCurrentTrack();
+    playback.stop(false);
+    newPlayback.setCallback(this);
+    newPlayback.setCurrentStreamPosition(position < 0 ? 0 : position);
+    newPlayback.setCurrentTrack(currentMediaId);
+    newPlayback.start();
+    // Finally swap the instance
+    playback = newPlayback;
+    switch (oldState) {
+      case PlaybackStateCompat.STATE_BUFFERING:
+      case PlaybackStateCompat.STATE_CONNECTING:
+      case PlaybackStateCompat.STATE_PAUSED:
+        playback.pause();
         break;
+      case PlaybackStateCompat.STATE_PLAYING:
+        Track currentQueueItem = queueManager.currentTrack();
+        if (resumePlaying && currentQueueItem != null) {
+          playback.play(currentQueueItem);
+        } else if (!resumePlaying) {
+          playback.pause();
+        } else {
+          playback.stop(true);
+        }
+        break;
+      default:
+    }
+  }
+
+  interface PlaybackServiceCallback {
+    void onPlaybackStart();
+    void onPlaybackStop();
+    void onNotificationRequired();
+    void onPlaybackStateUpdated(PlaybackStateCompat newState);
+  }
+
+  private class MediaSessionCallback extends MediaSessionCompat.Callback {
+    @Override public void onPlay() {
+      Timber.d("onPlay");
+      handlePlayRequest();
+    }
+
+    @Override public void onSkipToQueueItem(long id) {
+      Timber.d("onSkipToQueueItem %s", id);
+      if (queueManager.setQueuePosition((int) id)) {
+        handlePlayRequest();
       }
     }
-    queue = PlayQueue.builder()
-        .queue(sortedQueue)
-        .index(index)
-        .build();
-  }
 
-  private void shuffleQueue() {
-    Track currentTrack = queue.currentTrack();
-    List<Track> shuffledQueue = queue.queue();
-    Collections.shuffle(shuffledQueue);
-    int index = 0;
-    for (int i = 0; i < shuffledQueue.size(); ++i) {
-      if (currentTrack.equals(shuffledQueue.get(i))) {
-        index = i;
-        break;
+    @Override public void onPause() {
+      Timber.d("onPause");
+      handlePauseRequest();
+    }
+
+    @Override public void onSkipToNext() {
+      Timber.d("onSkipToNext");
+      queueManager.next();
+      handlePlayRequest();
+    }
+
+    @Override public void onSkipToPrevious() {
+      Timber.d("onSkipToPrevious");
+      if (playback.getCurrentStreamPosition() > 1500) {
+        playback.seekTo(0);
+        return;
+      }
+      queueManager.previous();
+      handlePlayRequest();
+    }
+
+    @Override public void onStop() {
+      Timber.d("onStop");
+      handleStopRequest();
+    }
+
+    @Override public void onSeekTo(long position) {
+      Timber.d("onSeekTo %s", position);
+      playback.seekTo((int) position);
+    }
+
+    @Override public void onCustomAction(String action, Bundle extras) {
+      Timber.d("onCustomAction %s", action);
+      switch (action) {
+        case CUSTOM_ACTION_REPEAT:
+          queueManager.repeat();
+          break;
+        case CUSTOM_ACTION_SHUFFLE:
+          queueManager.shuffle();
+          break;
+        default:
       }
     }
-    queue = PlayQueue.builder()
-        .queue(shuffledQueue)
-        .index(index)
-        .build();
   }
 }

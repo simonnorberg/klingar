@@ -20,6 +20,9 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.media.session.PlaybackStateCompat.State;
+import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -41,16 +44,16 @@ import com.bumptech.glide.Glide;
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
-import net.simno.klingar.playback.PlayQueue;
-import net.simno.klingar.playback.PlayState;
-import net.simno.klingar.playback.PlayState.PlayMode;
-import net.simno.klingar.playback.PlayState.RepeatMode;
-import net.simno.klingar.playback.PlayState.ShuffleMode;
-import net.simno.klingar.playback.PlaybackManager;
+import net.simno.klingar.playback.MusicController;
+import net.simno.klingar.playback.QueueManager;
+import net.simno.klingar.playback.QueueManager.RepeatMode;
+import net.simno.klingar.playback.QueueManager.ShuffleMode;
 import net.simno.klingar.ui.adapter.QueueAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -95,7 +98,8 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   @BindString(R.string.description_queue) String descQueue;
   @BindString(R.string.description_track) String descTrack;
   @Inject ToolbarOwner toolbarOwner;
-  @Inject PlaybackManager playbackManager;
+  @Inject QueueManager queueManager;
+  @Inject MusicController musicController;
   private boolean isSeeking;
   private boolean isQueueVisible;
 
@@ -150,8 +154,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
       }
 
       @Override public void onStopTrackingTouch(SeekBar seekBar) {
-        long milliseconds = seekBar.getProgress() * 1000;
-        playbackManager.seekTo(milliseconds);
+        musicController.seekTo(seekBar.getProgress() * 1000);
         isSeeking = false;
       }
     });
@@ -197,29 +200,29 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   }
 
   @OnClick(R.id.player_shuffle) void onClickShuffle() {
-    playbackManager.shuffle();
+    musicController.shuffle();
   }
 
   @OnClick(R.id.player_repeat) void onClickRepeat() {
-    playbackManager.repeat();
+    musicController.repeat();
   }
 
   @OnClick(R.id.player_play_pause) void onClickPlayPause() {
-    playbackManager.playPause();
+    musicController.playPause();
   }
 
   @OnClick(R.id.player_next) void onClickNext(ImageView nextButton) {
     ((Animatable) nextButton.getDrawable()).start();
-    playbackManager.next();
+    musicController.next();
   }
 
   @OnClick(R.id.player_previous) void onClickPrevious(ImageView previousButton) {
     ((Animatable) previousButton.getDrawable()).start();
-    playbackManager.previous();
+    musicController.previous();
   }
 
   private void observePlaybackState() {
-    subscriptions.add(playbackManager.progress()
+    subscriptions.add(musicController.progress()
         .compose(RxHelper.applySchedulers())
         .subscribe(new SimpleSubscriber<Long>() {
           @Override public void onNext(Long progress) {
@@ -228,53 +231,60 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
             }
           }
         }));
-    subscriptions.add(playbackManager.state()
+    subscriptions.add(musicController.state()
         .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<PlayState>() {
-          @Override public void onNext(PlayState state) {
-            updatePlayButton(state.playMode());
-            updateShuffleButton(state.shuffleMode());
-            updateRepeatButton(state.repeatMode());
+        .subscribe(new SimpleSubscriber<Integer>() {
+          @Override public void onNext(Integer state) {
+            updatePlayButton(state);
           }
         }));
-    subscriptions.add(playbackManager.queue()
+    subscriptions.add(queueManager.mode()
         .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<PlayQueue>() {
-          @Override public void onNext(PlayQueue queue) {
-            queueAdapter.setQueue(queue);
-            updateTrackInfo(queue.currentTrack());
+        .subscribe(new SimpleSubscriber<Pair<Integer, Integer>>() {
+          @Override public void onNext(Pair<Integer, Integer> pair) {
+            updateShuffleButton(pair.first);
+            updateRepeatButton(pair.second);
+          }
+        }));
+    subscriptions.add(queueManager.queue()
+        .compose(RxHelper.applySchedulers())
+        .subscribe(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
+          @Override public void onNext(Pair<List<Track>, Integer> pair) {
+            queueAdapter.setQueue(pair.first, pair.second);
+            updateTrackInfo(pair.first.get(pair.second));
           }
         }));
   }
 
-  private void updatePlayButton(@PlayMode int playMode) {
-    if (playMode == PlayState.PLAYING) {
+  private void updatePlayButton(@State int state) {
+    if (state == PlaybackStateCompat.STATE_PLAYING
+        || state == PlaybackStateCompat.STATE_BUFFERING) {
       playPauseButton.setImageState(PAUSE, true);
       playPauseButton.setContentDescription(descPause);
-    } else if (playMode == PlayState.PAUSED) {
+    } else {
       playPauseButton.setImageState(PLAY, true);
       playPauseButton.setContentDescription(descPlay);
     }
   }
 
   private void updateShuffleButton(@ShuffleMode int shuffleMode) {
-    if (shuffleMode == PlayState.SHUFFLE_OFF) {
+    if (shuffleMode == QueueManager.SHUFFLE_OFF) {
       shuffleButton.setImageState(SHUFFLE_OFF, true);
       shuffleButton.setContentDescription(descShuffleOff);
-    } else if (shuffleMode == PlayState.SHUFFLE_ALL) {
+    } else if (shuffleMode == QueueManager.SHUFFLE_ALL) {
       shuffleButton.setImageState(SHUFFLE_ALL, true);
       shuffleButton.setContentDescription(descShuffleAll);
     }
   }
 
   private void updateRepeatButton(@RepeatMode int repeatMode) {
-    if (repeatMode == PlayState.REPEAT_OFF) {
+    if (repeatMode == QueueManager.REPEAT_OFF) {
       repeatButton.setImageState(REPEAT_OFF, true);
       repeatButton.setContentDescription(descRepeatOff);
-    } else if (repeatMode == PlayState.REPEAT_ALL) {
+    } else if (repeatMode == QueueManager.REPEAT_ALL) {
       repeatButton.setImageState(REPEAT_ALL, true);
       repeatButton.setContentDescription(descRepeatAll);
-    } else if (repeatMode == PlayState.REPEAT_ONE) {
+    } else if (repeatMode == QueueManager.REPEAT_ONE) {
       repeatButton.setImageState(REPEAT_ONE, true);
       repeatButton.setContentDescription(descRepeatOne);
     }
@@ -295,6 +305,6 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   }
 
   @Override public void onTrackClicked(int position) {
-    playbackManager.playFromQueue(position);
+    musicController.skipToPosition(position);
   }
 }

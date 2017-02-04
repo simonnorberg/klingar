@@ -18,6 +18,7 @@ package net.simno.klingar.ui;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,7 +41,8 @@ import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.data.repository.MusicRepository;
-import net.simno.klingar.playback.PlaybackManager;
+import net.simno.klingar.playback.MusicController;
+import net.simno.klingar.playback.QueueManager;
 import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.BackgroundLayout;
 import net.simno.klingar.ui.widget.BackgroundScrollListener;
@@ -86,7 +88,8 @@ public class DetailController extends BaseController implements
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
   @Inject ToolbarOwner toolbarOwner;
   @Inject MusicRepository musicRepository;
-  @Inject PlaybackManager playbackManager;
+  @Inject QueueManager queueManager;
+  @Inject MusicController musicController;
   private DistanceScrollListener scrollListener;
   private PlexItem plexItem;
   private boolean itemsLoaded;
@@ -280,19 +283,23 @@ public class DetailController extends BaseController implements
   }
 
   private void observePlayback() {
-    subscriptions.add(playbackManager.isPlaying()
+    subscriptions.add(musicController.state()
         .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Boolean>() {
-          @Override public void onNext(Boolean isPlaying) {
-            if (isPlaying) {
-              Router miniplayerRouter = getChildRouter(miniplayerContainer);
-              if (!miniplayerRouter.hasRootController()) {
-                miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
-              }
-            } else {
-              for (Router router : getChildRouters()) {
-                removeChildRouter(router);
-              }
+        .subscribe(new SimpleSubscriber<Integer>() {
+          @Override public void onNext(Integer state) {
+            switch (state) {
+              case PlaybackStateCompat.STATE_ERROR:
+              case PlaybackStateCompat.STATE_NONE:
+              case PlaybackStateCompat.STATE_STOPPED:
+                for (Router router : getChildRouters()) {
+                  removeChildRouter(router);
+                }
+                break;
+              default:
+                Router miniplayerRouter = getChildRouter(miniplayerContainer);
+                if (!miniplayerRouter.hasRootController()) {
+                  miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
+                }
             }
           }
         }));
@@ -318,6 +325,7 @@ public class DetailController extends BaseController implements
       }
     }
 
-    playbackManager.play(queue, startIndex);
+    queueManager.setQueue(queue, startIndex);
+    musicController.play();
   }
 }

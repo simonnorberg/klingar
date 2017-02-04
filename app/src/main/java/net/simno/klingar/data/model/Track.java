@@ -15,7 +15,6 @@
  */
 package net.simno.klingar.data.model;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
@@ -26,7 +25,7 @@ import net.simno.klingar.data.HttpUrlTypeAdapter;
 import okhttp3.HttpUrl;
 
 @AutoValue
-public abstract class Track implements PlexItem, Comparable<Track> {
+public abstract class Track implements PlexItem {
   public static Builder builder() {
     return new AutoValue_Track.Builder();
   }
@@ -44,10 +43,6 @@ public abstract class Track implements PlexItem, Comparable<Track> {
   @Nullable public abstract String thumb();
 
   @ParcelAdapter(HttpUrlTypeAdapter.class) public abstract HttpUrl uri();
-
-  @Override public int compareTo(@NonNull Track o) {
-    return Integer.compare(index(), o.index());
-  }
 
   @AutoValue.Builder public abstract static class Builder {
     public abstract Builder title(String name);

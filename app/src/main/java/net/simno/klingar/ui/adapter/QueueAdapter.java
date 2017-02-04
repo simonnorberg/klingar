@@ -21,17 +21,18 @@ import android.view.ViewGroup;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
-import net.simno.klingar.playback.PlayQueue;
-import net.simno.klingar.playback.PlayState;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 
 public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
 
   private final OnTrackClickListener listener;
   private List<Track> items = new ArrayList<>();
-  private int index;
+  private int position;
 
   public QueueAdapter(OnTrackClickListener listener) {
     this.listener = listener;
@@ -39,7 +40,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
 
   @Override public QueueViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-    if (viewType == PlayState.PLAYING) {
+    if (viewType == STATE_PLAYING) {
       return new PlayingViewHolder(inflater.inflate(R.layout.item_playing, parent, false),
           listener::onTrackClicked);
     }
@@ -56,12 +57,12 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
   }
 
   @Override public int getItemViewType(int position) {
-    return position == index ? PlayState.PLAYING : PlayState.PAUSED;
+    return this.position == position ? STATE_PLAYING : STATE_PAUSED;
   }
 
-  public void setQueue(PlayQueue queue) {
-    this.items = queue.queue();
-    this.index = queue.index();
+  public void setQueue(List<Track> queue, int position) {
+    this.items = queue;
+    this.position = position;
     notifyDataSetChanged();
   }
 

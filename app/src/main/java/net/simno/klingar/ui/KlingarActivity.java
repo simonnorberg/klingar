@@ -15,10 +15,18 @@
  */
 package net.simno.klingar.ui;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,10 +37,16 @@ import android.widget.Spinner;
 import com.bluelinelabs.conductor.Conductor;
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastState;
+import com.google.android.gms.cast.framework.CastStateListener;
+import com.google.android.gms.cast.framework.IntroductoryOverlay;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.LoginManager;
+import net.simno.klingar.playback.MusicService;
 
 import java.util.List;
 
@@ -54,6 +68,29 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
   @Inject LoginManager loginManager;
   @Inject ToolbarOwner toolbarOwner;
   private Router router;
+  private CastContext castContext;
+  private MenuItem mediaRouteMenuItem;
+  private boolean bound;
+
+  private final CastStateListener castStateListener = newState -> {
+    if (newState != CastState.NO_DEVICES_AVAILABLE) {
+      new Handler().postDelayed(() -> {
+        if (mediaRouteMenuItem.isVisible()) {
+          showCastIntroductoryOverlay();
+        }
+      }, 1000);
+    }
+  };
+
+  private final ServiceConnection connection = new ServiceConnection() {
+    @Override public void onServiceConnected(ComponentName className, IBinder service) {
+      bound = true;
+    }
+
+    @Override public void onServiceDisconnected(ComponentName arg0) {
+      bound = false;
+    }
+  };
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -62,6 +99,7 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
     ButterKnife.bind(this);
     initActionBar();
     toolbarOwner.takeActivity(this);
+    castContext = CastContext.getSharedInstance(this);
     router = Conductor.attachRouter(this, container, savedInstanceState);
     if (savedInstanceState == null) {
       if (loginManager.isLoggedOut()) {
@@ -72,9 +110,39 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
     }
   }
 
+  @Override protected void onStart() {
+    super.onStart();
+    bindService(new Intent(this, MusicService.class), connection, Context.BIND_AUTO_CREATE);
+  }
+
+  @Override protected void onResume() {
+    super.onResume();
+    castContext.addCastStateListener(castStateListener);
+  }
+
+  @Override protected void onPause() {
+    super.onPause();
+    castContext.removeCastStateListener(castStateListener);
+  }
+
+  @Override protected void onStop() {
+    super.onStop();
+    if (bound) {
+      unbindService(connection);
+      bound = false;
+    }
+  }
+
   @Override protected void onDestroy() {
     toolbarOwner.dropActivity();
     super.onDestroy();
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_cast, menu);
+    mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+        R.id.media_route_menu_item);
+    return true;
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -89,10 +157,6 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
     if (!router.handleBack()) {
       super.onBackPressed();
     }
-  }
-
-  private void initActionBar() {
-    setSupportActionBar(toolbar);
   }
 
   @Override public void setShowTitleEnabled(boolean enabled) {
@@ -138,5 +202,22 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
   }
 
   @Override public void onNothingSelected(AdapterView<?> adapterView) {
+  }
+
+  private void initActionBar() {
+    toolbar.inflateMenu(R.menu.menu_cast);
+    setSupportActionBar(toolbar);
+  }
+
+  private void showCastIntroductoryOverlay() {
+    Menu menu = toolbar.getMenu();
+    View view = menu.findItem(R.id.media_route_menu_item).getActionView();
+    if (view != null && view instanceof MediaRouteButton) {
+      IntroductoryOverlay overlay = new IntroductoryOverlay.Builder(this, mediaRouteMenuItem)
+          .setTitleText(R.string.touch_to_cast)
+          .setSingleTime()
+          .build();
+      overlay.show();
+    }
   }
 }

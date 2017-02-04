@@ -17,6 +17,9 @@ package net.simno.klingar.ui;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.media.session.PlaybackStateCompat.State;
+import android.support.v4.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,11 +27,12 @@ import android.widget.TextView;
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
-import net.simno.klingar.playback.PlayQueue;
-import net.simno.klingar.playback.PlayState;
-import net.simno.klingar.playback.PlaybackManager;
+import net.simno.klingar.playback.MusicController;
+import net.simno.klingar.playback.QueueManager;
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -46,7 +50,8 @@ public class MiniPlayerController extends BaseController {
   @BindView(R.id.miniplayer_play_pause) ImageView playPauseButton;
   @BindString(R.string.description_play) String descPlay;
   @BindString(R.string.description_pause) String descPause;
-  @Inject PlaybackManager playbackManager;
+  @Inject MusicController musicController;
+  @Inject QueueManager queueManager;
 
   public MiniPlayerController(Bundle args) {
     super(args);
@@ -68,31 +73,32 @@ public class MiniPlayerController extends BaseController {
   }
 
   @OnClick(R.id.miniplayer_play_pause) void onClickPlayPause() {
-    playbackManager.playPause();
+    musicController.playPause();
   }
 
   private void observePlaybackState() {
-    subscriptions.add(playbackManager.state()
+    subscriptions.add(musicController.state()
         .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<PlayState>() {
-          @Override public void onNext(PlayState state) {
-            updatePlayButton(state.playMode());
+        .subscribe(new SimpleSubscriber<Integer>() {
+          @Override public void onNext(Integer state) {
+            updatePlayButton(state);
           }
         }));
-    subscriptions.add(playbackManager.queue()
+    subscriptions.add(queueManager.queue()
         .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<PlayQueue>() {
-          @Override public void onNext(PlayQueue queue) {
-            updateTrackInfo(queue.currentTrack());
+        .subscribe(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
+          @Override public void onNext(Pair<List<Track>, Integer> pair) {
+            updateTrackInfo(pair.first.get(pair.second));
           }
         }));
   }
 
-  private void updatePlayButton(@PlayState.PlayMode int playMode) {
-    if (playMode == PlayState.PLAYING) {
+  private void updatePlayButton(@State int state) {
+    if (state == PlaybackStateCompat.STATE_PLAYING
+        || state == PlaybackStateCompat.STATE_BUFFERING) {
       playPauseButton.setImageState(PAUSE, true);
       playPauseButton.setContentDescription(descPause);
-    } else if (playMode == PlayState.PAUSED) {
+    } else {
       playPauseButton.setImageState(PLAY, true);
       playPauseButton.setContentDescription(descPlay);
     }

@@ -18,7 +18,9 @@ package net.simno.klingar;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.view.inputmethod.InputMethodManager;
 
 import dagger.Module;
@@ -42,5 +44,13 @@ import dagger.Provides;
 
   @Provides ConnectivityManager provideConnectivityManager(Context context) {
     return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+  }
+
+  @Provides AudioManager provideAudioManager(Context context) {
+    return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+  }
+
+  @Provides WifiManager provideWifiManager(Context context) {
+    return (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
   }
 }

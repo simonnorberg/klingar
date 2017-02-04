@@ -15,6 +15,7 @@
  */
 package net.simno.klingar;
 
+import net.simno.klingar.playback.MusicService;
 import net.simno.klingar.ui.BrowserController;
 import net.simno.klingar.ui.DetailController;
 import net.simno.klingar.ui.KlingarActivity;
@@ -29,4 +30,5 @@ public interface AppComponent {
   void inject(MiniPlayerController controller);
   void inject(PlayerController controller);
   void inject(KlingarActivity activity);
+  void inject(MusicService service);
 }

@@ -118,11 +118,6 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
   }
 
-  public void add(PlexItem item) {
-    this.items.add(item);
-    notifyDataSetChanged();
-  }
-
   public void addAll(List<PlexItem> items) {
     this.items.addAll(items);
     notifyDataSetChanged();
