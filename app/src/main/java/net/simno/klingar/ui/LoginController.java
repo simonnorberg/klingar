@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,7 @@ import android.widget.TextView;
 import com.bluelinelabs.conductor.RouterTransaction;
 import com.squareup.okhttp.Credentials;
 
+import net.simno.klingar.BuildConfig;
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.LoginManager;
@@ -91,6 +93,23 @@ public class LoginController extends BaseController {
     usernameEdit.requestFocus();
     contentLoading.hide();
     return view;
+  }
+
+  @Override
+  protected void onAttach(@NonNull View view) {
+    super.onAttach(view);
+    debugLogin();
+  }
+
+  private void debugLogin() {
+    if (BuildConfig.DEBUG) {
+      if (!TextUtils.equals(BuildConfig.DEBUG_USER, "null")
+          && !TextUtils.equals(BuildConfig.DEBUG_PWD, "null")) {
+        usernameEdit.setText(BuildConfig.DEBUG_USER);
+        passwordEdit.setText(BuildConfig.DEBUG_PWD);
+        login();
+      }
+    }
   }
 
   @OnEditorAction(R.id.password_edit)

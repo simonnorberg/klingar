@@ -83,6 +83,8 @@ android {
     buildConfigField 'String', 'GIT_SHA', "\"${gitSha()}\""
     buildConfigField 'long', 'GIT_TIMESTAMP', "${gitTimestamp()}L"
     buildConfigField "String", "CAST_APP_ID", "\"631E34EA\""
+    buildConfigField 'String', 'DEBUG_USER', "\"${project.findProperty('debugUser') ?: 'null'}\""
+    buildConfigField 'String', 'DEBUG_PWD', "\"${project.findProperty('debugPwd') ?: 'null'}\""
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
   }
