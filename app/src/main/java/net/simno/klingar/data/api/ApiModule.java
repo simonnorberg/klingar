@@ -15,6 +15,10 @@
  */
 package net.simno.klingar.data.api;
 
+import android.content.res.Resources;
+
+import net.simno.klingar.R;
+
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.stream.Format;
 import org.simpleframework.xml.stream.HyphenStyle;
@@ -26,9 +30,13 @@ import dagger.Module;
 import dagger.Provides;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
+import timber.log.Timber;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Module
 public class ApiModule {
@@ -39,8 +47,31 @@ public class ApiModule {
     return new AuthInterceptor();
   }
 
+  @Provides @Singleton PlexHeaders providePlexHeaders(@Named("clientId") String clientId,
+                                                      Resources resources) {
+    return new PlexHeaders(clientId, resources.getString(R.string.app_name));
+  }
+
   @Provides @Singleton SimpleXmlConverterFactory provideConverterFactory() {
     return SimpleXmlConverterFactory.create(new Persister(new Format(new HyphenStyle())));
+  }
+
+  @Provides @Singleton HttpLoggingInterceptor provideLoggingInterceptor() {
+    HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message ->
+        Timber.tag("OkHttp").d(message));
+    logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+    return logging;
+  }
+
+  @Provides @Singleton @Named("default")
+  OkHttpClient provideOkHttpClient(HttpLoggingInterceptor logging, PlexHeaders plexHeaders) {
+    return new OkHttpClient().newBuilder()
+        .connectTimeout(15, SECONDS)
+        .readTimeout(15, SECONDS)
+        .writeTimeout(15, SECONDS)
+        .addInterceptor(logging)
+        .addInterceptor(plexHeaders)
+        .build();
   }
 
   @Provides @Singleton @Named("plex")

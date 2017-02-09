@@ -15,21 +15,19 @@
  */
 package net.simno.klingar.data;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 import net.simno.klingar.data.api.ApiModule;
 import net.simno.klingar.data.repository.RepositoryModule;
+
+import java.util.UUID;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import timber.log.Timber;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Module(includes = {
     ApiModule.class,
@@ -41,20 +39,12 @@ public class DataModule {
     return new SharedPrefs(preferences);
   }
 
-  @Provides @Singleton HttpLoggingInterceptor provideLoggingInterceptor() {
-    HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message ->
-        Timber.tag("OkHttp").d(message));
-    logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-    return logging;
-  }
-
-  @Provides @Singleton @Named("default")
-  OkHttpClient provideOkHttpClient(HttpLoggingInterceptor logging) {
-    return new OkHttpClient().newBuilder()
-        .connectTimeout(15, SECONDS)
-        .readTimeout(15, SECONDS)
-        .writeTimeout(15, SECONDS)
-        .addInterceptor(logging)
-        .build();
+  @Provides @Singleton @Named("clientId") String provideClientId(Prefs prefs, Context context) {
+    String clientId = prefs.getString("pref_client_id", null);
+    if (clientId == null) {
+      clientId = context.getPackageName() + "-" + UUID.randomUUID().toString();
+      prefs.putString("pref_client_id", clientId);
+    }
+    return clientId;
   }
 }

@@ -15,7 +15,6 @@
  */
 package net.simno.klingar.ui;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.ContentLoadingProgressBar;
@@ -95,8 +94,7 @@ public class LoginController extends BaseController {
     return view;
   }
 
-  @Override
-  protected void onAttach(@NonNull View view) {
+  @Override protected void onAttach(@NonNull View view) {
     super.onAttach(view);
     debugLogin();
   }
@@ -142,8 +140,7 @@ public class LoginController extends BaseController {
     hideInputMethod();
     invisible(loginForm);
     contentLoading.show();
-    subscriptions.add(plex.signIn(appName, Build.VERSION.RELEASE, Build.MODEL, Build.MODEL,
-        Credentials.basic(username, password))
+    subscriptions.add(plex.signIn(Credentials.basic(username, password))
         .compose(RxHelper.applySchedulers())
         .subscribe(new SimpleSubscriber<User>() {
           @Override public void onError(Throwable e) {

@@ -15,31 +15,17 @@
  */
 package net.simno.klingar.data.api;
 
-import net.simno.klingar.BuildConfig;
 import net.simno.klingar.data.api.model.DeviceContainer;
 import net.simno.klingar.data.api.model.User;
 
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import rx.Observable;
 
 public interface PlexService {
-
-  @SuppressWarnings("SameParameterValue")
-  @Headers({
-      "X-Plex-Platform: Android",
-      "X-Plex-Provides: player",
-      "X-Plex-Client-Identifier: 1337",
-      "X-Plex-Version: " + BuildConfig.VERSION_NAME
-  })
   @POST("/users/sign_in.xml")
-  Observable<User> signIn(@Header("X-Plex-Product") String product,
-                          @Header("X-Plex-Platform-Version") String platformVersion,
-                          @Header("X-Plex-Device") String device,
-                          @Header("X-Plex-Device-Name") String deviceName,
-                          @Header("Authorization") String authorization);
+  Observable<User> signIn(@Header("Authorization") String authorization);
 
   @GET("/pms/resources?includeHttps=1")
   Observable<DeviceContainer> resources();
