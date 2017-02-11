@@ -15,11 +15,14 @@
  */
 package net.simno.klingar.data.repository;
 
+import android.util.Pair;
+
 import net.simno.klingar.data.model.Album;
 import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.MediaType;
 import net.simno.klingar.data.model.PlexItem;
+import net.simno.klingar.data.model.Track;
 
 import java.util.List;
 
@@ -30,4 +33,5 @@ public interface MusicRepository {
   Observable<List<PlexItem>> browseMediaType(MediaType mediaType, int offset);
   Observable<List<PlexItem>> artistItems(Artist artist);
   Observable<List<PlexItem>> albumItems(Album album);
+  Observable<Pair<List<Track>, Long>> createPlayQueue(Track track);
 }

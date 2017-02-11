@@ -16,7 +16,6 @@
 package net.simno.klingar.data.api;
 
 import net.simno.klingar.data.api.model.MediaContainer;
-import net.simno.klingar.data.api.model.SectionContainer;
 
 import okhttp3.HttpUrl;
 import rx.Observable;
@@ -31,25 +30,9 @@ public class MediaServiceHelper {
     this.media = media;
   }
 
-  public Observable<SectionContainer> sections(HttpUrl url) {
+  public Observable<MediaContainer> sections(HttpUrl url) {
     return media.sections(url.newBuilder()
         .addPathSegments("library/sections")
-        .build());
-  }
-
-  public Observable<MediaContainer> playlists(HttpUrl url) {
-    return media.playlists(url.newBuilder()
-        .addPathSegments("playlists/all")
-        .query("type=15&playlistType=audio")
-        .addQueryParameter(TOKEN, url.queryParameter(TOKEN))
-        .build());
-  }
-
-  public Observable<MediaContainer> playlistItems(HttpUrl url, String playlistKey) {
-    return media.playlistItems(url.newBuilder()
-        .addPathSegment("playlists")
-        .addPathSegment(playlistKey)
-        .addPathSegment("items")
         .build());
   }
 
@@ -109,6 +92,17 @@ public class MediaServiceHelper {
         .addPathSegment(libKey)
         .addPathSegment("firstCharacter")
         .addQueryParameter("type", mediaKey)
+        .build());
+  }
+
+  public Observable<MediaContainer> playQueue(HttpUrl url, String trackKey, String trackParentKey,
+                                              String libraryId) {
+    return media.playQueue(url.newBuilder()
+        .addPathSegments("playQueues")
+        .query("repeat=0&shuffle=0&type=audio&continuous=0")
+        .addQueryParameter("key", trackKey)
+        .addQueryParameter("uri", "library://" + libraryId + "/item/" + trackParentKey)
+        .addQueryParameter(TOKEN, url.queryParameter(TOKEN))
         .build());
   }
 }

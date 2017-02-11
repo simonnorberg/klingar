@@ -19,6 +19,8 @@ import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.ryanharter.auto.value.parcel.ParcelAdapter;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import net.simno.klingar.data.HttpUrlTypeAdapter;
 
@@ -30,11 +32,27 @@ public abstract class Track implements PlexItem {
     return new AutoValue_Track.Builder();
   }
 
+  public static JsonAdapter<Track> jsonAdapter(Moshi moshi) {
+    return new AutoValue_Track.MoshiJsonAdapter(moshi);
+  }
+
+  public abstract long queueItemId();
+
+  public abstract String libraryId();
+
+  public abstract String key();
+
+  public abstract String ratingKey();
+
+  public abstract String parentKey();
+
   public abstract String title();
 
   public abstract String albumTitle();
 
   public abstract String artistTitle();
+
+  public abstract String source();
 
   public abstract int index();
 
@@ -45,9 +63,15 @@ public abstract class Track implements PlexItem {
   @ParcelAdapter(HttpUrlTypeAdapter.class) public abstract HttpUrl uri();
 
   @AutoValue.Builder public abstract static class Builder {
+    public abstract Builder queueItemId(long queueItemId);
+    public abstract Builder libraryId(String libraryId);
+    public abstract Builder key(String key);
+    public abstract Builder ratingKey(String ratingKey);
+    public abstract Builder parentKey(String parentKey);
     public abstract Builder title(String name);
     public abstract Builder artistTitle(String artistTitle);
     public abstract Builder albumTitle(String albumTitle);
+    public abstract Builder source(String source);
     public abstract Builder index(int index);
     public abstract Builder duration(long duration);
     public abstract Builder thumb(String thumb);

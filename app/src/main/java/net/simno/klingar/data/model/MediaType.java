@@ -34,7 +34,9 @@ public abstract class MediaType implements PlexItem {
 
   public abstract String mediaKey();
 
-  public abstract String libKey();
+  public abstract String libraryKey();
+
+  public abstract String libraryId();
 
   @ParcelAdapter(HttpUrlTypeAdapter.class) public abstract HttpUrl uri();
 
@@ -42,7 +44,8 @@ public abstract class MediaType implements PlexItem {
     public abstract Builder title(String name);
     public abstract Builder type(int type);
     public abstract Builder mediaKey(String mediaKey);
-    public abstract Builder libKey(String libKey);
+    public abstract Builder libraryKey(String libraryKey);
+    public abstract Builder libraryId(String libraryId);
     public abstract Builder uri(HttpUrl uri);
     public abstract MediaType build();
   }

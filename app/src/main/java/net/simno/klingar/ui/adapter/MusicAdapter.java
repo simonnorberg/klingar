@@ -24,7 +24,6 @@ import net.simno.klingar.data.model.Album;
 import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.Header;
 import net.simno.klingar.data.model.MediaType;
-import net.simno.klingar.data.model.Playlist;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
 
@@ -35,7 +34,6 @@ import static net.simno.klingar.data.Type.ALBUM;
 import static net.simno.klingar.data.Type.ARTIST;
 import static net.simno.klingar.data.Type.HEADER;
 import static net.simno.klingar.data.Type.MEDIA_TYPE;
-import static net.simno.klingar.data.Type.PLAYLIST;
 import static net.simno.klingar.data.Type.TRACK;
 
 public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -52,19 +50,16 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     switch (viewType) {
       case ARTIST:
         return new ArtistViewHolder(inflater.inflate(R.layout.item_artist, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position), position));
+            position -> listener.onPlexItemClicked(items.get(position)));
       case ALBUM:
         return new AlbumViewHolder(inflater.inflate(R.layout.item_album, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position), position));
+            position -> listener.onPlexItemClicked(items.get(position)));
       case TRACK:
         return new TrackViewHolder(inflater.inflate(R.layout.item_track, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position), position));
-      case PLAYLIST:
-        return new PlaylistViewHolder(inflater.inflate(R.layout.item_playlist, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position), position));
+            position -> listener.onPlexItemClicked(items.get(position)));
       case MEDIA_TYPE:
         return new MediaTypeViewHolder(inflater.inflate(R.layout.item_media_type, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position), position));
+            position -> listener.onPlexItemClicked(items.get(position)));
       case HEADER:
         return new HeaderViewHolder(inflater.inflate(R.layout.item_header, parent, false));
       default:
@@ -83,9 +78,6 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         break;
       case TRACK:
         ((TrackViewHolder) holder).bindModel((Track) item);
-        break;
-      case PLAYLIST:
-        ((PlaylistViewHolder) holder).bindModel((Playlist) item);
         break;
       case MEDIA_TYPE:
         ((MediaTypeViewHolder) holder).bindModel((MediaType) item);
@@ -109,8 +101,6 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
       return ALBUM;
     } else if (item instanceof Track) {
       return TRACK;
-    } else if (item instanceof Playlist) {
-      return PLAYLIST;
     } else if (item instanceof MediaType) {
       return MEDIA_TYPE;
     } else {
@@ -128,11 +118,7 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     notifyDataSetChanged();
   }
 
-  public List<PlexItem> getItems() {
-    return items;
-  }
-
   public interface OnPlexItemClickListener {
-    void onPlexItemClicked(PlexItem plexItem, int position);
+    void onPlexItemClicked(PlexItem plexItem);
   }
 }

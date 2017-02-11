@@ -19,9 +19,7 @@ limitations under the License.
   <item name="album" type="id"/>
   <item name="artist" type="id"/>
   <item name="header" type="id"/>
-  <item name="library" type="id"/>
   <item name="media_type" type="id"/>
-  <item name="playlist" type="id"/>
   <item name="track" type="id"/>
 
 </resources>

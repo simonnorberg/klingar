@@ -206,7 +206,7 @@ class PlaybackManager implements Playback.Callback {
 
     @Override public void onSkipToQueueItem(long id) {
       Timber.d("onSkipToQueueItem %s", id);
-      if (queueManager.setQueuePosition((int) id)) {
+      if (queueManager.setQueuePosition(id)) {
         handlePlayRequest();
       }
     }

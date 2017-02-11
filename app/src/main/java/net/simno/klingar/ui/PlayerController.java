@@ -304,7 +304,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
     artistTitle.setText(track.artistTitle());
   }
 
-  @Override public void onTrackClicked(int position) {
-    musicController.skipToPosition(position);
+  @Override public void onTrackClicked(Track track) {
+    musicController.playQueueItem(track.queueItemId());
   }
 }

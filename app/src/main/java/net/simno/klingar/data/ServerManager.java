@@ -22,7 +22,7 @@ import com.jakewharton.rxrelay.BehaviorRelay;
 import net.simno.klingar.data.api.MediaServiceHelper;
 import net.simno.klingar.data.api.PlexService;
 import net.simno.klingar.data.api.model.Device;
-import net.simno.klingar.data.api.model.Section;
+import net.simno.klingar.data.api.model.Directory;
 import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.Server;
 import net.simno.klingar.util.RxHelper;
@@ -60,7 +60,7 @@ public class ServerManager {
         .flatMap(server -> Observable.combineLatest(
             Observable.just(server),
             media.sections(server.uri())
-                .flatMap(container -> Observable.from(container.sections))
+                .flatMap(container -> Observable.from(container.directories))
                 .filter(section -> TextUtils.equals(section.type, "artist")),
             this::parseLibrary))
         .toList()
@@ -73,10 +73,7 @@ public class ServerManager {
   }
 
   private Server parseServer(Device device) {
-    Server.Builder builder = Server.builder()
-        .id(device.clientIdentifier)
-        .name(device.name)
-        .accessToken(device.accessToken);
+    Server.Builder builder = Server.builder();
 
     for (Device.Connection connection : device.connections) {
       if (connection.local == 0) {
@@ -91,12 +88,11 @@ public class ServerManager {
     return builder.build();
   }
 
-  private Library parseLibrary(Server server, Section section) {
+  private Library parseLibrary(Server server, Directory section) {
     return Library.builder()
+        .uuid(section.uuid)
         .key(section.key)
         .name(section.title)
-        .serverName(server.name())
-        .accessToken(server.accessToken())
         .uri(server.uri())
         .build();
   }

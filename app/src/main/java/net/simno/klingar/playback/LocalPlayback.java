@@ -180,7 +180,7 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
         callback.onPlaybackStatusChanged();
       }
 
-      Uri uri = Uri.parse(track.uri().toString());
+      Uri uri = Uri.parse(track.source());
       ExtractorMediaSource source = new ExtractorMediaSource(uri, dataSourceFactory,
           extractorsFactory, null, null);
       configWhenReady = true;

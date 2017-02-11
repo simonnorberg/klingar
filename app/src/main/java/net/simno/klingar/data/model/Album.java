@@ -32,13 +32,11 @@ public abstract class Album implements PlexItem {
 
   public abstract String title();
 
-  public abstract String key();
+  public abstract String ratingKey();
 
   public abstract String artistTitle();
 
-  public abstract String year();
-
-  @Nullable public abstract String art();
+  public abstract String libraryId();
 
   @Nullable public abstract String thumb();
 
@@ -46,10 +44,9 @@ public abstract class Album implements PlexItem {
 
   @AutoValue.Builder public abstract static class Builder {
     public abstract Builder title(String name);
-    public abstract Builder key(String key);
+    public abstract Builder ratingKey(String ratingKey);
     public abstract Builder artistTitle(String artistTitle);
-    public abstract Builder year(String year);
-    public abstract Builder art(String art);
+    public abstract Builder libraryId(String libraryId);
     public abstract Builder thumb(String thumb);
     public abstract Builder uri(HttpUrl uri);
     public abstract Album build();

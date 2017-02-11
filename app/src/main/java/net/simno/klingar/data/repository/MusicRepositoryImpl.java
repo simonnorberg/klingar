@@ -17,6 +17,7 @@ package net.simno.klingar.data.repository;
 
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
+import android.util.Pair;
 
 import net.simno.klingar.data.Type;
 import net.simno.klingar.data.api.MediaServiceHelper;
@@ -40,7 +41,6 @@ import okhttp3.HttpUrl;
 import rx.Observable;
 import rx.functions.Func1;
 
-import static net.simno.klingar.util.Strings.valueOrDefault;
 import static net.simno.klingar.util.Urls.addPathToUrl;
 import static net.simno.klingar.util.Urls.getTranscodeUrl;
 
@@ -80,21 +80,24 @@ class MusicRepositoryImpl implements MusicRepository {
           .title("Artists")
           .type(Type.ARTIST)
           .mediaKey("8")
-          .libKey(lib.key())
+          .libraryKey(lib.key())
+          .libraryId(lib.uuid())
           .uri(lib.uri())
           .build());
       mediaTypes.add(MediaType.builder()
           .title("Albums")
           .type(Type.ALBUM)
           .mediaKey("9")
-          .libKey(lib.key())
+          .libraryKey(lib.key())
+          .libraryId(lib.uuid())
           .uri(lib.uri())
           .build());
       mediaTypes.add(MediaType.builder()
           .title("Tracks")
           .type(Type.TRACK)
           .mediaKey("10")
-          .libKey(lib.key())
+          .libraryKey(lib.key())
+          .libraryId(lib.uuid())
           .uri(lib.uri())
           .build());
       return Observable.just(mediaTypes);
@@ -104,7 +107,7 @@ class MusicRepositoryImpl implements MusicRepository {
   private Observable<List<PlexItem>> recentlyPlayed(Library lib) {
     return Observable.defer(() -> media.recentArtists(lib.uri(), lib.key())
         .flatMap(FLATMAP_DIRS)
-        .map(mapArtist(lib.key(), lib.uri()))
+        .map(mapArtist(lib.key(), lib.uuid(), lib.uri()))
         .toList()
         .map(items -> {
           if (!items.isEmpty()) {
@@ -141,28 +144,28 @@ class MusicRepositoryImpl implements MusicRepository {
   }
 
   private Observable<List<PlexItem>> browseArtists(MediaType mt, int offset) {
-    return Observable.defer(() -> media.browse(mt.uri(), mt.libKey(), mt.mediaKey(), offset)
+    return Observable.defer(() -> media.browse(mt.uri(), mt.libraryKey(), mt.mediaKey(), offset)
         .flatMap(FLATMAP_DIRS)
-        .map(mapArtist(mt.libKey(), mt.uri()))
+        .map(mapArtist(mt.libraryKey(), mt.libraryId(), mt.uri()))
         .toList());
   }
 
   private Observable<List<PlexItem>> browseAlbums(MediaType mt, int offset) {
-    return Observable.defer(() -> media.browse(mt.uri(), mt.libKey(), mt.mediaKey(), offset)
+    return Observable.defer(() -> media.browse(mt.uri(), mt.libraryKey(), mt.mediaKey(), offset)
         .flatMap(FLATMAP_DIRS)
-        .map(mapAlbum(mt.uri()))
+        .map(mapAlbum(mt.libraryId(), mt.uri()))
         .toList());
   }
 
   private Observable<List<PlexItem>> browseTracks(MediaType mt, int offset) {
-    return Observable.defer(() -> media.browse(mt.uri(), mt.libKey(), mt.mediaKey(), offset)
+    return Observable.defer(() -> media.browse(mt.uri(), mt.libraryKey(), mt.mediaKey(), offset)
         .flatMap(FLATMAP_TRACKS)
-        .map(mapTrack(mt.uri()))
+        .map(mapTrack(mt.libraryId(), mt.uri()))
         .toList());
   }
 
   private Observable<SimpleArrayMap<Integer, PlexItem>> browseHeaders(MediaType mt) {
-    return Observable.defer(() -> media.firstCharacter(mt.uri(), mt.libKey(), mt.mediaKey())
+    return Observable.defer(() -> media.firstCharacter(mt.uri(), mt.libraryKey(), mt.mediaKey())
         .flatMap(FLATMAP_DIRS)
         .toList()
         .map(dirs -> {
@@ -194,58 +197,79 @@ class MusicRepositoryImpl implements MusicRepository {
   }
 
   private Observable<List<PlexItem>> popularTracks(Artist artist) {
-    return Observable.defer(() -> media.popularTracks(artist.uri(), artist.libKey(), artist.key())
+    return Observable.defer(() -> media.popularTracks(artist.uri(), artist.libraryKey(),
+        artist.ratingKey())
         .flatMap(FLATMAP_TRACKS)
-        .map(mapTrack(artist.uri()))
+        .map(mapTrack(artist.libraryId(), artist.uri()))
         .toList());
   }
 
   private Observable<List<PlexItem>> albums(Artist artist) {
-    return Observable.defer(() -> media.albums(artist.uri(), artist.key())
+    return Observable.defer(() -> media.albums(artist.uri(), artist.ratingKey())
         .flatMap(FLATMAP_DIRS)
-        .map(mapAlbum(artist.uri()))
+        .map(mapAlbum(artist.libraryId(), artist.uri()))
         .toList());
   }
 
   @Override public Observable<List<PlexItem>> albumItems(Album album) {
-    return Observable.defer(() -> media.tracks(album.uri(), album.key())
+    return Observable.defer(() -> media.tracks(album.uri(), album.ratingKey())
         .flatMap(FLATMAP_TRACKS)
-        .map(mapTrack(album.uri()))
+        .map(mapTrack(album.libraryId(), album.uri()))
         .toList());
   }
 
-  @NonNull private Func1<Directory, PlexItem> mapAlbum(HttpUrl uri) {
+  @Override public Observable<Pair<List<Track>, Long>> createPlayQueue(Track track) {
+    return Observable.defer(() -> media.playQueue(track.uri(), track.key(), track.parentKey(),
+        track.libraryId())
+        .flatMap(container -> Observable.zip(
+            Observable.just(container.playQueueSelectedItemID),
+            Observable.just(container)
+                .flatMap(FLATMAP_TRACKS)
+                .map(mapTrack(track.libraryId(), track.uri()))
+                .map(plexItem -> (Track) plexItem)
+                .toList(),
+            (queueItemId, tracks) -> new Pair<>(tracks, queueItemId))));
+  }
+
+  @NonNull private Func1<Directory, PlexItem> mapAlbum(String libraryId, HttpUrl uri) {
     return dir -> Album.builder()
         .title(dir.title)
-        .key(dir.ratingKey)
+        .ratingKey(dir.ratingKey)
         .artistTitle(dir.parentTitle)
-        .year(valueOrDefault(dir.year, ""))
-        .art(getTranscodeUrl(uri, dir.art))
+        .libraryId(libraryId)
         .thumb(getTranscodeUrl(uri, dir.thumb))
         .uri(uri)
         .build();
   }
 
-  @NonNull private Func1<Directory, PlexItem> mapArtist(String libKey, HttpUrl uri) {
+  @NonNull
+  private Func1<Directory, PlexItem> mapArtist(String libKey, String libraryId, HttpUrl uri) {
     return dir -> Artist.builder()
         .title(dir.title)
-        .key(dir.ratingKey)
-        .libKey(libKey)
+        .ratingKey(dir.ratingKey)
+        .libraryKey(libKey)
+        .libraryId(libraryId)
         .art(getTranscodeUrl(uri, dir.art))
         .thumb(getTranscodeUrl(uri, dir.thumb))
         .uri(uri)
         .build();
   }
 
-  @NonNull private Func1<Song, PlexItem> mapTrack(HttpUrl uri) {
+  @NonNull private Func1<Song, PlexItem> mapTrack(String libraryId, HttpUrl uri) {
     return track -> Track.builder()
+        .queueItemId(track.playQueueItemID != null ? track.playQueueItemID : 0)
+        .libraryId(libraryId)
+        .key(track.key)
+        .ratingKey(track.ratingKey)
+        .parentKey(track.parentKey)
         .title(track.title)
         .albumTitle(track.parentTitle)
         .artistTitle(track.grandparentTitle)
         .index(track.index)
         .duration(track.duration)
         .thumb(Strings.isBlank(track.thumb) ? null : addPathToUrl(uri, track.thumb).toString())
-        .uri(addPathToUrl(uri, track.media.part.key))
+        .source(addPathToUrl(uri, track.media.part.key).toString())
+        .uri(uri)
         .build();
   }
 }

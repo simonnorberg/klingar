@@ -21,10 +21,13 @@ import org.simpleframework.xml.Root;
 
 @Root(name = "Track", strict = false)
 public final class Song {
+  @Attribute public String key;
   @Attribute public String ratingKey;
+  @Attribute public String parentKey;
   @Attribute public String title;
   @Attribute public String parentTitle;
   @Attribute public String grandparentTitle;
+  @Attribute(required = false) public Long playQueueItemID;
   @Attribute(required = false) public String thumb;
   @Attribute(required = false) public int index;
   @Attribute(required = false) public long duration;
@@ -38,6 +41,5 @@ public final class Song {
   @Root(strict = false)
   public static class Part {
     @Attribute public String key;
-    @Attribute public String container;
   }
 }

@@ -73,9 +73,9 @@ public class QueueManager {
     return repeatMode;
   }
 
-  public void setQueue(List<Track> queue, int position) {
+  public void setQueue(List<Track> queue, long queueItemId) {
     this.queue = queue;
-    this.position = position;
+    setQueuePosition(queueItemId);
     notifyQueue();
   }
 
@@ -87,11 +87,12 @@ public class QueueManager {
     if (queue.contains(remoteTrack)) {
       setQueuePosition(queue.indexOf(remoteTrack));
     } else {
-      setQueue(Collections.singletonList(remoteTrack), 0);
+      setQueue(Collections.singletonList(remoteTrack), remoteTrack.queueItemId());
     }
   }
 
-  boolean setQueuePosition(int newPosition) {
+  boolean setQueuePosition(long queueItemId) {
+    int newPosition = getPositionFromQueueItem(queueItemId);
     if (position == newPosition) {
       return false;
     }
@@ -167,6 +168,15 @@ public class QueueManager {
 
   boolean hasNext() {
     return (position + 1) < queue.size() || repeatMode == REPEAT_ONE || repeatMode == REPEAT_ALL;
+  }
+
+  private int getPositionFromQueueItem(long id) {
+    for (int position = 0; position < queue.size(); ++position) {
+      if (queue.get(position).queueItemId() == id) {
+        return position;
+      }
+    }
+    return 0;
   }
 
   private void sortQueue() {

@@ -15,7 +15,7 @@
  */
 package net.simno.klingar.data.api;
 
-import net.simno.klingar.data.api.model.DeviceContainer;
+import net.simno.klingar.data.api.model.MediaContainer;
 import net.simno.klingar.data.api.model.User;
 
 import retrofit2.http.GET;
@@ -28,5 +28,5 @@ public interface PlexService {
   Observable<User> signIn(@Header("Authorization") String authorization);
 
   @GET("/pms/resources?includeHttps=1")
-  Observable<DeviceContainer> resources();
+  Observable<MediaContainer> resources();
 }

@@ -42,10 +42,10 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
     if (viewType == STATE_PLAYING) {
       return new PlayingViewHolder(inflater.inflate(R.layout.item_playing, parent, false),
-          listener::onTrackClicked);
+          position -> listener.onTrackClicked(items.get(position)));
     }
     return new QueueViewHolder(inflater.inflate(R.layout.item_queue, parent, false),
-        listener::onTrackClicked);
+        position -> listener.onTrackClicked(items.get(position)));
   }
 
   @Override public void onBindViewHolder(QueueViewHolder holder, int position) {
@@ -67,6 +67,6 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
   }
 
   public interface OnTrackClickListener {
-    void onTrackClicked(int position);
+    void onTrackClicked(Track track);
   }
 }

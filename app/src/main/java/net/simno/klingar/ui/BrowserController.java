@@ -22,6 +22,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +58,7 @@ import javax.inject.Inject;
 import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 import static net.simno.klingar.data.Key.PLEX_ITEM;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
@@ -162,7 +164,7 @@ public class BrowserController extends BaseController implements
     }
   }
 
-  @Override public void onPlexItemClicked(PlexItem plexItem, int position) {
+  @Override public void onPlexItemClicked(PlexItem plexItem) {
     if (plexItem instanceof MediaType) {
       goToMediaType((MediaType) plexItem);
     } else if (plexItem instanceof Artist) {
@@ -170,12 +172,11 @@ public class BrowserController extends BaseController implements
     } else if (plexItem instanceof Album) {
       goToDetails(plexItem);
     } else if (plexItem instanceof Track) {
-      playTrack(position);
+      playTrack((Track) plexItem);
     }
   }
 
-  @OnClick(R.id.miniplayer_container)
-  void onMiniplayerClicked() {
+  @OnClick(R.id.miniplayer_container) void onMiniplayerClicked() {
     getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
   }
 
@@ -295,15 +296,15 @@ public class BrowserController extends BaseController implements
     getRouter().pushController(RouterTransaction.with(new DetailController(args)));
   }
 
-  private void playTrack(int position) {
-    List<PlexItem> items = adapter.getItems();
-    List<Track> queue = new ArrayList<>();
-    for (int i = position; i < items.size() && queue.size() < 25; ++i) {
-      if (items.get(i) instanceof Track) {
-        queue.add((Track) items.get(i));
-      }
-    }
-    queueManager.setQueue(queue, 0);
-    musicController.play();
+  private void playTrack(Track track) {
+    Timber.d("playTrack %s", track);
+    subscriptions.add(musicRepository.createPlayQueue(track)
+        .compose(RxHelper.applySchedulers())
+        .subscribe(new SimpleSubscriber<Pair<List<Track>, Long>>() {
+          @Override public void onNext(Pair<List<Track>, Long> pair) {
+            queueManager.setQueue(pair.first, pair.second);
+            musicController.play();
+          }
+        }));
   }
 }

@@ -21,9 +21,7 @@ public final class Type {
   public static final int ALBUM = R.id.album;
   public static final int ARTIST = R.id.artist;
   public static final int HEADER = R.id.header;
-  public static final int LIBRARY = R.id.library;
   public static final int MEDIA_TYPE = R.id.media_type;
-  public static final int PLAYLIST = R.id.playlist;
   public static final int TRACK = R.id.track;
 
   private Type() {

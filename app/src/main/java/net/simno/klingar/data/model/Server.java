@@ -25,18 +25,9 @@ public abstract class Server {
     return new AutoValue_Server.Builder();
   }
 
-  public abstract String id();
-
-  public abstract String name();
-
-  public abstract String accessToken();
-
   public abstract HttpUrl uri();
 
   @AutoValue.Builder public abstract static class Builder {
-    public abstract Builder id(String id);
-    public abstract Builder name(String name);
-    public abstract Builder accessToken(String accessToken);
     public abstract Builder uri(HttpUrl uri);
     public abstract Server build();
   }

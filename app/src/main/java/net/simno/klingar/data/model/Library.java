@@ -28,21 +28,18 @@ public abstract class Library implements PlexItem {
     return new AutoValue_Library.Builder();
   }
 
+  public abstract String uuid();
+
   public abstract String key();
 
   public abstract String name();
 
-  public abstract String serverName();
-
-  public abstract String accessToken();
-
   @ParcelAdapter(HttpUrlTypeAdapter.class) public abstract HttpUrl uri();
 
   @AutoValue.Builder public abstract static class Builder {
-    public abstract Builder key(String id);
+    public abstract Builder uuid(String uuid);
+    public abstract Builder key(String key);
     public abstract Builder name(String name);
-    public abstract Builder serverName(String serverName);
-    public abstract Builder accessToken(String accessToken);
     public abstract Builder uri(HttpUrl uri);
     public abstract Library build();
   }

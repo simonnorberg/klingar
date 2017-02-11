@@ -23,8 +23,8 @@ import java.util.List;
 
 @Root(strict = false)
 public final class MediaContainer {
-  @Attribute public int size;
+  @Attribute(required = false) public Long playQueueSelectedItemID;
   @ElementList(inline = true, required = false) public List<Directory> directories;
   @ElementList(inline = true, required = false) public List<Song> tracks;
-  @ElementList(inline = true, required = false) public List<Songlist> playlists;
+  @ElementList(inline = true, required = false) public List<Device> devices;
 }

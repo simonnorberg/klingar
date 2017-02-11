@@ -16,21 +16,20 @@
 package net.simno.klingar.data.api;
 
 import net.simno.klingar.data.api.model.MediaContainer;
-import net.simno.klingar.data.api.model.SectionContainer;
 
 import okhttp3.HttpUrl;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Url;
 import rx.Observable;
 
 interface MediaService {
-  @GET Observable<SectionContainer> sections(@Url HttpUrl url);
-  @GET Observable<MediaContainer> playlists(@Url HttpUrl url);
-  @GET Observable<MediaContainer> playlistItems(@Url HttpUrl url);
+  @GET Observable<MediaContainer> sections(@Url HttpUrl url);
   @GET Observable<MediaContainer> albums(@Url HttpUrl url);
   @GET Observable<MediaContainer> tracks(@Url HttpUrl url);
   @GET Observable<MediaContainer> popularTracks(@Url HttpUrl url);
   @GET Observable<MediaContainer> browse(@Url HttpUrl url);
   @GET Observable<MediaContainer> recentArtists(@Url HttpUrl url);
   @GET Observable<MediaContainer> firstCharacter(@Url HttpUrl url);
+  @POST Observable<MediaContainer> playQueue(@Url HttpUrl url);
 }

@@ -29,13 +29,16 @@ import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.images.WebImage;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
 import net.simno.klingar.data.model.Track;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import okhttp3.HttpUrl;
+import java.io.IOException;
+
 import timber.log.Timber;
 
 /**
@@ -44,14 +47,9 @@ import timber.log.Timber;
 class CastPlayback implements Playback {
 
   private static final String MIME_TYPE_AUDIO_MPEG = "audio/mpeg";
-  private static final String CUSTOM_INT_INDEX = "custom_int_index";
-  private static final String CUSTOM_LONG_DURATION = "custom_long_duration";
-  private static final String CUSTOM_STRING_ALBUM = "custom_string_album";
-  private static final String CUSTOM_STRING_ARTIST = "custom_string_artist";
-  private static final String CUSTOM_STRING_THUMB = "custom_string_thumb";
-  private static final String CUSTOM_STRING_TITLE = "custom_string_title";
-  private static final String CUSTOM_STRING_URI = "custom_string_uri";
+  private static final String CUSTOM_DATA_TRACK = "custom_data_track";
 
+  private final JsonAdapter<Track> jsonAdapter = Track.jsonAdapter(new Moshi.Builder().build());
   private final Context appContext;
   private final RemoteMediaClient remoteMediaClient;
   private final RemoteMediaClient.Listener remoteMediaClientListener;
@@ -82,7 +80,7 @@ class CastPlayback implements Playback {
     mediaMetadata.addImage(image);
 
     //noinspection ResourceType
-    return new MediaInfo.Builder(track.uri().toString())
+    return new MediaInfo.Builder(track.source())
         .setContentType(MIME_TYPE_AUDIO_MPEG)
         .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
         .setMetadata(mediaMetadata)
@@ -242,13 +240,7 @@ class CastPlayback implements Playback {
       currentPosition = 0;
     }
     JSONObject customData = new JSONObject();
-    customData.put(CUSTOM_INT_INDEX, track.index());
-    customData.put(CUSTOM_LONG_DURATION, track.duration());
-    customData.put(CUSTOM_STRING_ALBUM, track.albumTitle());
-    customData.put(CUSTOM_STRING_ARTIST, track.artistTitle());
-    customData.put(CUSTOM_STRING_THUMB, track.thumb());
-    customData.put(CUSTOM_STRING_TITLE, track.title());
-    customData.put(CUSTOM_STRING_URI, track.uri().toString());
+    customData.put(CUSTOM_DATA_TRACK, jsonAdapter.toJson(track));
     MediaInfo media = toCastMediaMetadata(track, customData);
     remoteMediaClient.load(media, autoPlay, currentPosition, customData);
   }
@@ -264,23 +256,8 @@ class CastPlayback implements Playback {
         return;
       }
       JSONObject customData = mediaInfo.getCustomData();
-      if (customData != null
-          // thumb is nullable
-          && customData.has(CUSTOM_INT_INDEX)
-          && customData.has(CUSTOM_LONG_DURATION)
-          && customData.has(CUSTOM_STRING_ALBUM)
-          && customData.has(CUSTOM_STRING_ARTIST)
-          && customData.has(CUSTOM_STRING_TITLE)
-          && customData.has(CUSTOM_STRING_URI)) {
-        Track remoteTrack = Track.builder()
-            .index(customData.getInt(CUSTOM_INT_INDEX))
-            .duration(customData.getLong(CUSTOM_LONG_DURATION))
-            .albumTitle(customData.getString(CUSTOM_STRING_ALBUM))
-            .artistTitle(customData.getString(CUSTOM_STRING_ARTIST))
-            .thumb(customData.getString(CUSTOM_STRING_THUMB))
-            .title(customData.getString(CUSTOM_STRING_TITLE))
-            .uri(HttpUrl.parse(customData.getString(CUSTOM_STRING_URI)))
-            .build();
+      if (customData != null && customData.has(CUSTOM_DATA_TRACK)) {
+        Track remoteTrack = jsonAdapter.fromJson(customData.getString(CUSTOM_DATA_TRACK));
         Timber.d("setMetadataFromRemote %s", remoteTrack);
         if (!remoteTrack.equals(currentTrack)) {
           currentTrack = remoteTrack;
@@ -290,7 +267,7 @@ class CastPlayback implements Playback {
           updateLastKnownStreamPosition();
         }
       }
-    } catch (JSONException e) {
+    } catch (JSONException | IOException e) {
       Timber.e(e, "Exception processing update metadata");
     }
   }

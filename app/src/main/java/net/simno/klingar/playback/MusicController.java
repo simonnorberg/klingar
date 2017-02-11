@@ -168,9 +168,9 @@ public class MusicController {
     }
   }
 
-  public void skipToPosition(int position) {
+  public void playQueueItem(long id) {
     if (mediaController != null) {
-      mediaController.getTransportControls().skipToQueueItem(position);
+      mediaController.getTransportControls().skipToQueueItem(id);
     }
   }
 

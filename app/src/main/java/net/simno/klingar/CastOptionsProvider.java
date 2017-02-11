@@ -26,6 +26,7 @@ import java.util.List;
 /**
  * Specify receiver application ID for cast
  */
+@SuppressWarnings("unused")
 public class CastOptionsProvider implements OptionsProvider {
 
   @Override public CastOptions getCastOptions(Context context) {

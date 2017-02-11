@@ -23,20 +23,12 @@ import java.util.List;
 
 @Root(strict = false)
 public final class Device {
-  @Attribute public String name;
-  @Attribute public String device;
-  @Attribute public String clientIdentifier;
-  @Attribute public long createdAt;
-  @Attribute public long lastSeenAt;
   @Attribute public String provides;
-  @Attribute public String accessToken;
+  @Attribute(required = false) public String accessToken;
   @ElementList(inline = true) public List<Connection> connections;
 
   @Root(strict = false)
   public static class Connection {
-    @Attribute public String protocol;
-    @Attribute public String address;
-    @Attribute public int port;
     @Attribute public String uri;
     @Attribute public int local;
   }

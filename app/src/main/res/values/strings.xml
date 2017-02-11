@@ -21,11 +21,6 @@ limitations under the License.
   <string name="media_route_menu_title">Play on…</string>
   <string name="touch_to_cast">Touch to connect to a Google Cast device</string>
 
-  <plurals name="tracks">
-    <item quantity="one">%d track</item>
-    <item quantity="other">%d tracks</item>
-  </plurals>
-
   <string name="hint_username">Plex Username</string>
   <string name="hint_password">Plex Password</string>
   <string name="invalid_username">Invalid username</string>

@@ -22,11 +22,11 @@ import org.simpleframework.xml.Root;
 public final class Directory {
   @Attribute public String title;
   @Attribute public String key;
+  @Attribute(required = false) public String uuid;
   @Attribute(required = false) public String parentTitle;
   @Attribute(required = false) public String art;
   @Attribute(required = false) public String ratingKey;
   @Attribute(required = false) public String type;
   @Attribute(required = false) public String thumb;
-  @Attribute(required = false) public String year;
   @Attribute(required = false) public int size;
 }
