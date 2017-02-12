@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2014 The Android Open Source Project
+Copyright (C) 2017 Simon Norberg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,12 +16,24 @@ limitations under the License.
 -->
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
   <item
       android:id="@+id/media_route_menu_item"
-      android:title="@string/media_route_menu_title"
+      android:title="@string/menu_media_route"
       app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-      app:showAsAction="always"/>
+      app:showAsAction="always"
+      tools:ignore="AlwaysShowAction"/>
+
+  <item
+      android:id="@+id/credits"
+      android:title="@string/menu_credits"
+      app:showAsAction="never"/>
+
+  <item
+      android:id="@+id/sign_out"
+      android:title="@string/menu_sign_out"
+      app:showAsAction="never"/>
 
 </menu>

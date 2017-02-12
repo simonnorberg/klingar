@@ -154,6 +154,9 @@ public class LoginController extends BaseController {
 
           @Override public void onNext(User user) {
             loginManager.login(user.authenticationToken);
+            if (getActivity() != null) {
+              getActivity().invalidateOptionsMenu();
+            }
             getRouter().setRoot(RouterTransaction.with(new BrowserController(null)));
           }
         }));

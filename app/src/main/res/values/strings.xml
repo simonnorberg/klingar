@@ -18,8 +18,10 @@ limitations under the License.
 
   <string name="app_name">Klingar</string>
 
-  <string name="media_route_menu_title">Play on…</string>
+  <string name="menu_media_route">Play on…</string>
   <string name="touch_to_cast">Touch to connect to a Google Cast device</string>
+  <string name="menu_credits">Credits</string>
+  <string name="menu_sign_out">Sign out</string>
 
   <string name="hint_username">Plex Username</string>
   <string name="hint_password">Plex Password</string>

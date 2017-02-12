@@ -46,6 +46,7 @@ import com.google.android.gms.cast.framework.IntroductoryOverlay;
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.LoginManager;
+import net.simno.klingar.playback.MusicController;
 import net.simno.klingar.playback.MusicService;
 
 import java.util.List;
@@ -67,6 +68,7 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
 
   @Inject LoginManager loginManager;
   @Inject ToolbarOwner toolbarOwner;
+  @Inject MusicController musicController;
   private Router router;
   private CastContext castContext;
   private MenuItem mediaRouteMenuItem;
@@ -75,7 +77,7 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
   private final CastStateListener castStateListener = newState -> {
     if (newState != CastState.NO_DEVICES_AVAILABLE) {
       new Handler().postDelayed(() -> {
-        if (mediaRouteMenuItem.isVisible()) {
+        if (mediaRouteMenuItem != null && mediaRouteMenuItem.isVisible()) {
           showCastIntroductoryOverlay();
         }
       }, 1000);
@@ -139,18 +141,29 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_cast, menu);
+    if (loginManager.isLoggedOut()) {
+      return super.onCreateOptionsMenu(menu);
+    }
+    getMenuInflater().inflate(R.menu.menu_main, menu);
     mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
         R.id.media_route_menu_item);
     return true;
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == android.R.id.home) {
-      onBackPressed();
-      return true;
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        onBackPressed();
+        return true;
+      case R.id.credits:
+        showCredits();
+        return true;
+      case R.id.sign_out:
+        logout();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
     }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override public void onBackPressed() {
@@ -205,7 +218,7 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
   }
 
   private void initActionBar() {
-    toolbar.inflateMenu(R.menu.menu_cast);
+    toolbar.inflateMenu(R.menu.menu_main);
     setSupportActionBar(toolbar);
   }
 
@@ -219,5 +232,16 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
           .build();
       overlay.show();
     }
+  }
+
+  private void showCredits() {
+
+  }
+
+  private void logout() {
+    musicController.stop();
+    loginManager.logout();
+    router.setRoot(RouterTransaction.with(new LoginController(null)));
+    supportInvalidateOptionsMenu();
   }
 }

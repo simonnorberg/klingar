@@ -151,6 +151,12 @@ public class MusicController {
     }
   }
 
+  public void stop() {
+    if (mediaController != null) {
+      mediaController.getTransportControls().stop();
+    }
+  }
+
   public void playPause() {
     PlaybackStateCompat state = mediaController.getPlaybackState();
     if (state != null) {
