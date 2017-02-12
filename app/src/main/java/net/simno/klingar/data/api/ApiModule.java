@@ -59,7 +59,7 @@ public class ApiModule {
   @Provides @Singleton HttpLoggingInterceptor provideLoggingInterceptor() {
     HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message ->
         Timber.tag("OkHttp").d(message));
-    logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+    logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
     return logging;
   }
 

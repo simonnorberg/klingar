@@ -95,6 +95,20 @@ public class MediaServiceHelper {
         .build());
   }
 
+  public Observable<MediaContainer> timeline(HttpUrl url, long queueItemId, String trackKey,
+                                             String trackRatingKey, String state, long duration,
+                                             long time) {
+    return media.playQueue(url.newBuilder()
+        .addPathSegments(":/timeline")
+        .addQueryParameter("playQueueItemID", String.valueOf(queueItemId))
+        .addQueryParameter("key", trackKey)
+        .addQueryParameter("ratingKey", trackRatingKey)
+        .addQueryParameter("state", state)
+        .addQueryParameter("duration", String.valueOf(duration))
+        .addQueryParameter("time", String.valueOf(time))
+        .build());
+  }
+
   public Observable<MediaContainer> playQueue(HttpUrl url, String trackKey, String trackParentKey,
                                               String libraryId) {
     return media.playQueue(url.newBuilder()

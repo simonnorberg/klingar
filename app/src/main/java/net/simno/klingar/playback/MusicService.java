@@ -39,6 +39,7 @@ import com.google.android.gms.cast.framework.SessionManagerListener;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.MediaNotificationManager;
+import net.simno.klingar.data.api.MediaServiceHelper;
 import net.simno.klingar.ui.KlingarActivity;
 
 import java.lang.ref.WeakReference;
@@ -62,12 +63,14 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
   @Inject MusicController musicController;
   @Inject AudioManager audioManager;
   @Inject WifiManager wifiManager;
+  @Inject MediaServiceHelper media;
   private PlaybackManager playbackManager;
   private MediaSessionCompat session;
   private MediaNotificationManager mediaNotificationManager;
   private MediaRouter mediaRouter;
   private SessionManager castSessionManager;
   private SessionManagerListener<CastSession> castSessionManagerListener;
+  private TimelineManager timelineManager;
 
   @Nullable @Override public IBinder onBind(Intent intent) {
     return binder;
@@ -100,6 +103,9 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
     castSessionManager.addSessionManagerListener(castSessionManagerListener, CastSession.class);
 
     mediaRouter = MediaRouter.getInstance(getApplicationContext());
+
+    timelineManager = new TimelineManager(musicController, queueManager, media);
+    timelineManager.start();
   }
 
   @Override public int onStartCommand(Intent startIntent, int flags, int startId) {
@@ -127,6 +133,8 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
       castSessionManager.removeSessionManagerListener(castSessionManagerListener,
           CastSession.class);
     }
+
+    timelineManager.stop();
 
     delayedStopHandler.removeCallbacksAndMessages(null);
     session.release();

@@ -31,5 +31,6 @@ interface MediaService {
   @GET Observable<MediaContainer> browse(@Url HttpUrl url);
   @GET Observable<MediaContainer> recentArtists(@Url HttpUrl url);
   @GET Observable<MediaContainer> firstCharacter(@Url HttpUrl url);
+  @GET Observable<MediaContainer> timeline(@Url HttpUrl url);
   @POST Observable<MediaContainer> playQueue(@Url HttpUrl url);
 }
