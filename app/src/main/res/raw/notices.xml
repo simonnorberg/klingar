@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2017 Simon Norberg
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<notices>
+  <notice>
+    <name>AutoValue</name>
+    <url>https://github.com/google/auto</url>
+    <copyright>Copyright 2013 Google, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>AutoValue: Moshi Extension</name>
+    <url>https://github.com/rharter/auto-value-moshi</url>
+    <copyright>Copyright 2015 Ryan Harter.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>AutoValue: Parcel Extension</name>
+    <url>https://github.com/rharter/auto-value-parcel</url>
+    <copyright>Copyright 2015 Ryan Harter.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Butter Knife</name>
+    <url>https://github.com/JakeWharton/butterknife</url>
+    <copyright>Copyright 2013 Jake Wharton</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Conductor</name>
+    <url>https://github.com/bluelinelabs/Conductor</url>
+    <copyright>Copyright 2016 BlueLine Labs, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Dagger 2</name>
+    <url>https://github.com/google/dagger</url>
+    <copyright>Copyright 2012 The Dagger Authors</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>ExoPlayer</name>
+    <url>https://github.com/google/ExoPlayer</url>
+    <copyright>Copyright (C) 2016 The Android Open Source Project</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Glide</name>
+    <url>https://github.com/bumptech/glide</url>
+    <copyright>Copyright 2014 Google, Inc. All rights reserved.</copyright>
+    <license>BSD 3-Clause License</license>
+  </notice>
+  <notice>
+    <name>Moshi</name>
+    <url>https://github.com/square/moshi</url>
+    <copyright>Copyright 2015 Square, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>OkHttp</name>
+    <url>https://github.com/square/okhttp</url>
+    <copyright>Copyright 2016 Square, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Retrofit</name>
+    <url>https://github.com/square/retrofit</url>
+    <copyright>Copyright 2013 Square, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>RxAndroid</name>
+    <url>https://github.com/ReactiveX/RxAndroid</url>
+    <copyright>Copyright 2015 The RxAndroid authors</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>RxJava</name>
+    <url>https://github.com/ReactiveX/RxJava</url>
+    <copyright>Copyright (c) 2016-present, RxJava Contributors.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>RxRelay</name>
+    <url>https://github.com/JakeWharton/RxRelay</url>
+    <copyright>Copyright 2014 Netflix, Inc.&lt;br/&gt;Copyright 2015 Jake Wharton</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Timber</name>
+    <url>https://github.com/JakeWharton/timber</url>
+    <copyright>Copyright 2013 Jake Wharton</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Universal Android Music Player Sample</name>
+    <url>https://github.com/googlesamples/android-UniversalMusicPlayer</url>
+    <copyright>Copyright 2014 The Android Open Source Project, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+</notices>

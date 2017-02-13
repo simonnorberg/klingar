@@ -55,6 +55,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.psdev.licensesdialog.LicensesDialog;
 
 import static net.simno.klingar.util.Views.gone;
 import static net.simno.klingar.util.Views.visible;
@@ -235,7 +236,13 @@ public class KlingarActivity extends AppCompatActivity implements ToolbarOwner.A
   }
 
   private void showCredits() {
-
+    new LicensesDialog.Builder(this)
+        .setIncludeOwnLicense(true)
+        .setShowFullLicenseText(false)
+        .setNotices(R.raw.notices)
+        .setNoticesCssStyle(R.string.notices_style)
+        .build()
+        .show();
   }
 
   private void logout() {
