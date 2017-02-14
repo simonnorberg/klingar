@@ -31,8 +31,8 @@ limitations under the License.
       android:elevation="@dimen/toolbar_elevation"
       android:paddingEnd="8dp"
       android:paddingStart="0dp"
-      app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark">
+      app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+      app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <Spinner
         android:id="@+id/toolbar_libs_spinner"

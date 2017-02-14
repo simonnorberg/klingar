@@ -264,6 +264,7 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
         break;
       case ExoPlayer.STATE_ENDED:
         if (playerStateChanged) { // only call onCompletion once
+          currentPosition = 0;
           callback.onCompletion();
         }
         break;

@@ -85,20 +85,18 @@ public class QueueManager {
 
   void setTrackFromRemote(Track remoteTrack) {
     if (queue.contains(remoteTrack)) {
-      setQueuePosition(queue.indexOf(remoteTrack));
+      setQueuePosition(remoteTrack.queueItemId());
     } else {
       setQueue(Collections.singletonList(remoteTrack), remoteTrack.queueItemId());
     }
   }
 
-  boolean setQueuePosition(long queueItemId) {
+  void setQueuePosition(long queueItemId) {
     int newPosition = getPositionFromQueueItem(queueItemId);
-    if (position == newPosition) {
-      return false;
+    if (newPosition != position) {
+      position = newPosition;
+      notifyQueue();
     }
-    position = newPosition;
-    notifyQueue();
-    return true;
   }
 
   void next() {

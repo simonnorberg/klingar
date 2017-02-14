@@ -287,6 +287,7 @@ class CastPlayback implements Playback {
       case MediaStatus.PLAYER_STATE_IDLE:
         if (idleReason == MediaStatus.IDLE_REASON_FINISHED) {
           if (callback != null) {
+            currentPosition = 0;
             callback.onCompletion();
           }
         }
