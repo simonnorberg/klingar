@@ -15,6 +15,9 @@
  */
 package net.simno.klingar.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import okhttp3.HttpUrl;
 
 public final class Urls {
@@ -23,25 +26,19 @@ public final class Urls {
     // no instances
   }
 
-  public static HttpUrl addPathToUrl(HttpUrl url, String path) {
-    if (url == null || Strings.isBlank(path)) {
-      return null;
-    }
-
+  @NonNull public static HttpUrl addPathToUrl(@NonNull HttpUrl url, @NonNull String path) {
     HttpUrl.Builder builder = url.newBuilder();
     String[] segments = path.split("/");
     for (String segment : segments) {
       builder.addPathSegment(segment);
     }
-
     return builder.build();
   }
 
-  public static String getTranscodeUrl(HttpUrl url, String imageKey) {
-    if (url == null || Strings.isBlank(imageKey)) {
+  @Nullable public static String getTranscodeUrl(@NonNull HttpUrl url, @Nullable String imageKey) {
+    if (Strings.isBlank(imageKey)) {
       return null;
     }
-
     return url.newBuilder().addPathSegment("photo")
         .addPathSegment(":")
         .addPathSegment("transcode")
@@ -50,11 +47,11 @@ public final class Urls {
         .toString();
   }
 
-  public static String addTranscodeParams(String transcodeUrl, int width, int height) {
+  @Nullable
+  public static String addTranscodeParams(@Nullable String transcodeUrl, int width, int height) {
     if (Strings.isBlank(transcodeUrl)) {
       return null;
     }
-
     return HttpUrl.parse(transcodeUrl).newBuilder()
         .addQueryParameter("width", String.valueOf(width))
         .addQueryParameter("height", String.valueOf(height))

@@ -22,7 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import com.google.auto.value.AutoValue;
-import com.jakewharton.rxrelay.PublishRelay;
+import com.jakewharton.rxrelay2.PublishRelay;
 
 import net.simno.klingar.R;
 
@@ -32,7 +32,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import rx.Observable;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 
 /**
  * Allows shared configuration of the toolbar
@@ -75,11 +76,11 @@ public class ToolbarOwner {
   }
 
   void spinnerItemSelected(int position) {
-    spinnerRelay.call(position);
+    spinnerRelay.accept(position);
   }
 
-  Observable<Integer> spinnerSelection() {
-    return spinnerRelay;
+  Flowable<Integer> spinnerSelection() {
+    return spinnerRelay.toFlowable(BackpressureStrategy.LATEST);
   }
 
   private void update() {

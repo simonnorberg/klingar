@@ -15,15 +15,15 @@
  */
 package net.simno.klingar.playback;
 
-import net.simno.klingar.data.api.MediaServiceHelper;
-import net.simno.klingar.data.api.model.MediaContainer;
+import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.schedulers.Schedulers;
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED;
@@ -37,54 +37,65 @@ class TimelineManager {
 
   private final MusicController musicController;
   private final QueueManager queueManager;
-  private final MediaServiceHelper media;
-  private Subscription subscription;
+  private final MediaService media;
+  private Disposable disposable;
 
-  TimelineManager(MusicController musicController, QueueManager queueManager,
-                  MediaServiceHelper media) {
+  TimelineManager(MusicController musicController, QueueManager queueManager, MediaService media) {
     this.musicController = musicController;
     this.queueManager = queueManager;
     this.media = media;
   }
 
   void start() {
-    subscription = Observable.combineLatest(
-        musicController.state()
-            .filter(state -> state == STATE_PLAYING || state == STATE_PAUSED
-                || state == STATE_STOPPED)
-            .map(state -> {
-              if (state == STATE_PLAYING) {
-                return "playing";
-              } else if (state == STATE_PAUSED) {
-                return "paused";
-              }
-              return "stopped";
-            }),
-        queueManager.queue()
-            .filter(pair -> pair.second < pair.first.size())
-            .map(pair -> pair.first.get(pair.second)),
-        musicController.progress()
-            .filter(progress -> (progress % 10000) == 0), // Send updates every 10 seconds
+    disposable = Flowable.combineLatest(state(), currentTrack(), progress(),
         (state, track, time) -> new Timeline(state, time, track))
         .observeOn(Schedulers.io())
-        .flatMap(t -> media.timeline(t.track.uri(), t.track.queueItemId(), t.track.key(),
-            t.track.ratingKey(), t.state, t.track.duration(), t.time)
-            .onErrorReturn(throwable -> new MediaContainer())) // Skip errors
+        .flatMapCompletable(this::updateTimeline)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
-        .subscribe(new SimpleSubscriber<MediaContainer>() {
-          @Override public void onNext(MediaContainer container) {
-            Timber.d("Timeline updated");
+        .subscribeWith(new DisposableCompletableObserver() {
+          @Override public void onComplete() {
+            Timber.d("onComplete");
           }
 
           @Override public void onError(Throwable e) {
-            Timber.e(e, "Timeline update failed");
+            Timber.e(e, "onError");
           }
         });
   }
 
+  private Completable updateTimeline(Timeline t) {
+    return media.timeline(t.track.uri(), t.track.queueItemId(), t.track.key(), t.track.ratingKey(),
+        t.state, t.track.duration(), t.time)
+        .onErrorComplete(); // Skip errors;
+  }
+
+  private Flowable<Long> progress() {
+    return musicController.progress()
+        .filter(progress -> (progress % 10000) == 0);  // Send updates every 10 seconds
+  }
+
+  private Flowable<Track> currentTrack() {
+    return queueManager.queue()
+        .filter(pair -> pair.second < pair.first.size())
+        .map(pair -> pair.first.get(pair.second));
+  }
+
+  private Flowable<String> state() {
+    return musicController.state()
+        .filter(state -> state == STATE_PLAYING || state == STATE_PAUSED || state == STATE_STOPPED)
+        .map(state -> {
+          if (state == STATE_PLAYING) {
+            return "playing";
+          } else if (state == STATE_PAUSED) {
+            return "paused";
+          }
+          return "stopped";
+        });
+  }
+
   void stop() {
-    RxHelper.unsubscribe(subscription);
+    RxHelper.dispose(disposable);
   }
 
   private static class Timeline {

@@ -18,14 +18,15 @@ package net.simno.klingar.data.api;
 import net.simno.klingar.data.api.model.MediaContainer;
 import net.simno.klingar.data.api.model.User;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
-import rx.Observable;
 
 public interface PlexService {
   @POST("/users/sign_in.xml")
-  Observable<User> signIn(@Header("Authorization") String authorization);
+  Single<User> signIn(@Header("Authorization") String authorization);
 
   @GET("/pms/resources?includeHttps=1")
   Observable<MediaContainer> resources();

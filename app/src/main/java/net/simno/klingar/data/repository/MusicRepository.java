@@ -26,12 +26,12 @@ import net.simno.klingar.data.model.Track;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Single;
 
 public interface MusicRepository {
-  Observable<List<PlexItem>> browseLibrary(Library lib);
-  Observable<List<PlexItem>> browseMediaType(MediaType mediaType, int offset);
-  Observable<List<PlexItem>> artistItems(Artist artist);
-  Observable<List<PlexItem>> albumItems(Album album);
-  Observable<Pair<List<Track>, Long>> createPlayQueue(Track track);
+  Single<List<PlexItem>> browseLibrary(Library lib);
+  Single<List<PlexItem>> browseMediaType(MediaType mediaType, int offset);
+  Single<List<PlexItem>> artistItems(Artist artist);
+  Single<List<PlexItem>> albumItems(Album album);
+  Single<Pair<List<Track>, Long>> createPlayQueue(Track track);
 }

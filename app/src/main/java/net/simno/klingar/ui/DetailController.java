@@ -52,6 +52,7 @@ import net.simno.klingar.ui.widget.DistanceScrollListener;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.SquareImageView;
 import net.simno.klingar.util.RxHelper;
+import net.simno.klingar.util.SimpleSingleObserver;
 import net.simno.klingar.util.SimpleSubscriber;
 import net.simno.klingar.util.Urls;
 
@@ -259,33 +260,31 @@ public class DetailController extends BaseController implements
   }
 
   private void getArtistItems(Artist artist) {
-    subscriptions.add(musicRepository.artistItems(artist)
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<List<PlexItem>>() {
-          @Override public void onNext(List<PlexItem> items) {
+    disposables.add(musicRepository.artistItems(artist)
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
+          @Override public void onSuccess(List<PlexItem> items) {
             adapter.addAll(items);
             itemsLoaded = true;
           }
-        })
-    );
+        }));
   }
 
   private void getAlbumItems(Album album) {
-    subscriptions.add(musicRepository.albumItems(album)
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<List<PlexItem>>() {
-          @Override public void onNext(List<PlexItem> items) {
+    disposables.add(musicRepository.albumItems(album)
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
+          @Override public void onSuccess(List<PlexItem> items) {
             adapter.addAll(items);
             itemsLoaded = true;
           }
-        })
-    );
+        }));
   }
 
   private void observePlayback() {
-    subscriptions.add(musicController.state()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Integer>() {
+    disposables.add(musicController.state()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
             switch (state) {
               case PlaybackStateCompat.STATE_ERROR:
@@ -313,10 +312,10 @@ public class DetailController extends BaseController implements
 
   private void playTrack(Track track) {
     Timber.d("playTrack %s", track);
-    subscriptions.add(musicRepository.createPlayQueue(track)
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Pair<List<Track>, Long>>() {
-          @Override public void onNext(Pair<List<Track>, Long> pair) {
+    disposables.add(musicRepository.createPlayQueue(track)
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<Pair<List<Track>, Long>>() {
+          @Override public void onSuccess(Pair<List<Track>, Long> pair) {
             queueManager.setQueue(pair.first, pair.second);
             musicController.play();
           }

@@ -47,6 +47,7 @@ import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.EndScrollListener;
 import net.simno.klingar.util.RxHelper;
+import net.simno.klingar.util.SimpleSingleObserver;
 import net.simno.klingar.util.SimpleSubscriber;
 
 import java.util.ArrayList;
@@ -181,9 +182,9 @@ public class BrowserController extends BaseController implements
   }
 
   private void observeLibs() {
-    subscriptions.add(serverManager.libs()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<List<Library>>() {
+    disposables.add(serverManager.libs()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<List<Library>>() {
           @Override public void onNext(List<Library> libs) {
             BrowserController.this.libs = libs;
 
@@ -206,9 +207,9 @@ public class BrowserController extends BaseController implements
   }
 
   private void observeSpinner() {
-    subscriptions.add(toolbarOwner.spinnerSelection()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Integer>() {
+    disposables.add(toolbarOwner.spinnerSelection()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer position) {
             if (position < libs.size()) {
               browseLibrary(libs.get(position));
@@ -222,10 +223,10 @@ public class BrowserController extends BaseController implements
       return;
     }
     currentLib = lib;
-    subscriptions.add(musicRepository.browseLibrary(lib)
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<List<PlexItem>>() {
-          @Override public void onNext(List<PlexItem> items) {
+    disposables.add(musicRepository.browseLibrary(lib)
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
+          @Override public void onSuccess(List<PlexItem> items) {
             adapter.set(items);
           }
         }));
@@ -236,10 +237,10 @@ public class BrowserController extends BaseController implements
       return;
     }
     isLoading = true;
-    subscriptions.add(musicRepository.browseMediaType(mediaType, PAGE_SIZE * currentPage)
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<List<PlexItem>>() {
-          @Override public void onNext(List<PlexItem> items) {
+    disposables.add(musicRepository.browseMediaType(mediaType, PAGE_SIZE * currentPage)
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
+          @Override public void onSuccess(List<PlexItem> items) {
             if (items.isEmpty()) {
               stopEndlessScrolling();
             } else {
@@ -262,9 +263,9 @@ public class BrowserController extends BaseController implements
   }
 
   private void observePlayback() {
-    subscriptions.add(musicController.state()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Integer>() {
+    disposables.add(musicController.state()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
             switch (state) {
               case PlaybackStateCompat.STATE_ERROR:
@@ -298,10 +299,10 @@ public class BrowserController extends BaseController implements
 
   private void playTrack(Track track) {
     Timber.d("playTrack %s", track);
-    subscriptions.add(musicRepository.createPlayQueue(track)
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Pair<List<Track>, Long>>() {
-          @Override public void onNext(Pair<List<Track>, Long> pair) {
+    disposables.add(musicRepository.createPlayQueue(track)
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<Pair<List<Track>, Long>>() {
+          @Override public void onSuccess(Pair<List<Track>, Long> pair) {
             queueManager.setQueue(pair.first, pair.second);
             musicController.play();
           }

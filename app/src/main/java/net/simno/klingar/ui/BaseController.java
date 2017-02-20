@@ -24,15 +24,15 @@ import android.widget.Toast;
 
 import com.bluelinelabs.conductor.Controller;
 
+import net.simno.klingar.util.RxHelper;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import rx.subscriptions.CompositeSubscription;
-
-import static net.simno.klingar.util.RxHelper.unsubscribe;
+import io.reactivex.disposables.CompositeDisposable;
 
 abstract class BaseController extends Controller {
 
-  CompositeSubscription subscriptions;
+  CompositeDisposable disposables;
   private Unbinder unbinder;
 
   public BaseController(Bundle args) {
@@ -52,12 +52,12 @@ abstract class BaseController extends Controller {
 
   @Override protected void onAttach(@NonNull View view) {
     super.onAttach(view);
-    subscriptions = new CompositeSubscription();
+    disposables = new CompositeDisposable();
   }
 
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
-    unsubscribe(subscriptions);
+    RxHelper.dispose(disposables);
   }
 
   @Override protected void onDestroyView(@NonNull View view) {

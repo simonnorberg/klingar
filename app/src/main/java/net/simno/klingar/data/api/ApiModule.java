@@ -32,7 +32,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 import timber.log.Timber;
 
@@ -52,8 +52,12 @@ public class ApiModule {
     return new PlexHeaders(clientId, resources.getString(R.string.app_name));
   }
 
-  @Provides @Singleton SimpleXmlConverterFactory provideConverterFactory() {
+  @Provides @Singleton SimpleXmlConverterFactory provideSimpleXmlConverterFactory() {
     return SimpleXmlConverterFactory.create(new Persister(new Format(new HyphenStyle())));
+  }
+
+  @Provides @Singleton RxJava2CallAdapterFactory provideRxJava2CallAdapterFactory() {
+    return RxJava2CallAdapterFactory.create();
   }
 
   @Provides @Singleton HttpLoggingInterceptor provideLoggingInterceptor() {
@@ -84,12 +88,13 @@ public class ApiModule {
 
   @Provides @Singleton @Named("plex")
   Retrofit providePlexRetrofit(@Named("plex") OkHttpClient client,
-                               SimpleXmlConverterFactory converterFactory) {
+                               SimpleXmlConverterFactory simpleXml,
+                               RxJava2CallAdapterFactory rxJava) {
     return new Retrofit.Builder()
         .baseUrl(PLEX_URL)
         .callFactory(client)
-        .addConverterFactory(converterFactory)
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .addConverterFactory(simpleXml)
+        .addCallAdapterFactory(rxJava)
         .build();
   }
 
@@ -99,17 +104,17 @@ public class ApiModule {
 
   @Provides @Singleton @Named("media")
   Retrofit provideMediaRetrofit(@Named("default") OkHttpClient client,
-                                SimpleXmlConverterFactory converterFactory) {
+                                SimpleXmlConverterFactory simpleXml,
+                                RxJava2CallAdapterFactory rxJava) {
     return new Retrofit.Builder()
-        .baseUrl(PLEX_URL)
+        .baseUrl(PLEX_URL) // never used
         .callFactory(client)
-        .addConverterFactory(converterFactory)
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .addConverterFactory(simpleXml)
+        .addCallAdapterFactory(rxJava)
         .build();
   }
 
-  @Provides @Singleton
-  MediaServiceHelper provideMediaServiceHelper(@Named("media") Retrofit retrofit) {
-    return new MediaServiceHelper(retrofit.create(MediaService.class));
+  @Provides @Singleton MediaService provideMediaService(@Named("media") Retrofit retrofit) {
+    return new MediaService(retrofit.create(MediaService.Api.class));
   }
 }

@@ -39,7 +39,7 @@ import net.simno.klingar.data.LoginManager;
 import net.simno.klingar.data.api.PlexService;
 import net.simno.klingar.data.api.model.User;
 import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
+import net.simno.klingar.util.SimpleSingleObserver;
 import net.simno.klingar.util.Strings;
 
 import javax.inject.Inject;
@@ -140,9 +140,17 @@ public class LoginController extends BaseController {
     hideInputMethod();
     invisible(loginForm);
     contentLoading.show();
-    subscriptions.add(plex.signIn(Credentials.basic(username, password))
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<User>() {
+    disposables.add(plex.signIn(Credentials.basic(username, password))
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<User>() {
+          @Override public void onSuccess(User user) {
+            loginManager.login(user.authenticationToken);
+            if (getActivity() != null) {
+              getActivity().invalidateOptionsMenu();
+            }
+            getRouter().setRoot(RouterTransaction.with(new BrowserController(null)));
+          }
+
           @Override public void onError(Throwable e) {
             super.onError(e);
             loginManager.logout();
@@ -150,14 +158,6 @@ public class LoginController extends BaseController {
             visible(loginForm);
             showToast(R.string.sign_in_failed);
             enableInput();
-          }
-
-          @Override public void onNext(User user) {
-            loginManager.login(user.authenticationToken);
-            if (getActivity() != null) {
-              getActivity().invalidateOptionsMenu();
-            }
-            getRouter().setRoot(RouterTransaction.with(new BrowserController(null)));
           }
         }));
   }

@@ -39,7 +39,7 @@ import com.google.android.gms.cast.framework.SessionManagerListener;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.MediaNotificationManager;
-import net.simno.klingar.data.api.MediaServiceHelper;
+import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.ui.KlingarActivity;
 
 import java.lang.ref.WeakReference;
@@ -63,7 +63,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
   @Inject MusicController musicController;
   @Inject AudioManager audioManager;
   @Inject WifiManager wifiManager;
-  @Inject MediaServiceHelper media;
+  @Inject MediaService media;
   private PlaybackManager playbackManager;
   private MediaSessionCompat session;
   private MediaNotificationManager mediaNotificationManager;

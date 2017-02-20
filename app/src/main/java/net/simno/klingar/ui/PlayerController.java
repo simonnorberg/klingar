@@ -222,33 +222,33 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   }
 
   private void observePlaybackState() {
-    subscriptions.add(musicController.progress()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Long>() {
+    disposables.add(musicController.progress()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Long>() {
           @Override public void onNext(Long progress) {
             if (!isSeeking) {
               seekBar.setProgress((int) (progress / 1000));
             }
           }
         }));
-    subscriptions.add(musicController.state()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Integer>() {
+    disposables.add(musicController.state()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
             updatePlayButton(state);
           }
         }));
-    subscriptions.add(queueManager.mode()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Pair<Integer, Integer>>() {
+    disposables.add(queueManager.mode()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Pair<Integer, Integer>>() {
           @Override public void onNext(Pair<Integer, Integer> pair) {
             updateShuffleButton(pair.first);
             updateRepeatButton(pair.second);
           }
         }));
-    subscriptions.add(queueManager.queue()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
+    disposables.add(queueManager.queue()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
           @Override public void onNext(Pair<List<Track>, Integer> pair) {
             queueAdapter.setQueue(pair.first, pair.second);
             updateTrackInfo(pair.first.get(pair.second));

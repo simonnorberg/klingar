@@ -18,7 +18,7 @@ package net.simno.klingar.playback;
 import android.support.annotation.IntDef;
 import android.support.v4.util.Pair;
 
-import com.jakewharton.rxrelay.BehaviorRelay;
+import com.jakewharton.rxrelay2.BehaviorRelay;
 
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.data.model.TrackComparator;
@@ -31,7 +31,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import rx.Observable;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -44,8 +45,10 @@ public class QueueManager {
   public static final int REPEAT_ALL = 4;
   public static final int REPEAT_ONE = 5;
 
-  private final BehaviorRelay<Pair<Integer, Integer>> modeRelay = BehaviorRelay.create();
-  private final BehaviorRelay<Pair<List<Track>, Integer>> queueRelay = BehaviorRelay.create();
+  private final BehaviorRelay<Pair<Integer, Integer>> modeRelay =
+      BehaviorRelay.createDefault(new Pair<>(SHUFFLE_OFF, REPEAT_OFF));
+  private final BehaviorRelay<Pair<List<Track>, Integer>> queueRelay =
+      BehaviorRelay.createDefault(new Pair<>(Collections.emptyList(), 0));
 
   @ShuffleMode private int shuffleMode = SHUFFLE_OFF;
   @RepeatMode private int repeatMode = REPEAT_OFF;
@@ -53,16 +56,14 @@ public class QueueManager {
   private int position;
 
   @Inject public QueueManager() {
-    notifyQueue();
-    notifyMode();
   }
 
-  public Observable<Pair<Integer, Integer>> mode() {
-    return modeRelay.onBackpressureLatest();
+  public Flowable<Pair<Integer, Integer>> mode() {
+    return modeRelay.toFlowable(BackpressureStrategy.LATEST);
   }
 
-  public Observable<Pair<List<Track>, Integer>> queue() {
-    return queueRelay.onBackpressureLatest();
+  public Flowable<Pair<List<Track>, Integer>> queue() {
+    return queueRelay.toFlowable(BackpressureStrategy.LATEST);
   }
 
   @ShuffleMode int getShuffleMode() {
@@ -190,11 +191,11 @@ public class QueueManager {
   }
 
   private void notifyQueue() {
-    queueRelay.call(new Pair<>(new ArrayList<>(queue), position));
+    queueRelay.accept(new Pair<>(new ArrayList<>(queue), position));
   }
 
   private void notifyMode() {
-    modeRelay.call(new Pair<>(shuffleMode, repeatMode));
+    modeRelay.accept(new Pair<>(shuffleMode, repeatMode));
   }
 
   @Retention(SOURCE)

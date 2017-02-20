@@ -23,7 +23,7 @@ import android.support.v4.media.session.MediaSessionCompat.Token;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 
-import com.jakewharton.rxrelay.BehaviorRelay;
+import com.jakewharton.rxrelay2.BehaviorRelay;
 
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
@@ -33,9 +33,10 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.schedulers.Schedulers;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_REPEAT;
@@ -44,13 +45,14 @@ import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_SHUFFLE;
 @Singleton
 public class MusicController {
 
-  private final BehaviorRelay<Long> progressRelay = BehaviorRelay.create();
-  private final BehaviorRelay<Integer> stateRelay = BehaviorRelay.create();
+  private final BehaviorRelay<Long> progressRelay = BehaviorRelay.createDefault(0L);
+  private final BehaviorRelay<Integer> stateRelay =
+      BehaviorRelay.createDefault(PlaybackStateCompat.STATE_NONE);
   private final Context context;
   private MediaControllerCompat mediaController;
   private Token token;
   private PlaybackStateCompat playbackState;
-  private Subscription progressSubscription;
+  private Disposable progressDisposable;
   private String castName;
 
   private final MediaControllerCompat.Callback callback = new MediaControllerCompat.Callback() {
@@ -60,7 +62,7 @@ public class MusicController {
       @State int currentState = stateRelay.getValue() != null ? stateRelay.getValue()
           : PlaybackStateCompat.STATE_NONE;
       if (newState.getState() != currentState) {
-        stateRelay.call(newState.getState());
+        stateRelay.accept(newState.getState());
         handleProgress(newState);
       }
       playbackState = newState;
@@ -69,11 +71,12 @@ public class MusicController {
 
   @Inject public MusicController(Context context) {
     this.context = context;
-    progressRelay.call(0L);
   }
 
   private static String getStateString(@State int state) {
     switch (state) {
+      case PlaybackStateCompat.STATE_NONE:
+        return "STATE_NONE";
       case PlaybackStateCompat.STATE_STOPPED:
         return "STATE_STOPPED";
       case PlaybackStateCompat.STATE_PLAYING:
@@ -97,7 +100,7 @@ public class MusicController {
       case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
         return "STATE_SKIPPING_TO_QUEUE_ITEM";
       default:
-        return "STATE_NONE";
+        return "UNKNOWN";
     }
   }
 
@@ -131,12 +134,12 @@ public class MusicController {
     this.castName = castName;
   }
 
-  public Observable<Long> progress() {
-    return progressRelay.onBackpressureLatest();
+  public Flowable<Long> progress() {
+    return progressRelay.toFlowable(BackpressureStrategy.LATEST);
   }
 
-  public Observable<Integer> state() {
-    return stateRelay.onBackpressureLatest();
+  public Flowable<Integer> state() {
+    return stateRelay.toFlowable(BackpressureStrategy.LATEST);
   }
 
   public void play() {
@@ -221,17 +224,17 @@ public class MusicController {
   }
 
   private void startProgress(final long startPosition) {
-    progressRelay.call(startPosition);
-    progressSubscription = Observable.interval(1, TimeUnit.SECONDS)
+    progressRelay.accept(startPosition);
+    progressDisposable = Flowable.interval(1, TimeUnit.SECONDS)
         .subscribeOn(Schedulers.newThread())
-        .subscribe(new SimpleSubscriber<Long>() {
+        .subscribeWith(new SimpleSubscriber<Long>() {
           @Override public void onNext(Long count) {
-            progressRelay.call(((count + 1) * 1000) + startPosition);
+            progressRelay.accept(((count + 1) * 1000) + startPosition);
           }
         });
   }
 
   private void stopProgress() {
-    RxHelper.unsubscribe(progressSubscription);
+    RxHelper.dispose(progressDisposable);
   }
 }

@@ -15,38 +15,46 @@
  */
 package net.simno.klingar.util;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.FlowableTransformer;
+import io.reactivex.SingleTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public final class RxHelper {
 
-  @SuppressWarnings("RedundantCast")
-  private static final Observable.Transformer SCHEDULERS_TRANSFORMER =
-      observable -> ((Observable) observable)
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread());
+  private static final SingleTransformer SINGLE_SCHEDULERS = single -> single
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread());
+
+  private static final FlowableTransformer FLOWABLE_SCHEDULERS = flowable -> flowable
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread());
 
   private RxHelper() {
     // no instances
   }
 
-  public static void unsubscribe(CompositeSubscription subscriptions) {
-    if (subscriptions != null && !subscriptions.isUnsubscribed()) {
-      subscriptions.unsubscribe();
+  public static void dispose(CompositeDisposable disposables) {
+    if (disposables != null && !disposables.isDisposed()) {
+      disposables.dispose();
     }
   }
 
-  public static void unsubscribe(Subscription subscription) {
-    if (subscription != null && !subscription.isUnsubscribed()) {
-      subscription.unsubscribe();
+  public static void dispose(Disposable disposable) {
+    if (disposable != null && !disposable.isDisposed()) {
+      disposable.dispose();
     }
   }
 
-  public static <T> Observable.Transformer<T, T> applySchedulers() {
+  public static <T> FlowableTransformer<T, T> flowableSchedulers() {
     //noinspection unchecked
-    return (Observable.Transformer<T, T>) RxHelper.SCHEDULERS_TRANSFORMER;
+    return (FlowableTransformer<T, T>) RxHelper.FLOWABLE_SCHEDULERS;
+  }
+
+  public static <T> SingleTransformer<T, T> singleSchedulers() {
+    //noinspection unchecked
+    return (SingleTransformer<T, T>) RxHelper.SINGLE_SCHEDULERS;
   }
 }

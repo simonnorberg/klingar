@@ -15,7 +15,7 @@
  */
 package net.simno.klingar.data.repository;
 
-import net.simno.klingar.data.api.MediaServiceHelper;
+import net.simno.klingar.data.api.MediaService;
 
 import javax.inject.Singleton;
 
@@ -24,8 +24,7 @@ import dagger.Provides;
 
 @Module
 public class RepositoryModule {
-  @Provides @Singleton
-  MusicRepository provideMusicRepository(MediaServiceHelper mediaServiceHelper) {
-    return new MusicRepositoryImpl(mediaServiceHelper);
+  @Provides @Singleton MusicRepository provideMusicRepository(MediaService media) {
+    return new MusicRepositoryImpl(media);
   }
 }

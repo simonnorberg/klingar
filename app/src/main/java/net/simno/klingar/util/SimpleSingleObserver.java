@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Simon Norberg
+ * Copyright (C) 2017 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,14 @@
  */
 package net.simno.klingar.util;
 
-import io.reactivex.subscribers.DisposableSubscriber;
+import io.reactivex.observers.DisposableSingleObserver;
 import timber.log.Timber;
 
-public class SimpleSubscriber<T> extends DisposableSubscriber<T> {
+public class SimpleSingleObserver<T> extends DisposableSingleObserver<T> {
+  @Override public void onSuccess(T t) {
+  }
+
   @Override public void onError(Throwable e) {
     Timber.e(e, e.getMessage());
-  }
-
-  @Override public void onComplete() {
-  }
-
-  @Override public void onNext(T t) {
   }
 }

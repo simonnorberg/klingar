@@ -77,16 +77,16 @@ public class MiniPlayerController extends BaseController {
   }
 
   private void observePlaybackState() {
-    subscriptions.add(musicController.state()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Integer>() {
+    disposables.add(musicController.state()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
             updatePlayButton(state);
           }
         }));
-    subscriptions.add(queueManager.queue()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
+    disposables.add(queueManager.queue()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
           @Override public void onNext(Pair<List<Track>, Integer> pair) {
             updateTrackInfo(pair.first.get(pair.second));
           }

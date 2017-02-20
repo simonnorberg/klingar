@@ -38,7 +38,7 @@ afterEvaluate {
 }
 
 def versionMajor = 0
-def versionMinor = 1
+def versionMinor = 2
 def versionPatch = 0
 
 def gitSha() {
@@ -121,7 +121,7 @@ ext {
   supportLibVersion = '25.0.1'
   daggerVersion = '2.9'
   okhttpVersion = '3.6.0'
-  retrofitVersion = '2.1.0'
+  retrofitVersion = '2.2.0-SNAPSHOT'
 }
 
 dependencies {
@@ -136,7 +136,7 @@ dependencies {
   compile 'com.github.bumptech.glide:okhttp-integration:1.4.0'
 
   compile 'com.google.android.exoplayer:exoplayer:r2.2.0'
-  compile 'com.google.android.gms:play-services-cast-framework:10.0.1'
+  compile 'com.google.android.gms:play-services-cast-framework:10.2.0'
 
   provided 'com.google.auto.value:auto-value:1.4-rc2'
   annotationProcessor 'com.google.auto.value:auto-value:1.4-rc2'
@@ -150,13 +150,13 @@ dependencies {
   compile 'com.jakewharton:butterknife:8.5.1'
   annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
   compile 'com.jakewharton.timber:timber:4.5.1'
-  compile 'com.jakewharton.rxrelay:rxrelay:1.2.0'
+  compile 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
 
   compile 'com.squareup.moshi:moshi:1.4.0'
   compile "com.squareup.okhttp3:okhttp:${okhttpVersion}"
   compile "com.squareup.okhttp3:logging-interceptor:${okhttpVersion}"
   compile "com.squareup.retrofit2:retrofit:${retrofitVersion}"
-  compile "com.squareup.retrofit2:adapter-rxjava:${retrofitVersion}"
+  compile "com.squareup.retrofit2:adapter-rxjava2:${retrofitVersion}"
   compile("com.squareup.retrofit2:converter-simplexml:${retrofitVersion}") {
     exclude group: 'stax', module: 'stax-api'
     exclude group: 'stax', module: 'stax'
@@ -165,8 +165,8 @@ dependencies {
 
   compile 'de.psdev.licensesdialog:licensesdialog:1.8.1'
 
-  compile 'io.reactivex:rxandroid:1.2.1'
-  compile 'io.reactivex:rxjava:1.2.6'
+  compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+  compile 'io.reactivex.rxjava2:rxjava:2.0.6'
 
   provided 'javax.annotation:jsr250-api:1.0'
 

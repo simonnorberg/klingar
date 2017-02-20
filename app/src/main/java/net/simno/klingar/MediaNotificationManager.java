@@ -45,7 +45,7 @@ import net.simno.klingar.util.SimpleSubscriber;
 
 import java.util.List;
 
-import rx.Subscription;
+import io.reactivex.disposables.Disposable;
 import timber.log.Timber;
 
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
@@ -77,8 +77,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
   private final int iconHeight;
   @State private int state;
   private Track currentTrack;
-  private Subscription stateSubscription;
-  private Subscription trackSubscription;
+  private Disposable stateDisposable;
+  private Disposable trackDisposable;
   private boolean started;
 
   public MediaNotificationManager(MusicService service, MusicController musicController,
@@ -140,12 +140,12 @@ public class MediaNotificationManager extends BroadcastReceiver {
   }
 
   private void observeSession() {
-    RxHelper.unsubscribe(trackSubscription);
-    RxHelper.unsubscribe(stateSubscription);
+    RxHelper.dispose(trackDisposable);
+    RxHelper.dispose(stateDisposable);
 
-    trackSubscription = queueManager.queue()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
+    trackDisposable = queueManager.queue()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
           @Override public void onNext(Pair<List<Track>, Integer> pair) {
             Track track = pair.first.get(pair.second);
             if (!track.equals(currentTrack)) {
@@ -158,9 +158,9 @@ public class MediaNotificationManager extends BroadcastReceiver {
           }
         });
 
-    stateSubscription = musicController.state()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<Integer>() {
+    stateDisposable = musicController.state()
+        .compose(RxHelper.flowableSchedulers())
+        .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
             boolean stateChanged = MediaNotificationManager.this.state != state;
             MediaNotificationManager.this.state = state;
@@ -183,8 +183,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
   public void stopNotification() {
     if (started) {
       started = false;
-      RxHelper.unsubscribe(trackSubscription);
-      RxHelper.unsubscribe(stateSubscription);
+      RxHelper.dispose(trackDisposable);
+      RxHelper.dispose(stateDisposable);
       try {
         notificationManager.cancel(NOTIFICATION_ID);
         service.unregisterReceiver(this);

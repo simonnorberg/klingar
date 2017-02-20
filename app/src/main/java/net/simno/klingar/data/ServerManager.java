@@ -17,62 +17,62 @@ package net.simno.klingar.data;
 
 import android.text.TextUtils;
 
-import com.jakewharton.rxrelay.BehaviorRelay;
+import com.jakewharton.rxrelay2.BehaviorRelay;
 
-import net.simno.klingar.data.api.MediaServiceHelper;
+import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.data.api.PlexService;
 import net.simno.klingar.data.api.model.Device;
-import net.simno.klingar.data.api.model.Directory;
 import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.Server;
 import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
+import net.simno.klingar.util.SimpleSingleObserver;
 
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
 import okhttp3.HttpUrl;
-import rx.Observable;
 
 @Singleton
 public class ServerManager {
 
   private final BehaviorRelay<List<Library>> libsRelay = BehaviorRelay.create();
   private final PlexService plex;
-  private final MediaServiceHelper media;
+  private final MediaService media;
+  private Disposable disposable;
 
-  @Inject ServerManager(PlexService plex, MediaServiceHelper media) {
+  @Inject ServerManager(PlexService plex, MediaService media) {
     this.plex = plex;
     this.media = media;
   }
 
-  public Observable<List<Library>> libs() {
-    return libsRelay.onBackpressureLatest();
+  public Flowable<List<Library>> libs() {
+    return libsRelay.toFlowable(BackpressureStrategy.LATEST);
   }
 
   public void refresh() {
-    plex.resources()
-        .flatMap(container -> Observable.from(container.devices))
+    RxHelper.dispose(disposable);
+    disposable = plex.resources()
+        .flatMap(container -> Observable.fromIterable(container.devices))
         .filter(device -> device.provides.contains("server"))
-        .map(this::parseServer)
-        .flatMap(server -> Observable.combineLatest(
-            Observable.just(server),
-            media.sections(server.uri())
-                .flatMap(container -> Observable.from(container.directories))
-                .filter(section -> TextUtils.equals(section.type, "artist")),
-            this::parseLibrary))
+        .map(this::createServer)
+        .flatMap(createLibrary())
         .toList()
-        .compose(RxHelper.applySchedulers())
-        .subscribe(new SimpleSubscriber<List<Library>>() {
-          @Override public void onNext(List<Library> libs) {
-            libsRelay.call(libs);
+        .compose(RxHelper.singleSchedulers())
+        .subscribeWith(new SimpleSingleObserver<List<Library>>() {
+          @Override public void onSuccess(List<Library> libs) {
+            libsRelay.accept(libs);
           }
         });
   }
 
-  private Server parseServer(Device device) {
+  private Server createServer(Device device) {
     Server.Builder builder = Server.builder();
 
     for (Device.Connection connection : device.connections) {
@@ -88,12 +88,15 @@ public class ServerManager {
     return builder.build();
   }
 
-  private Library parseLibrary(Server server, Directory section) {
-    return Library.builder()
-        .uuid(section.uuid)
-        .key(section.key)
-        .name(section.title)
-        .uri(server.uri())
-        .build();
+  private Function<Server, Observable<Library>> createLibrary() {
+    return server -> media.sections(server.uri())
+        .flatMap(container -> Observable.fromIterable(container.directories))
+        .filter(section -> TextUtils.equals(section.type, "artist"))
+        .flatMap(section -> Observable.just(Library.builder()
+            .uuid(section.uuid)
+            .key(section.key)
+            .name(section.title)
+            .uri(server.uri())
+            .build()));
   }
 }
