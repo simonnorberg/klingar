@@ -38,7 +38,7 @@ afterEvaluate {
 }
 
 def versionMajor = 0
-def versionMinor = 2
+def versionMinor = 3
 def versionPatch = 0
 
 def gitSha() {
@@ -71,9 +71,9 @@ android {
   dexOptions {
     preDexLibraries = preDexEnabled && !isTravis
   }
-
   defaultConfig {
     applicationId "net.simno.klingar"
+    testApplicationId "net.simno.klingar.test"
     minSdkVersion 21
     targetSdkVersion 25
 
@@ -109,19 +109,13 @@ android {
   packagingOptions {
     exclude 'LICENSE.txt'
   }
-  configurations.all {
-    resolutionStrategy {
-      force 'com.android.support:support-annotations:25.0.1'
-      force 'com.android.support:support-compat:25.0.1'
-    }
-  }
 }
 
 ext {
-  supportLibVersion = '25.0.1'
+  supportLibVersion = '25.2.0'
   daggerVersion = '2.9'
   okhttpVersion = '3.6.0'
-  retrofitVersion = '2.2.0-SNAPSHOT'
+  retrofitVersion = '2.2.0'
 }
 
 dependencies {
@@ -171,5 +165,11 @@ dependencies {
   provided 'javax.annotation:jsr250-api:1.0'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'org.mockito:mockito-core:2.7.11'
+
+  androidTestCompile "com.android.support:support-annotations:${supportLibVersion}"
+  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+  androidTestCompile 'com.android.support.test:runner:0.5'
+  androidTestCompile 'com.android.support.test:rules:0.5'
+  androidTestCompile 'com.google.code.findbugs:jsr305:3.0.1'
 }
