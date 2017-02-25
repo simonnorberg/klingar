@@ -43,8 +43,7 @@ import net.simno.klingar.ui.KlingarActivity;
 import net.simno.klingar.util.RxHelper;
 import net.simno.klingar.util.SimpleSubscriber;
 
-import java.util.List;
-
+import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
 import timber.log.Timber;
 
@@ -77,8 +76,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   private final int iconHeight;
   @State private int state;
   private Track currentTrack;
-  private Disposable stateDisposable;
-  private Disposable trackDisposable;
+  private Disposable disposable;
   private boolean started;
 
   public MediaNotificationManager(MusicService service, MusicController musicController,
@@ -140,33 +138,34 @@ public class MediaNotificationManager extends BroadcastReceiver {
   }
 
   private void observeSession() {
-    RxHelper.dispose(trackDisposable);
-    RxHelper.dispose(stateDisposable);
+    RxHelper.dispose(disposable);
+    disposable = Flowable.combineLatest(queueManager.queue(), musicController.state(),
+        (pair, state) -> {
+          boolean stopNotification = false; // higher priority if both are true
+          boolean showNotification = false;
 
-    trackDisposable = queueManager.queue()
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
-          @Override public void onNext(Pair<List<Track>, Integer> pair) {
-            Track track = pair.first.get(pair.second);
-            if (!track.equals(currentTrack)) {
-              currentTrack = track;
-              Notification notification = createNotification();
-              if (notification != null) {
-                notificationManager.notify(NOTIFICATION_ID, notification);
-              }
-            }
+          Track track = pair.first.get(pair.second);
+          if (!track.equals(currentTrack)) {
+            currentTrack = track;
+            showNotification = true;
           }
-        });
 
-    stateDisposable = musicController.state()
+          boolean stateChanged = MediaNotificationManager.this.state != state;
+          MediaNotificationManager.this.state = state;
+          if (state == STATE_STOPPED || state == STATE_NONE) {
+            stopNotification = true;
+          } else if (stateChanged) {
+            showNotification = true;
+          }
+
+          return new Pair<>(stopNotification, showNotification);
+        })
         .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Integer>() {
-          @Override public void onNext(Integer state) {
-            boolean stateChanged = MediaNotificationManager.this.state != state;
-            MediaNotificationManager.this.state = state;
-            if (state == STATE_STOPPED || state == STATE_NONE) {
+        .subscribeWith(new SimpleSubscriber<Pair<Boolean, Boolean>>() {
+          @Override public void onNext(Pair<Boolean, Boolean> pair) {
+            if (pair.first) {
               stopNotification();
-            } else if (stateChanged) {
+            } else if (pair.second) {
               Notification notification = createNotification();
               if (notification != null) {
                 notificationManager.notify(NOTIFICATION_ID, notification);
@@ -183,8 +182,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   public void stopNotification() {
     if (started) {
       started = false;
-      RxHelper.dispose(trackDisposable);
-      RxHelper.dispose(stateDisposable);
+      RxHelper.dispose(disposable);
       try {
         notificationManager.cancel(NOTIFICATION_ID);
         service.unregisterReceiver(this);
