@@ -26,8 +26,10 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.media.session.MediaButtonReceiver;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.media.MediaRouter;
@@ -37,6 +39,7 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
 
+import net.simno.klingar.AndroidClock;
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.MediaNotificationManager;
 import net.simno.klingar.data.api.MediaService;
@@ -83,10 +86,19 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
 
     Playback playback = new LocalPlayback(getApplicationContext(), musicController, audioManager,
         wifiManager);
-    playbackManager = new PlaybackManager(queueManager, this, playback);
+    playbackManager = new PlaybackManager(queueManager, this, AndroidClock.DEFAULT, playback);
 
     session = new MediaSessionCompat(this, "MusicService");
-    musicController.setSessionToken(session.getSessionToken());
+
+    try {
+      MediaControllerCompat mediaController =
+          new MediaControllerCompat(this.getApplicationContext(), session.getSessionToken());
+      musicController.setMediaController(mediaController);
+    } catch (RemoteException e) {
+      Timber.e(e, "Could not create MediaController");
+      throw new IllegalStateException();
+    }
+
     session.setCallback(playbackManager.getMediaSessionCallback());
     session.setFlags(FLAG_HANDLES_MEDIA_BUTTONS | FLAG_HANDLES_TRANSPORT_CONTROLS);
 

@@ -15,31 +15,36 @@
  */
 package net.simno.klingar.data.model;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-
+import org.junit.Before;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import okhttp3.HttpUrl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-public class TrackJsonAdapterTest {
-  private final Moshi moshi = new Moshi.Builder().build();
-  private final JsonAdapter<Track> adapter = Track.jsonAdapter(moshi);
+public class TrackComparatorTest {
 
-  @Test public void serialization() throws IOException {
-    Track exptected = createTrack();
-    String json = adapter.toJson(exptected);
-    Track actual = adapter.fromJson(json);
-    assertThat(actual, is(equalTo(exptected)));
+  private TrackComparator comparator;
+
+  @Before public void setup() {
+    comparator = new TrackComparator();
   }
 
-  private Track createTrack() {
+  @Test public void compareTracks() {
+    Track track1 = createTrackWithIndex(10);
+    Track track2 = createTrackWithIndex(11);
+    int result = comparator.compare(track1, track2);
+    assertTrue(result < 0);
+  }
+
+  @Test public void compareTracksSameIndex() {
+    Track track1 = createTrackWithIndex(10);
+    Track track2 = createTrackWithIndex(10);
+    int result = comparator.compare(track1, track2);
+    assertTrue(result == 0);
+  }
+
+  private Track createTrackWithIndex(int index) {
     return Track.builder()
         .queueItemId(100)
         .libraryId("libraryId")
@@ -49,7 +54,7 @@ public class TrackJsonAdapterTest {
         .title("title")
         .albumTitle("albumTitle")
         .artistTitle("artistTitle")
-        .index(200)
+        .index(index)
         .duration(300)
         .thumb("thumb")
         .source("source")

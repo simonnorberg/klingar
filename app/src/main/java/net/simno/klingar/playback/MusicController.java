@@ -15,8 +15,6 @@
  */
 package net.simno.klingar.playback;
 
-import android.content.Context;
-import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat.Token;
@@ -39,6 +37,18 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_CONNECTING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_ERROR;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_FAST_FORWARDING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_NONE;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_REWINDING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED;
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_REPEAT;
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_SHUFFLE;
 
@@ -46,80 +56,77 @@ import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_SHUFFLE;
 public class MusicController {
 
   private final BehaviorRelay<Long> progressRelay = BehaviorRelay.createDefault(0L);
-  private final BehaviorRelay<Integer> stateRelay =
-      BehaviorRelay.createDefault(PlaybackStateCompat.STATE_NONE);
-  private final Context context;
+  private final BehaviorRelay<Integer> stateRelay = BehaviorRelay.createDefault(STATE_NONE);
   private MediaControllerCompat mediaController;
-  private Token token;
   private PlaybackStateCompat playbackState;
   private Disposable progressDisposable;
   private String castName;
 
   private final MediaControllerCompat.Callback callback = new MediaControllerCompat.Callback() {
-    @Override public void onPlaybackStateChanged(PlaybackStateCompat newState) {
-      super.onPlaybackStateChanged(newState);
-      Timber.d("onPlaybackStateChanged %s", getStateString(newState.getState()));
-      @State int currentState = stateRelay.getValue() != null ? stateRelay.getValue()
-          : PlaybackStateCompat.STATE_NONE;
-      if (newState.getState() != currentState) {
-        stateRelay.accept(newState.getState());
-        handleProgress(newState);
+    @Override public void onPlaybackStateChanged(PlaybackStateCompat newPlaybackState) {
+      super.onPlaybackStateChanged(newPlaybackState);
+
+      @State int newState = newPlaybackState.getState();
+      @State int currentState = stateRelay.getValue() != null ? stateRelay.getValue() : STATE_NONE;
+
+      if (newState != currentState) {
+        stateRelay.accept(newState);
+        handleProgress(newState, newPlaybackState.getPosition());
       }
-      playbackState = newState;
+      playbackState = newPlaybackState;
+
+      Timber.d("onPlaybackStateChanged %s", getStateString(newState));
     }
   };
 
-  @Inject public MusicController(Context context) {
-    this.context = context;
+  @Inject public MusicController() {
   }
 
   private static String getStateString(@State int state) {
     switch (state) {
-      case PlaybackStateCompat.STATE_NONE:
+      case STATE_NONE:
         return "STATE_NONE";
-      case PlaybackStateCompat.STATE_STOPPED:
+      case STATE_STOPPED:
         return "STATE_STOPPED";
-      case PlaybackStateCompat.STATE_PLAYING:
+      case STATE_PLAYING:
         return "STATE_PLAYING";
-      case PlaybackStateCompat.STATE_PAUSED:
+      case STATE_PAUSED:
         return "STATE_PAUSED";
-      case PlaybackStateCompat.STATE_FAST_FORWARDING:
+      case STATE_FAST_FORWARDING:
         return "STATE_FAST_FORWARDING";
-      case PlaybackStateCompat.STATE_REWINDING:
+      case STATE_REWINDING:
         return "STATE_REWINDING";
-      case PlaybackStateCompat.STATE_BUFFERING:
+      case STATE_BUFFERING:
         return "STATE_BUFFERING";
-      case PlaybackStateCompat.STATE_ERROR:
+      case STATE_ERROR:
         return "STATE_ERROR";
-      case PlaybackStateCompat.STATE_CONNECTING:
+      case STATE_CONNECTING:
         return "STATE_CONNECTING";
-      case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
+      case STATE_SKIPPING_TO_PREVIOUS:
         return "STATE_SKIPPING_TO_PREVIOUS";
-      case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
+      case STATE_SKIPPING_TO_NEXT:
         return "STATE_SKIPPING_TO_NEXT";
-      case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
+      case STATE_SKIPPING_TO_QUEUE_ITEM:
         return "STATE_SKIPPING_TO_QUEUE_ITEM";
       default:
         return "UNKNOWN";
     }
   }
 
-  public Token getSessionToken() {
-    return token;
+  @Nullable public Token getSessionToken() {
+    return mediaController != null ? mediaController.getSessionToken() : null;
   }
 
-  void setSessionToken(Token token) {
-    this.token = token;
+  /**
+   * Set a new MediaController with the current session token
+   */
+  void setMediaController(MediaControllerCompat newMediaController) {
     if (mediaController != null) {
       mediaController.unregisterCallback(callback);
       mediaController = null;
     }
-    try {
-      mediaController = new MediaControllerCompat(context, token);
-      mediaController.registerCallback(callback);
-    } catch (RemoteException e) {
-      Timber.e(e, "failed to create controller");
-    }
+    mediaController = newMediaController;
+    mediaController.registerCallback(callback);
   }
 
   public PlaybackStateCompat getPlaybackState() {
@@ -164,12 +171,12 @@ public class MusicController {
     PlaybackStateCompat state = mediaController.getPlaybackState();
     if (state != null) {
       switch (state.getState()) {
-        case PlaybackStateCompat.STATE_PLAYING:
-        case PlaybackStateCompat.STATE_BUFFERING:
+        case STATE_PLAYING:
+        case STATE_BUFFERING:
           pause();
           break;
-        case PlaybackStateCompat.STATE_PAUSED:
-        case PlaybackStateCompat.STATE_STOPPED:
+        case STATE_PAUSED:
+        case STATE_STOPPED:
           play();
           break;
         default:
@@ -213,9 +220,8 @@ public class MusicController {
     }
   }
 
-  private void handleProgress(PlaybackStateCompat state) {
-    final long startPosition = state.getPosition();
-    if (state.getState() == PlaybackStateCompat.STATE_PLAYING) {
+  private void handleProgress(@State final int state, final long startPosition) {
+    if (state == STATE_PLAYING) {
       stopProgress();
       startProgress(startPosition);
     } else {

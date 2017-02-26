@@ -17,12 +17,12 @@
 package net.simno.klingar.playback;
 
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 
+import net.simno.klingar.AndroidClock;
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.playback.QueueManager.RepeatMode;
@@ -38,12 +38,14 @@ class PlaybackManager implements Playback.Callback {
   private final QueueManager queueManager;
   private final MediaSessionCallback sessionCallback;
   private final PlaybackServiceCallback serviceCallback;
+  private final AndroidClock androidClock;
   private Playback playback;
 
   PlaybackManager(QueueManager queueManager, PlaybackServiceCallback serviceCallback,
-                  Playback playback) {
+                  AndroidClock androidClock, Playback playback) {
     this.queueManager = queueManager;
     this.serviceCallback = serviceCallback;
+    this.androidClock = androidClock;
     this.playback = playback;
     this.playback.setCallback(this);
     this.sessionCallback = new MediaSessionCallback();
@@ -60,8 +62,8 @@ class PlaybackManager implements Playback.Callback {
   private void handlePlayRequest() {
     Track currentQueueItem = queueManager.currentTrack();
     if (currentQueueItem != null) {
-      serviceCallback.onPlaybackStart();
       playback.play(currentQueueItem);
+      serviceCallback.onPlaybackStart();
     }
   }
 
@@ -90,7 +92,7 @@ class PlaybackManager implements Playback.Callback {
     addCustomActions(stateBuilder);
 
     @State int state = playback.getState();
-    stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
+    stateBuilder.setState(state, position, 1.0f, androidClock.elapsedRealTime());
 
     serviceCallback.onPlaybackStateUpdated(stateBuilder.build());
 

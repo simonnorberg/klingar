@@ -18,7 +18,6 @@ package net.simno.klingar.util;
 import io.reactivex.FlowableTransformer;
 import io.reactivex.SingleTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -34,12 +33,6 @@ public final class RxHelper {
 
   private RxHelper() {
     // no instances
-  }
-
-  public static void dispose(CompositeDisposable disposables) {
-    if (disposables != null && !disposables.isDisposed()) {
-      disposables.dispose();
-    }
   }
 
   public static void dispose(Disposable disposable) {
