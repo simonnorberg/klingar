@@ -22,7 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.bluelinelabs.conductor.Controller;
+import com.bluelinelabs.conductor.rxlifecycle2.RxController;
 
 import net.simno.klingar.util.RxHelper;
 
@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
 
-abstract class BaseController extends Controller {
+abstract class BaseController extends RxController {
 
   CompositeDisposable disposables;
   private Unbinder unbinder;

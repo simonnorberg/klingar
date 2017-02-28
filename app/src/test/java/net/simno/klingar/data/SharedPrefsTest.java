@@ -30,8 +30,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SharedPrefsTest {
 
-  @Mock SharedPreferences mockSharedPreferences;
   private final TestEditor testEditor = new TestEditor();
+  @Mock SharedPreferences mockSharedPreferences;
   private SharedPrefs prefs;
 
   @Before public void setup() {

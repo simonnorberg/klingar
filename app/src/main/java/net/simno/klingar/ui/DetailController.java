@@ -70,6 +70,7 @@ import timber.log.Timber;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.data.Key.PLEX_ITEM;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
@@ -261,6 +262,7 @@ public class DetailController extends BaseController implements
 
   private void getArtistItems(Artist artist) {
     disposables.add(musicRepository.artistItems(artist)
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
           @Override public void onSuccess(List<PlexItem> items) {
@@ -272,6 +274,7 @@ public class DetailController extends BaseController implements
 
   private void getAlbumItems(Album album) {
     disposables.add(musicRepository.albumItems(album)
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
           @Override public void onSuccess(List<PlexItem> items) {
@@ -283,6 +286,7 @@ public class DetailController extends BaseController implements
 
   private void observePlayback() {
     disposables.add(musicController.state()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
@@ -313,6 +317,7 @@ public class DetailController extends BaseController implements
   private void playTrack(Track track) {
     Timber.d("playTrack %s", track);
     disposables.add(musicRepository.createPlayQueue(track)
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<Pair<List<Track>, Long>>() {
           @Override public void onSuccess(Pair<List<Track>, Long> pair) {

@@ -62,6 +62,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnClick;
 
+import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 
 public class PlayerController extends BaseController implements QueueAdapter.OnTrackClickListener {
@@ -223,6 +224,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
 
   private void observePlaybackState() {
     disposables.add(musicController.progress()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Long>() {
           @Override public void onNext(Long progress) {
@@ -232,6 +234,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
           }
         }));
     disposables.add(musicController.state()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
@@ -239,6 +242,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
           }
         }));
     disposables.add(queueManager.mode()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Pair<Integer, Integer>>() {
           @Override public void onNext(Pair<Integer, Integer> pair) {
@@ -247,6 +251,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
           }
         }));
     disposables.add(queueManager.queue()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
           @Override public void onNext(Pair<List<Track>, Integer> pair) {

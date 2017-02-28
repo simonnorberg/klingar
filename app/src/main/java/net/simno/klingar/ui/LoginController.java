@@ -48,6 +48,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnEditorAction;
 
+import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.util.Views.invisible;
 import static net.simno.klingar.util.Views.visible;
@@ -141,6 +142,7 @@ public class LoginController extends BaseController {
     invisible(loginForm);
     contentLoading.show();
     disposables.add(plex.signIn(Credentials.basic(username, password))
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<User>() {
           @Override public void onSuccess(User user) {

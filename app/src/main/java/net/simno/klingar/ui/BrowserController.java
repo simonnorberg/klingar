@@ -61,6 +61,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import timber.log.Timber;
 
+import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.data.Key.PLEX_ITEM;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 
@@ -183,6 +184,7 @@ public class BrowserController extends BaseController implements
 
   private void observeLibs() {
     disposables.add(serverManager.libs()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<List<Library>>() {
           @Override public void onNext(List<Library> libs) {
@@ -208,6 +210,7 @@ public class BrowserController extends BaseController implements
 
   private void observeSpinner() {
     disposables.add(toolbarOwner.spinnerSelection()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer position) {
@@ -224,6 +227,7 @@ public class BrowserController extends BaseController implements
     }
     currentLib = lib;
     disposables.add(musicRepository.browseLibrary(lib)
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
           @Override public void onSuccess(List<PlexItem> items) {
@@ -238,6 +242,7 @@ public class BrowserController extends BaseController implements
     }
     isLoading = true;
     disposables.add(musicRepository.browseMediaType(mediaType, PAGE_SIZE * currentPage)
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
           @Override public void onSuccess(List<PlexItem> items) {
@@ -264,6 +269,7 @@ public class BrowserController extends BaseController implements
 
   private void observePlayback() {
     disposables.add(musicController.state()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
@@ -300,6 +306,7 @@ public class BrowserController extends BaseController implements
   private void playTrack(Track track) {
     Timber.d("playTrack %s", track);
     disposables.add(musicRepository.createPlayQueue(track)
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.singleSchedulers())
         .subscribeWith(new SimpleSingleObserver<Pair<List<Track>, Long>>() {
           @Override public void onSuccess(Pair<List<Track>, Long> pair) {

@@ -40,6 +40,8 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnClick;
 
+import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
+
 public class MiniPlayerController extends BaseController {
 
   private static final int[] PLAY = {-R.attr.state_pause};
@@ -78,6 +80,7 @@ public class MiniPlayerController extends BaseController {
 
   private void observePlaybackState() {
     disposables.add(musicController.state()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Integer>() {
           @Override public void onNext(Integer state) {
@@ -85,6 +88,7 @@ public class MiniPlayerController extends BaseController {
           }
         }));
     disposables.add(queueManager.queue()
+        .compose(bindUntilEvent(DETACH))
         .compose(RxHelper.flowableSchedulers())
         .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
           @Override public void onNext(Pair<List<Track>, Integer> pair) {
