@@ -48,7 +48,7 @@ public final class Rx {
     }
   };
 
-  public Rx(Scheduler io, Scheduler ui, Scheduler newThread) {
+  private Rx(Scheduler io, Scheduler ui, Scheduler newThread) {
     this.io = io;
     this.ui = ui;
     this.newThread = newThread;

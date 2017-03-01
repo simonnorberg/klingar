@@ -285,9 +285,7 @@ public class DetailController extends BaseController implements
             case PlaybackStateCompat.STATE_ERROR:
             case PlaybackStateCompat.STATE_NONE:
             case PlaybackStateCompat.STATE_STOPPED:
-              for (Router router : getChildRouters()) {
-                removeChildRouter(router);
-              }
+              getChildRouters().forEach(this::removeChildRouter);
               break;
             default:
               Router miniplayerRouter = getChildRouter(miniplayerContainer);
