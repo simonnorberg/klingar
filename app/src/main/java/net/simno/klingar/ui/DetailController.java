@@ -22,7 +22,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,12 +50,8 @@ import net.simno.klingar.ui.widget.CircleImageViewTarget;
 import net.simno.klingar.ui.widget.DistanceScrollListener;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.SquareImageView;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSingleObserver;
-import net.simno.klingar.util.SimpleSubscriber;
+import net.simno.klingar.util.Rx;
 import net.simno.klingar.util.Urls;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -93,6 +88,7 @@ public class DetailController extends BaseController implements
   @Inject MusicRepository musicRepository;
   @Inject QueueManager queueManager;
   @Inject MusicController musicController;
+  @Inject Rx rx;
   private DistanceScrollListener scrollListener;
   private PlexItem plexItem;
   private boolean itemsLoaded;
@@ -263,49 +259,43 @@ public class DetailController extends BaseController implements
   private void getArtistItems(Artist artist) {
     disposables.add(musicRepository.artistItems(artist)
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
-          @Override public void onSuccess(List<PlexItem> items) {
-            adapter.addAll(items);
-            itemsLoaded = true;
-          }
-        }));
+        .compose(rx.singleSchedulers())
+        .subscribe(items -> {
+          adapter.addAll(items);
+          itemsLoaded = true;
+        }, Rx::onError));
   }
 
   private void getAlbumItems(Album album) {
     disposables.add(musicRepository.albumItems(album)
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
-          @Override public void onSuccess(List<PlexItem> items) {
-            adapter.addAll(items);
-            itemsLoaded = true;
-          }
-        }));
+        .compose(rx.singleSchedulers())
+        .subscribe(items -> {
+          adapter.addAll(items);
+          itemsLoaded = true;
+        }, Rx::onError));
   }
 
   private void observePlayback() {
     disposables.add(musicController.state()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Integer>() {
-          @Override public void onNext(Integer state) {
-            switch (state) {
-              case PlaybackStateCompat.STATE_ERROR:
-              case PlaybackStateCompat.STATE_NONE:
-              case PlaybackStateCompat.STATE_STOPPED:
-                for (Router router : getChildRouters()) {
-                  removeChildRouter(router);
-                }
-                break;
-              default:
-                Router miniplayerRouter = getChildRouter(miniplayerContainer);
-                if (!miniplayerRouter.hasRootController()) {
-                  miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
-                }
-            }
+        .compose(rx.flowableSchedulers())
+        .subscribe(state -> {
+          switch (state) {
+            case PlaybackStateCompat.STATE_ERROR:
+            case PlaybackStateCompat.STATE_NONE:
+            case PlaybackStateCompat.STATE_STOPPED:
+              for (Router router : getChildRouters()) {
+                removeChildRouter(router);
+              }
+              break;
+            default:
+              Router miniplayerRouter = getChildRouter(miniplayerContainer);
+              if (!miniplayerRouter.hasRootController()) {
+                miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
+              }
           }
-        }));
+        }, Rx::onError));
   }
 
   private void goToDetails(PlexItem plexItem) {
@@ -318,12 +308,10 @@ public class DetailController extends BaseController implements
     Timber.d("playTrack %s", track);
     disposables.add(musicRepository.createPlayQueue(track)
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<Pair<List<Track>, Long>>() {
-          @Override public void onSuccess(Pair<List<Track>, Long> pair) {
-            queueManager.setQueue(pair.first, pair.second);
-            musicController.play();
-          }
-        }));
+        .compose(rx.singleSchedulers())
+        .subscribe(pair -> {
+          queueManager.setQueue(pair.first, pair.second);
+          musicController.play();
+        }, Rx::onError));
   }
 }

@@ -37,9 +37,7 @@ import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.LoginManager;
 import net.simno.klingar.data.api.PlexService;
-import net.simno.klingar.data.api.model.User;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSingleObserver;
+import net.simno.klingar.util.Rx;
 import net.simno.klingar.util.Strings;
 
 import javax.inject.Inject;
@@ -67,6 +65,7 @@ public class LoginController extends BaseController {
   @Inject PlexService plex;
   @Inject LoginManager loginManager;
   @Inject InputMethodManager imm;
+  @Inject Rx rx;
 
   public LoginController(Bundle args) {
     super(args);
@@ -143,24 +142,20 @@ public class LoginController extends BaseController {
     contentLoading.show();
     disposables.add(plex.signIn(Credentials.basic(username, password))
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<User>() {
-          @Override public void onSuccess(User user) {
-            loginManager.login(user.authenticationToken);
-            if (getActivity() != null) {
-              getActivity().invalidateOptionsMenu();
-            }
-            getRouter().setRoot(RouterTransaction.with(new BrowserController(null)));
+        .compose(rx.singleSchedulers())
+        .subscribe(user -> {
+          loginManager.login(user.authenticationToken);
+          if (getActivity() != null) {
+            getActivity().invalidateOptionsMenu();
           }
-
-          @Override public void onError(Throwable e) {
-            super.onError(e);
-            loginManager.logout();
-            contentLoading.hide();
-            visible(loginForm);
-            showToast(R.string.sign_in_failed);
-            enableInput();
-          }
+          getRouter().setRoot(RouterTransaction.with(new BrowserController(null)));
+        }, e -> {
+          Rx.onError(e);
+          loginManager.logout();
+          contentLoading.hide();
+          visible(loginForm);
+          showToast(R.string.sign_in_failed);
+          enableInput();
         }));
   }
 

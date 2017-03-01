@@ -23,18 +23,11 @@ import android.support.v4.media.session.PlaybackStateCompat.State;
 
 import com.jakewharton.rxrelay2.BehaviorRelay;
 
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
-
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import net.simno.klingar.util.Rx;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
@@ -52,11 +45,12 @@ import static android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_REPEAT;
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_SHUFFLE;
 
-@Singleton
 public class MusicController {
 
   private final BehaviorRelay<Long> progressRelay = BehaviorRelay.createDefault(0L);
   private final BehaviorRelay<Integer> stateRelay = BehaviorRelay.createDefault(STATE_NONE);
+  private final Flowable<Long> seconds;
+  private final Rx rx;
   private MediaControllerCompat mediaController;
   private PlaybackStateCompat playbackState;
   private Disposable progressDisposable;
@@ -79,7 +73,9 @@ public class MusicController {
     }
   };
 
-  @Inject public MusicController() {
+  public MusicController(Flowable<Long> seconds, Rx rx) {
+    this.seconds = seconds;
+    this.rx = rx;
   }
 
   private static String getStateString(@State int state) {
@@ -231,16 +227,12 @@ public class MusicController {
 
   private void startProgress(final long startPosition) {
     progressRelay.accept(startPosition);
-    progressDisposable = Flowable.interval(1, TimeUnit.SECONDS)
-        .subscribeOn(Schedulers.newThread())
-        .subscribeWith(new SimpleSubscriber<Long>() {
-          @Override public void onNext(Long count) {
-            progressRelay.accept(((count + 1) * 1000) + startPosition);
-          }
-        });
+    progressDisposable = seconds.map(count -> ((count + 1) * 1000) + startPosition)
+        .subscribeOn(rx.newThread())
+        .subscribe(progressRelay, Rx::onError);
   }
 
   private void stopProgress() {
-    RxHelper.dispose(progressDisposable);
+    Rx.dispose(progressDisposable);
   }
 }

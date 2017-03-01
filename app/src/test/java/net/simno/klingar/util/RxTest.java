@@ -22,24 +22,24 @@ import io.reactivex.disposables.CompositeDisposable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class RxHelperTest {
+public class RxTest {
 
   @Test public void dispose() {
     CompositeDisposable disposable = new CompositeDisposable();
     assertFalse(disposable.isDisposed());
-    RxHelper.dispose(disposable);
+    Rx.dispose(disposable);
     assertTrue(disposable.isDisposed());
   }
 
   @Test public void disposeNull() {
-    RxHelper.dispose(null);
+    Rx.dispose(null);
   }
 
   @Test public void disposeAlreadyDisposed() {
     CompositeDisposable disposable = new CompositeDisposable();
     disposable.dispose();
     assertTrue(disposable.isDisposed());
-    RxHelper.dispose(disposable);
+    Rx.dispose(disposable);
     assertTrue(disposable.isDisposed());
   }
 }

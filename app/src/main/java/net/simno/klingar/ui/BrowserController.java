@@ -22,7 +22,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,9 +45,7 @@ import net.simno.klingar.playback.QueueManager;
 import net.simno.klingar.ui.adapter.MusicAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
 import net.simno.klingar.ui.widget.EndScrollListener;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSingleObserver;
-import net.simno.klingar.util.SimpleSubscriber;
+import net.simno.klingar.util.Rx;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,6 +76,7 @@ public class BrowserController extends BaseController implements
   @Inject MusicRepository musicRepository;
   @Inject QueueManager queueManager;
   @Inject MusicController musicController;
+  @Inject Rx rx;
   private EndScrollListener endScrollListener;
   private List<Library> libs = Collections.emptyList();
   private Library currentLib;
@@ -185,40 +183,36 @@ public class BrowserController extends BaseController implements
   private void observeLibs() {
     disposables.add(serverManager.libs()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<List<Library>>() {
-          @Override public void onNext(List<Library> libs) {
-            BrowserController.this.libs = libs;
+        .compose(rx.flowableSchedulers())
+        .subscribe(libs -> {
+          BrowserController.this.libs = libs;
 
-            ArrayList<String> libNames = new ArrayList<>();
-            int currentPosition = 0;
-            for (int i = 0; i < libs.size(); ++i) {
-              Library lib = libs.get(i);
-              libNames.add(lib.name());
-              if (lib.equals(currentLib)) {
-                currentPosition = i;
-              }
+          ArrayList<String> libNames = new ArrayList<>();
+          int currentPosition = 0;
+          for (int i = 0; i < libs.size(); ++i) {
+            Library lib = libs.get(i);
+            libNames.add(lib.name());
+            if (lib.equals(currentLib)) {
+              currentPosition = i;
             }
-            toolbarOwner.setConfig(toolbarOwner.getConfig().toBuilder()
-                .title(null)
-                .options(libNames)
-                .selection(currentPosition)
-                .build());
           }
-        }));
+          toolbarOwner.setConfig(toolbarOwner.getConfig().toBuilder()
+              .title(null)
+              .options(libNames)
+              .selection(currentPosition)
+              .build());
+        }, Rx::onError));
   }
 
   private void observeSpinner() {
     disposables.add(toolbarOwner.spinnerSelection()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Integer>() {
-          @Override public void onNext(Integer position) {
-            if (position < libs.size()) {
-              browseLibrary(libs.get(position));
-            }
+        .compose(rx.flowableSchedulers())
+        .subscribe(position -> {
+          if (position < libs.size()) {
+            browseLibrary(libs.get(position));
           }
-        }));
+        }, Rx::onError));
   }
 
   private void browseLibrary(Library lib) {
@@ -228,12 +222,8 @@ public class BrowserController extends BaseController implements
     currentLib = lib;
     disposables.add(musicRepository.browseLibrary(lib)
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
-          @Override public void onSuccess(List<PlexItem> items) {
-            adapter.set(items);
-          }
-        }));
+        .compose(rx.singleSchedulers())
+        .subscribe(adapter::set, Rx::onError));
   }
 
   private void browseMediaType() {
@@ -243,18 +233,16 @@ public class BrowserController extends BaseController implements
     isLoading = true;
     disposables.add(musicRepository.browseMediaType(mediaType, PAGE_SIZE * currentPage)
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<List<PlexItem>>() {
-          @Override public void onSuccess(List<PlexItem> items) {
-            if (items.isEmpty()) {
-              stopEndlessScrolling();
-            } else {
-              adapter.addAll(items);
-            }
-            currentPage++; // Only increment page if current page was loaded successfully
-            isLoading = false;
+        .compose(rx.singleSchedulers())
+        .subscribe(items -> {
+          if (items.isEmpty()) {
+            stopEndlessScrolling();
+          } else {
+            adapter.addAll(items);
           }
-        }));
+          currentPage++; // Only increment page if current page was loaded successfully
+          isLoading = false;
+        }, Rx::onError));
   }
 
   private void startEndlessScrolling() {
@@ -270,25 +258,23 @@ public class BrowserController extends BaseController implements
   private void observePlayback() {
     disposables.add(musicController.state()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Integer>() {
-          @Override public void onNext(Integer state) {
-            switch (state) {
-              case PlaybackStateCompat.STATE_ERROR:
-              case PlaybackStateCompat.STATE_NONE:
-              case PlaybackStateCompat.STATE_STOPPED:
-                for (Router router : getChildRouters()) {
-                  removeChildRouter(router);
-                }
-                break;
-              default:
-                Router miniplayerRouter = getChildRouter(miniplayerContainer);
-                if (!miniplayerRouter.hasRootController()) {
-                  miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
-                }
-            }
+        .compose(rx.flowableSchedulers())
+        .subscribe(state -> {
+          switch (state) {
+            case PlaybackStateCompat.STATE_ERROR:
+            case PlaybackStateCompat.STATE_NONE:
+            case PlaybackStateCompat.STATE_STOPPED:
+              for (Router router : getChildRouters()) {
+                removeChildRouter(router);
+              }
+              break;
+            default:
+              Router miniplayerRouter = getChildRouter(miniplayerContainer);
+              if (!miniplayerRouter.hasRootController()) {
+                miniplayerRouter.setRoot(RouterTransaction.with(new MiniPlayerController(null)));
+              }
           }
-        }));
+        }, Rx::onError));
   }
 
   private void goToMediaType(MediaType mediaType) {
@@ -307,12 +293,10 @@ public class BrowserController extends BaseController implements
     Timber.d("playTrack %s", track);
     disposables.add(musicRepository.createPlayQueue(track)
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<Pair<List<Track>, Long>>() {
-          @Override public void onSuccess(Pair<List<Track>, Long> pair) {
-            queueManager.setQueue(pair.first, pair.second);
-            musicController.play();
-          }
-        }));
+        .compose(rx.singleSchedulers())
+        .subscribe(pair -> {
+          queueManager.setQueue(pair.first, pair.second);
+          musicController.play();
+        }, Rx::onError));
   }
 }

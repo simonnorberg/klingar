@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.bluelinelabs.conductor.rxlifecycle2.RxController;
 
-import net.simno.klingar.util.RxHelper;
+import net.simno.klingar.util.Rx;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -57,7 +57,7 @@ abstract class BaseController extends RxController {
 
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
-    RxHelper.dispose(disposables);
+    Rx.dispose(disposables);
   }
 
   @Override protected void onDestroyView(@NonNull View view) {

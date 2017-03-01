@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
-import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -50,10 +49,7 @@ import net.simno.klingar.playback.QueueManager.RepeatMode;
 import net.simno.klingar.playback.QueueManager.ShuffleMode;
 import net.simno.klingar.ui.adapter.QueueAdapter;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
-
-import java.util.List;
+import net.simno.klingar.util.Rx;
 
 import javax.inject.Inject;
 
@@ -101,6 +97,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   @Inject ToolbarOwner toolbarOwner;
   @Inject QueueManager queueManager;
   @Inject MusicController musicController;
+  @Inject Rx rx;
   private boolean isSeeking;
   private boolean isQueueVisible;
 
@@ -225,40 +222,33 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   private void observePlaybackState() {
     disposables.add(musicController.progress()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Long>() {
-          @Override public void onNext(Long progress) {
-            if (!isSeeking) {
-              seekBar.setProgress((int) (progress / 1000));
-            }
+        .compose(rx.flowableSchedulers())
+        .subscribe(progress -> {
+          if (!isSeeking) {
+            seekBar.setProgress((int) (progress / 1000));
           }
-        }));
+        }, Rx::onError));
+
     disposables.add(musicController.state()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Integer>() {
-          @Override public void onNext(Integer state) {
-            updatePlayButton(state);
-          }
-        }));
+        .compose(rx.flowableSchedulers())
+        .subscribe(this::updatePlayButton, Rx::onError));
+
     disposables.add(queueManager.mode()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Pair<Integer, Integer>>() {
-          @Override public void onNext(Pair<Integer, Integer> pair) {
-            updateShuffleButton(pair.first);
-            updateRepeatButton(pair.second);
-          }
-        }));
+        .compose(rx.flowableSchedulers())
+        .subscribe(pair -> {
+          updateShuffleButton(pair.first);
+          updateRepeatButton(pair.second);
+        }, Rx::onError));
+
     disposables.add(queueManager.queue()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
-          @Override public void onNext(Pair<List<Track>, Integer> pair) {
-            queueAdapter.setQueue(pair.first, pair.second);
-            updateTrackInfo(pair.first.get(pair.second));
-          }
-        }));
+        .compose(rx.flowableSchedulers())
+        .subscribe(pair -> {
+          queueAdapter.setQueue(pair.first, pair.second);
+          updateTrackInfo(pair.first.get(pair.second));
+        }, Rx::onError));
   }
 
   private void updatePlayButton(@State int state) {

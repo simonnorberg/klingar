@@ -88,6 +88,12 @@ limitations under the License.
     <license>Apache Software License 2.0</license>
   </notice>
   <notice>
+    <name>RxLifecycle</name>
+    <url>https://github.com/trello/RxLifecycle</url>
+    <copyright>Copyright (C) 2016 Trello</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
     <name>RxJava</name>
     <url>https://github.com/ReactiveX/RxJava</url>
     <copyright>Copyright (c) 2016-present, RxJava Contributors.</copyright>

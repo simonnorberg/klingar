@@ -20,12 +20,15 @@ import android.support.v4.media.session.MediaControllerCompat.Callback;
 import android.support.v4.media.session.MediaControllerCompat.TransportControls;
 import android.support.v4.media.session.PlaybackStateCompat;
 
+import net.simno.klingar.util.Rx;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import io.reactivex.Flowable;
 import io.reactivex.subscribers.TestSubscriber;
 
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
@@ -50,7 +53,7 @@ public class MusicControllerTest {
   private MusicController musicController;
 
   @Before public void setup() {
-    musicController = new MusicController();
+    musicController = new MusicController(seconds(), Rx.test());
     musicController.setMediaController(mockMediaController);
     when(mockMediaController.getTransportControls()).thenReturn(mockTransportControls);
     when(mockMediaController.getPlaybackState()).thenReturn(mockPlaybackState);
@@ -149,5 +152,9 @@ public class MusicControllerTest {
 
     test.awaitTerminalEvent();
     test.assertValues(0L, 0L, 1000L, 2000L, 3000L);
+  }
+
+  private Flowable<Long> seconds() {
+    return Flowable.rangeLong(0, 3).onBackpressureBuffer();
   }
 }

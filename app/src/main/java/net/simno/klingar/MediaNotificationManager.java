@@ -40,8 +40,7 @@ import net.simno.klingar.playback.MusicController;
 import net.simno.klingar.playback.MusicService;
 import net.simno.klingar.playback.QueueManager;
 import net.simno.klingar.ui.KlingarActivity;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
+import net.simno.klingar.util.Rx;
 
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
@@ -65,6 +64,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   private final MusicService service;
   private final MusicController musicController;
   private final QueueManager queueManager;
+  private final Rx rx;
   private final NotificationManagerCompat notificationManager;
   private final PendingIntent playIntent;
   private final PendingIntent pauseIntent;
@@ -80,10 +80,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
   private boolean started;
 
   public MediaNotificationManager(MusicService service, MusicController musicController,
-                                  QueueManager queueManager) {
+                                  QueueManager queueManager, Rx rx) {
     this.service = service;
     this.musicController = musicController;
     this.queueManager = queueManager;
+    this.rx = rx;
 
     notificationColor = ContextCompat.getColor(service, R.color.primary);
     notificationManager = NotificationManagerCompat.from(service);
@@ -138,7 +139,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   }
 
   private void observeSession() {
-    RxHelper.dispose(disposable);
+    Rx.dispose(disposable);
     disposable = Flowable.combineLatest(queueManager.queue(), musicController.state(),
         (pair, state) -> {
           boolean stopNotification = false; // higher priority if both are true
@@ -160,19 +161,17 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
           return new Pair<>(stopNotification, showNotification);
         })
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Pair<Boolean, Boolean>>() {
-          @Override public void onNext(Pair<Boolean, Boolean> pair) {
-            if (pair.first) {
-              stopNotification();
-            } else if (pair.second) {
-              Notification notification = createNotification();
-              if (notification != null) {
-                notificationManager.notify(NOTIFICATION_ID, notification);
-              }
+        .compose(rx.flowableSchedulers())
+        .subscribe(pair -> {
+          if (pair.first) {
+            stopNotification();
+          } else if (pair.second) {
+            Notification notification = createNotification();
+            if (notification != null) {
+              notificationManager.notify(NOTIFICATION_ID, notification);
             }
           }
-        });
+        }, Rx::onError);
   }
 
   /**
@@ -182,7 +181,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   public void stopNotification() {
     if (started) {
       started = false;
-      RxHelper.dispose(disposable);
+      Rx.dispose(disposable);
       try {
         notificationManager.cancel(NOTIFICATION_ID);
         service.unregisterReceiver(this);

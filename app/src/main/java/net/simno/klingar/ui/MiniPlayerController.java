@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
-import android.support.v4.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,10 +28,7 @@ import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.playback.MusicController;
 import net.simno.klingar.playback.QueueManager;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSubscriber;
-
-import java.util.List;
+import net.simno.klingar.util.Rx;
 
 import javax.inject.Inject;
 
@@ -54,6 +50,7 @@ public class MiniPlayerController extends BaseController {
   @BindString(R.string.description_pause) String descPause;
   @Inject MusicController musicController;
   @Inject QueueManager queueManager;
+  @Inject Rx rx;
 
   public MiniPlayerController(Bundle args) {
     super(args);
@@ -81,20 +78,12 @@ public class MiniPlayerController extends BaseController {
   private void observePlaybackState() {
     disposables.add(musicController.state()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Integer>() {
-          @Override public void onNext(Integer state) {
-            updatePlayButton(state);
-          }
-        }));
+        .compose(rx.flowableSchedulers())
+        .subscribe(this::updatePlayButton, Rx::onError));
     disposables.add(queueManager.queue()
         .compose(bindUntilEvent(DETACH))
-        .compose(RxHelper.flowableSchedulers())
-        .subscribeWith(new SimpleSubscriber<Pair<List<Track>, Integer>>() {
-          @Override public void onNext(Pair<List<Track>, Integer> pair) {
-            updateTrackInfo(pair.first.get(pair.second));
-          }
-        }));
+        .compose(rx.flowableSchedulers())
+        .subscribe(pair -> updateTrackInfo(pair.first.get(pair.second)), Rx::onError));
   }
 
   private void updatePlayButton(@State int state) {

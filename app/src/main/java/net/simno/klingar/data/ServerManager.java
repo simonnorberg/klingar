@@ -24,8 +24,7 @@ import net.simno.klingar.data.api.PlexService;
 import net.simno.klingar.data.api.model.Device;
 import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.Server;
-import net.simno.klingar.util.RxHelper;
-import net.simno.klingar.util.SimpleSingleObserver;
+import net.simno.klingar.util.Rx;
 
 import java.util.List;
 
@@ -45,11 +44,13 @@ public class ServerManager {
   private final BehaviorRelay<List<Library>> libsRelay = BehaviorRelay.create();
   private final PlexService plex;
   private final MediaService media;
+  private final Rx rx;
   private Disposable disposable;
 
-  @Inject ServerManager(PlexService plex, MediaService media) {
+  @Inject ServerManager(PlexService plex, MediaService media, Rx rx) {
     this.plex = plex;
     this.media = media;
+    this.rx = rx;
   }
 
   public Flowable<List<Library>> libs() {
@@ -57,19 +58,15 @@ public class ServerManager {
   }
 
   public void refresh() {
-    RxHelper.dispose(disposable);
+    Rx.dispose(disposable);
     disposable = plex.resources()
         .flatMap(container -> Observable.fromIterable(container.devices))
         .filter(device -> device.provides.contains("server"))
         .map(this::createServer)
         .flatMap(createLibrary())
         .toList()
-        .compose(RxHelper.singleSchedulers())
-        .subscribeWith(new SimpleSingleObserver<List<Library>>() {
-          @Override public void onSuccess(List<Library> libs) {
-            libsRelay.accept(libs);
-          }
-        });
+        .compose(rx.singleSchedulers())
+        .subscribe(libsRelay, Rx::onError);
   }
 
   private Server createServer(Device device) {

@@ -17,13 +17,11 @@ package net.simno.klingar.playback;
 
 import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.data.model.Track;
-import net.simno.klingar.util.RxHelper;
+import net.simno.klingar.util.Rx;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableCompletableObserver;
-import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED;
@@ -38,30 +36,25 @@ class TimelineManager {
   private final MusicController musicController;
   private final QueueManager queueManager;
   private final MediaService media;
+  private final Rx rx;
   private Disposable disposable;
 
-  TimelineManager(MusicController musicController, QueueManager queueManager, MediaService media) {
+  TimelineManager(MusicController musicController, QueueManager queueManager, MediaService media,
+                  Rx rx) {
     this.musicController = musicController;
     this.queueManager = queueManager;
     this.media = media;
+    this.rx = rx;
   }
 
   void start() {
     disposable = Flowable.combineLatest(state(), currentTrack(), progress(),
         (state, track, time) -> new Timeline(state, time, track))
-        .observeOn(Schedulers.io())
+        .observeOn(rx.io())
         .flatMapCompletable(this::updateTimeline)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribeWith(new DisposableCompletableObserver() {
-          @Override public void onComplete() {
-            Timber.d("onComplete");
-          }
-
-          @Override public void onError(Throwable e) {
-            Timber.e(e, "onError");
-          }
-        });
+        .subscribeOn(rx.io())
+        .observeOn(rx.io())
+        .subscribe(() -> Timber.d("onCompleted"), Rx::onError);
   }
 
   private Completable updateTimeline(Timeline t) {
@@ -95,7 +88,7 @@ class TimelineManager {
   }
 
   void stop() {
-    RxHelper.dispose(disposable);
+    Rx.dispose(disposable);
   }
 
   private static class Timeline {

@@ -111,8 +111,7 @@ public class MediaService {
         .addQueryParameter("duration", String.valueOf(duration))
         .addQueryParameter("time", String.valueOf(time))
         .build())
-        .firstOrError()
-        .toCompletable();
+        .ignoreElements();
   }
 
   public Single<MediaContainer> playQueue(HttpUrl url, String trackKey, String trackParentKey,

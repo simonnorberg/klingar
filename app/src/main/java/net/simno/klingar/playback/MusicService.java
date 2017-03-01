@@ -44,6 +44,7 @@ import net.simno.klingar.KlingarApp;
 import net.simno.klingar.MediaNotificationManager;
 import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.ui.KlingarActivity;
+import net.simno.klingar.util.Rx;
 
 import java.lang.ref.WeakReference;
 
@@ -67,6 +68,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
   @Inject AudioManager audioManager;
   @Inject WifiManager wifiManager;
   @Inject MediaService media;
+  @Inject Rx rx;
   private PlaybackManager playbackManager;
   private MediaSessionCompat session;
   private MediaNotificationManager mediaNotificationManager;
@@ -108,7 +110,8 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
 
     playbackManager.updatePlaybackState();
 
-    mediaNotificationManager = new MediaNotificationManager(this, musicController, queueManager);
+    mediaNotificationManager = new MediaNotificationManager(this, musicController,
+        queueManager, rx);
 
     castSessionManager = CastContext.getSharedInstance(this).getSessionManager();
     castSessionManagerListener = new CastSessionManagerListener();
@@ -116,7 +119,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
 
     mediaRouter = MediaRouter.getInstance(getApplicationContext());
 
-    timelineManager = new TimelineManager(musicController, queueManager, media);
+    timelineManager = new TimelineManager(musicController, queueManager, media, rx);
     timelineManager.start();
   }
 
