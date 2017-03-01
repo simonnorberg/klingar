@@ -32,7 +32,8 @@ import okhttp3.HttpUrl;
 
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_REPEAT;
 import static net.simno.klingar.playback.PlaybackManager.CUSTOM_ACTION_SHUFFLE;
-import static org.junit.Assert.assertSame;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsSame.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -175,13 +176,13 @@ public class PlaybackManagerTest {
 
   @Test public void switchPlayback() {
     Playback oldPlayback = playbackManager.getPlayback();
-    assertSame(mockPlayback, oldPlayback);
+    assertThat(oldPlayback, sameInstance(mockPlayback));
 
     Playback newExpectedPlayback = mock(Playback.class);
     playbackManager.switchToPlayback(newExpectedPlayback, true);
 
     Playback newActualPlayback = playbackManager.getPlayback();
-    assertSame(newExpectedPlayback, newActualPlayback);
+    assertThat(newActualPlayback, sameInstance(newExpectedPlayback));
   }
 
   private Track createTrack() {

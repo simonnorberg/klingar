@@ -19,16 +19,16 @@ import org.junit.Test;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class RxTest {
 
   @Test public void dispose() {
     CompositeDisposable disposable = new CompositeDisposable();
-    assertFalse(disposable.isDisposed());
+    assertThat(disposable.isDisposed(), is(false));
     Rx.dispose(disposable);
-    assertTrue(disposable.isDisposed());
+    assertThat(disposable.isDisposed(), is(true));
   }
 
   @Test public void disposeNull() {
@@ -38,8 +38,8 @@ public class RxTest {
   @Test public void disposeAlreadyDisposed() {
     CompositeDisposable disposable = new CompositeDisposable();
     disposable.dispose();
-    assertTrue(disposable.isDisposed());
+    assertThat(disposable.isDisposed(), is(true));
     Rx.dispose(disposable);
-    assertTrue(disposable.isDisposed());
+    assertThat(disposable.isDisposed(), is(true));
   }
 }

@@ -15,6 +15,7 @@
  */
 package net.simno.klingar.data;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 
 import org.junit.Before;
@@ -23,10 +24,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+@SuppressLint("CommitPrefEdits")
 @RunWith(MockitoJUnitRunner.class)
 public class SharedPrefsTest {
 
@@ -44,13 +47,13 @@ public class SharedPrefsTest {
   @Test public void putAndGetString() {
     prefs.putString("testKey", "testValue");
     String actual = prefs.getString("testKey", "defaultValue");
-    assertEquals("testValue", actual);
+    assertThat(actual, is("testValue"));
   }
 
   @Test public void removeAndGetDefaultString() {
     prefs.putString("testKey", "testValue");
     prefs.remove("testKey");
     String actual = prefs.getString("testKey", "defaultValue");
-    assertEquals("defaultValue", actual);
+    assertThat(actual, is("defaultValue"));
   }
 }

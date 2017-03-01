@@ -25,7 +25,8 @@ import io.reactivex.Single;
 import okhttp3.HttpUrl;
 import retrofit2.http.Url;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class MediaServiceTest {
 
@@ -41,57 +42,56 @@ public class MediaServiceTest {
 
   @Test public void sections() {
     media.sections(URL);
-    assertEquals("https://plex.tv/library/sections?X-Plex-Token=token", api.actual);
+    assertThat(api.actual, is("https://plex.tv/library/sections?X-Plex-Token=token"));
   }
 
   @Test public void albums() {
     media.albums(URL, "artistKey");
-    assertEquals("https://plex.tv/library/metadata/artistKey/children?X-Plex-Token=token",
-        api.actual);
+    assertThat(api.actual,
+        is("https://plex.tv/library/metadata/artistKey/children?X-Plex-Token=token"));
   }
 
   @Test public void tracks() {
     media.tracks(URL, "albumKey");
-    assertEquals("https://plex.tv/library/metadata/albumKey/children?X-Plex-Token=token",
-        api.actual);
+    assertThat(api.actual,
+        is("https://plex.tv/library/metadata/albumKey/children?X-Plex-Token=token"));
   }
 
   @Test public void popularTracks() {
     media.popularTracks(URL, "libKey", "artistKey");
-    assertEquals("https://plex.tv/library/sections/libKey/all?group=title&limit=5" +
-        "&ratingCount%3E=1&sort=ratingCount:desc&type=10&artist.id=artistKey&X-Plex-Token=token",
-        api.actual);
+    assertThat(api.actual, is("https://plex.tv/library/sections/libKey/all?group=title&limit=5" +
+        "&ratingCount%3E=1&sort=ratingCount:desc&type=10&artist.id=artistKey&X-Plex-Token=token"));
   }
 
   @Test public void browse() {
     media.browse(URL, "libKey", "mediaKey", 100);
-    assertEquals("https://plex.tv/library/sections/libKey/all?sort=titleSort:asc" +
-        "&X-Plex-Container-Size=50&type=mediaKey&X-Plex-Container-Start=100&X-Plex-Token=token",
-        api.actual);
+    assertThat(api.actual, is("https://plex.tv/library/sections/libKey/all?sort=titleSort:asc" +
+        "&X-Plex-Container-Size=50&type=mediaKey&X-Plex-Container-Start=100&X-Plex-Token=token"));
   }
 
   @Test public void recentArtists() {
     media.recentArtists(URL, "libKey");
-    assertEquals("https://plex.tv/library/sections/libKey/all?viewCount%3E=1&type=8" +
-        "&sort=lastViewedAt:desc&X-Plex-Token=token", api.actual);
+    assertThat(api.actual, is("https://plex.tv/library/sections/libKey/all?viewCount%3E=1&type=8" +
+        "&sort=lastViewedAt:desc&X-Plex-Token=token"));
   }
 
   @Test public void firstCharacter() {
     media.firstCharacter(URL, "libKey", "mediaKey");
-    assertEquals("https://plex.tv/library/sections/libKey/firstCharacter?X-Plex-Token=token" +
-        "&type=mediaKey", api.actual);
+    assertThat(api.actual, is("https://plex.tv/library/sections/libKey/firstCharacter?" +
+        "X-Plex-Token=token&type=mediaKey"));
   }
 
   @Test public void timeline() {
     media.timeline(URL, 123L, "trackKey", "trackRatingKey", "playing", 300000L, 10000L);
-    assertEquals("https://plex.tv/:/timeline?X-Plex-Token=token&playQueueItemID=123&key=trackKey" +
-        "&ratingKey=trackRatingKey&state=playing&duration=300000&time=10000", api.actual);
+    assertThat(api.actual, is("https://plex.tv/:/timeline?X-Plex-Token=token&playQueueItemID=123" +
+        "&key=trackKey&ratingKey=trackRatingKey&state=playing&duration=300000&time=10000"));
   }
 
   @Test public void playQueue() {
     media.playQueue(URL, "trackKey", "trackParentKey", "libraryId");
-    assertEquals("https://plex.tv/playQueues?repeat=0&shuffle=0&type=audio&continuous=0" +
-        "&key=trackKey&uri=library://libraryId/item/trackParentKey&X-Plex-Token=token", api.actual);
+    assertThat(api.actual, is("https://plex.tv/playQueues?repeat=0&shuffle=0&type=audio" +
+        "&continuous=0&key=trackKey&uri=library://libraryId/item/trackParentKey" +
+        "&X-Plex-Token=token"));
   }
 
   private static class TestApi implements MediaService.Api {

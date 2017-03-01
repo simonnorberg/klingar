@@ -27,16 +27,13 @@ import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import java.util.Random;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-@Singleton
 public class QueueManager {
 
   public static final int SHUFFLE_OFF = 1;
@@ -49,13 +46,15 @@ public class QueueManager {
       BehaviorRelay.createDefault(new Pair<>(SHUFFLE_OFF, REPEAT_OFF));
   private final BehaviorRelay<Pair<List<Track>, Integer>> queueRelay =
       BehaviorRelay.createDefault(new Pair<>(Collections.emptyList(), 0));
+  private final Random random;
 
   @ShuffleMode private int shuffleMode = SHUFFLE_OFF;
   @RepeatMode private int repeatMode = REPEAT_OFF;
   private List<Track> queue = Collections.emptyList();
   private int position;
 
-  @Inject public QueueManager() {
+  public QueueManager(Random random) {
+    this.random = random;
   }
 
   public Flowable<Pair<Integer, Integer>> mode() {
@@ -186,7 +185,7 @@ public class QueueManager {
 
   private void shuffleQueue() {
     Track currentTrack = queue.get(position);
-    Collections.shuffle(queue);
+    Collections.shuffle(queue, random);
     position = Math.max(0, queue.indexOf(currentTrack));
   }
 

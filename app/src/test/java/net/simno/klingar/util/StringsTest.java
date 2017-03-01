@@ -17,24 +17,24 @@ package net.simno.klingar.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class StringsTest {
 
   @Test public void nullIsBlank() {
-    assertTrue(Strings.isBlank(null));
+    assertThat(Strings.isBlank(null), is(true));
   }
 
   @Test public void emptyIsBlank() {
-    assertTrue(Strings.isBlank(""));
+    assertThat(Strings.isBlank(""), is(true));
   }
 
   @Test public void spaceIsBlank() {
-    assertTrue(Strings.isBlank(" "));
+    assertThat(Strings.isBlank(" "), is(true));
   }
 
   @Test public void stringIsNotBlank() {
-    assertFalse(Strings.isBlank("not blank "));
+    assertThat(Strings.isBlank("not blank "), is(false));
   }
 }

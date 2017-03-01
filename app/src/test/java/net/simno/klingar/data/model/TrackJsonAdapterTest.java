@@ -24,11 +24,11 @@ import java.io.IOException;
 
 import okhttp3.HttpUrl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TrackJsonAdapterTest {
+
   private final Moshi moshi = new Moshi.Builder().build();
   private final JsonAdapter<Track> adapter = Track.jsonAdapter(moshi);
 
@@ -36,7 +36,7 @@ public class TrackJsonAdapterTest {
     Track exptected = createTrack();
     String json = adapter.toJson(exptected);
     Track actual = adapter.fromJson(json);
-    assertThat(actual, is(equalTo(exptected)));
+    assertThat(actual, is(exptected));
   }
 
   private Track createTrack() {

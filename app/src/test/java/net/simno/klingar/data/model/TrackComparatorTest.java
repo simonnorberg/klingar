@@ -20,7 +20,9 @@ import org.junit.Test;
 
 import okhttp3.HttpUrl;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.OrderingComparison.comparesEqualTo;
+import static org.hamcrest.number.OrderingComparison.lessThan;
 
 public class TrackComparatorTest {
 
@@ -34,14 +36,14 @@ public class TrackComparatorTest {
     Track track1 = createTrackWithIndex(10);
     Track track2 = createTrackWithIndex(11);
     int result = comparator.compare(track1, track2);
-    assertTrue(result < 0);
+    assertThat(result, lessThan(0));
   }
 
   @Test public void compareTracksSameIndex() {
     Track track1 = createTrackWithIndex(10);
     Track track2 = createTrackWithIndex(10);
     int result = comparator.compare(track1, track2);
-    assertTrue(result == 0);
+    assertThat(result, comparesEqualTo(0));
   }
 
   private Track createTrackWithIndex(int index) {

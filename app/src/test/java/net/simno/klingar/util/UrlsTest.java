@@ -19,7 +19,8 @@ import org.junit.Test;
 
 import okhttp3.HttpUrl;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 public class UrlsTest {
 
@@ -27,18 +28,18 @@ public class UrlsTest {
     String expected = "https://plex.tv/library/1337/metadata";
     HttpUrl url = Urls.addPathToUrl(HttpUrl.parse("https://plex.tv/"), "/library/1337/metadata");
     String actual = url.toString();
-    assertEquals(expected, actual);
+    assertThat(actual, is(expected));
   }
 
   @Test public void createImageTranscodeUrl() {
     String expected = "https://plex.tv/photo/:/transcode?url=imageKey";
     String actual = Urls.getTranscodeUrl(HttpUrl.parse("https://plex.tv/"), "imageKey");
-    assertEquals(expected, actual);
+    assertThat(actual, is(expected));
   }
 
   @Test public void addTranscodeDimensionParamsToUrl() {
     String expected = "https://plex.tv/photo/:/transcode?url=imageKey&width=8&height=4";
     String actual = Urls.addTranscodeParams("https://plex.tv/photo/:/transcode?url=imageKey", 8, 4);
-    assertEquals(expected, actual);
+    assertThat(actual, is(expected));
   }
 }

@@ -23,8 +23,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoginManagerTest {
@@ -39,12 +39,12 @@ public class LoginManagerTest {
 
   @Test public void login() {
     loginManager.login("testToken");
-    assertFalse(loginManager.isLoggedOut());
+    assertThat(loginManager.isLoggedOut(), is(false));
   }
 
   @Test public void logout() {
     loginManager.login("testToken");
     loginManager.logout();
-    assertTrue(loginManager.isLoggedOut());
+    assertThat(loginManager.isLoggedOut(), is(true));
   }
 }
