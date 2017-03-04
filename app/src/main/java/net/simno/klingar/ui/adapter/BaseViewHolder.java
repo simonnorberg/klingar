@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Simon Norberg
+ * Copyright (C) 2017 Simon Norberg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,17 @@
 package net.simno.klingar.ui.adapter;
 
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.TextView;
 
-import net.simno.klingar.R;
-import net.simno.klingar.data.model.MediaType;
+import butterknife.ButterKnife;
 
-import butterknife.BindView;
+abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
-final class MediaTypeViewHolder extends ClickableViewHolder<MediaType> {
-
-  @BindView(R.id.media_type_title) TextView title;
-
-  MediaTypeViewHolder(View view, ViewHolderListener listener) {
-    super(view, listener);
+  BaseViewHolder(View view) {
+    super(view);
+    ButterKnife.bind(this, view);
   }
 
-  @Override void bindModel(@NonNull MediaType mediaType) {
-    title.setText(mediaType.title());
-  }
+  abstract void bindModel(@NonNull T model);
 }

@@ -36,7 +36,8 @@ import static net.simno.klingar.data.Type.HEADER;
 import static net.simno.klingar.data.Type.MEDIA_TYPE;
 import static net.simno.klingar.data.Type.TRACK;
 
-public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+    implements ClickableViewHolder.ViewHolderListener {
 
   private final OnPlexItemClickListener listener;
   private List<PlexItem> items = new ArrayList<>();
@@ -49,17 +50,14 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
     switch (viewType) {
       case ARTIST:
-        return new ArtistViewHolder(inflater.inflate(R.layout.item_artist, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+        return new ArtistViewHolder(inflater.inflate(R.layout.item_artist, parent, false), this);
       case ALBUM:
-        return new AlbumViewHolder(inflater.inflate(R.layout.item_album, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+        return new AlbumViewHolder(inflater.inflate(R.layout.item_album, parent, false), this);
       case TRACK:
-        return new TrackViewHolder(inflater.inflate(R.layout.item_track, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+        return new TrackViewHolder(inflater.inflate(R.layout.item_track, parent, false), this);
       case MEDIA_TYPE:
         return new MediaTypeViewHolder(inflater.inflate(R.layout.item_media_type, parent, false),
-            position -> listener.onPlexItemClicked(items.get(position)));
+            this);
       case HEADER:
         return new HeaderViewHolder(inflater.inflate(R.layout.item_header, parent, false));
       default:
@@ -106,6 +104,10 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     } else {
       return HEADER;
     }
+  }
+
+  @Override public void onClick(int position) {
+    listener.onPlexItemClicked(items.get(position));
   }
 
   public void addAll(List<PlexItem> items) {

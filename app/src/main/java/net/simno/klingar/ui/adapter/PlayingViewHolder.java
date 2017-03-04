@@ -28,11 +28,11 @@ import net.simno.klingar.data.model.Track;
 
 final class PlayingViewHolder extends QueueViewHolder {
 
-  PlayingViewHolder(View view, OnClickListener listener) {
+  PlayingViewHolder(View view, ViewHolderListener listener) {
     super(view, listener);
   }
 
-  void bindModel(@NonNull Track track) {
+  @Override void bindModel(@NonNull Track track) {
     super.bindModel(track);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       AnimatedVectorDrawable avd = (AnimatedVectorDrawable) ContextCompat.getDrawable(

@@ -29,18 +29,18 @@ import net.simno.klingar.util.Urls;
 import butterknife.BindDimen;
 import butterknife.BindView;
 
-final class AlbumViewHolder extends ClickableViewHolder {
+final class AlbumViewHolder extends ClickableViewHolder<Album> {
 
   @BindView(R.id.album_thumb) ImageView thumb;
   @BindView(R.id.album_title) TextView title;
   @BindView(R.id.album_subtitle) TextView subtitle;
   @BindDimen(R.dimen.item_height) int height;
 
-  AlbumViewHolder(View view, OnClickListener listener) {
+  AlbumViewHolder(View view, ViewHolderListener listener) {
     super(view, listener);
   }
 
-  void bindModel(@NonNull Album album) {
+  @Override void bindModel(@NonNull Album album) {
     title.setText(album.title());
 
     //noinspection SuspiciousNameCombination

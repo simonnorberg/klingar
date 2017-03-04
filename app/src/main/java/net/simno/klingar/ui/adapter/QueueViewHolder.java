@@ -25,17 +25,17 @@ import net.simno.klingar.data.model.Track;
 
 import butterknife.BindView;
 
-class QueueViewHolder extends ClickableViewHolder {
+class QueueViewHolder extends ClickableViewHolder<Track> {
 
   @BindView(R.id.track_title) TextView title;
   @BindView(R.id.track_subtitle) TextView subtitle;
   @BindView(R.id.track_duration) TextView duration;
 
-  QueueViewHolder(View view, OnClickListener listener) {
+  QueueViewHolder(View view, ViewHolderListener listener) {
     super(view, listener);
   }
 
-  void bindModel(@NonNull Track track) {
+  @Override void bindModel(@NonNull Track track) {
     title.setText(track.title());
     subtitle.setText(track.artistTitle());
     duration.setText(DateUtils.formatElapsedTime(track.duration() / 1000));

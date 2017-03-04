@@ -16,7 +16,6 @@
 package net.simno.klingar.ui.adapter;
 
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -24,18 +23,16 @@ import net.simno.klingar.R;
 import net.simno.klingar.data.model.Header;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
-final class HeaderViewHolder extends RecyclerView.ViewHolder {
+final class HeaderViewHolder extends BaseViewHolder<Header> {
 
   @BindView(R.id.header_title) TextView title;
 
   HeaderViewHolder(View view) {
     super(view);
-    ButterKnife.bind(this, view);
   }
 
-  void bindModel(@NonNull Header header) {
+  @Override void bindModel(@NonNull Header header) {
     title.setText(header.title());
   }
 }

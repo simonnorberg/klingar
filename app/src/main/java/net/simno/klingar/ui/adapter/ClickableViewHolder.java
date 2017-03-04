@@ -15,22 +15,18 @@
  */
 package net.simno.klingar.ui.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-
-import butterknife.ButterKnife;
 
 /**
  * ClickableViewHolder adds a click listener to the default ViewHolder
  */
-class ClickableViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+abstract class ClickableViewHolder<T> extends BaseViewHolder<T> implements View.OnClickListener {
 
-  private final OnClickListener listener;
+  private final ViewHolderListener listener;
 
-  ClickableViewHolder(View view, OnClickListener listener) {
+  ClickableViewHolder(View view, ViewHolderListener listener) {
     super(view);
     this.listener = listener;
-    ButterKnife.bind(this, view);
     view.setOnClickListener(this);
   }
 
@@ -41,7 +37,7 @@ class ClickableViewHolder extends RecyclerView.ViewHolder implements View.OnClic
     }
   }
 
-  interface OnClickListener {
+  interface ViewHolderListener {
     void onClick(int position);
   }
 }

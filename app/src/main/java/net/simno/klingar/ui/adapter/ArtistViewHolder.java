@@ -30,17 +30,17 @@ import net.simno.klingar.util.Urls;
 import butterknife.BindDimen;
 import butterknife.BindView;
 
-final class ArtistViewHolder extends ClickableViewHolder {
+final class ArtistViewHolder extends ClickableViewHolder<Artist> {
 
   @BindView(R.id.artist_thumb) ImageView thumb;
   @BindView(R.id.artist_title) TextView title;
   @BindDimen(R.dimen.item_height) int height;
 
-  ArtistViewHolder(View view, OnClickListener listener) {
+  ArtistViewHolder(View view, ViewHolderListener listener) {
     super(view, listener);
   }
 
-  void bindModel(@NonNull Artist artist) {
+  @Override void bindModel(@NonNull Artist artist) {
     title.setText(artist.title());
 
     //noinspection SuspiciousNameCombination

@@ -28,7 +28,8 @@ import java.util.List;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 
-public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
+public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder>
+    implements ClickableViewHolder.ViewHolderListener {
 
   private final OnTrackClickListener listener;
   private List<Track> items = new ArrayList<>();
@@ -41,11 +42,9 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
   @Override public QueueViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
     if (viewType == STATE_PLAYING) {
-      return new PlayingViewHolder(inflater.inflate(R.layout.item_playing, parent, false),
-          position -> listener.onTrackClicked(items.get(position)));
+      return new PlayingViewHolder(inflater.inflate(R.layout.item_playing, parent, false), this);
     }
-    return new QueueViewHolder(inflater.inflate(R.layout.item_queue, parent, false),
-        position -> listener.onTrackClicked(items.get(position)));
+    return new QueueViewHolder(inflater.inflate(R.layout.item_queue, parent, false), this);
   }
 
   @Override public void onBindViewHolder(QueueViewHolder holder, int position) {
@@ -58,6 +57,10 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder> {
 
   @Override public int getItemViewType(int position) {
     return this.position == position ? STATE_PLAYING : STATE_PAUSED;
+  }
+
+  @Override public void onClick(int position) {
+    listener.onTrackClicked(items.get(position));
   }
 
   public void setQueue(List<Track> queue, int position) {
