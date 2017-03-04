@@ -15,10 +15,7 @@
  */
 package net.simno.klingar.ui.widget;
 
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-
-import net.simno.klingar.ui.ToolbarOwner;
 
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
@@ -26,9 +23,6 @@ import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 public class BackgroundScrollListener extends DistanceScrollListener {
 
   private static final int ALPHA_MAX = 0xff;
-
-  private final BackgroundLayout backgroundLayout;
-  private final ToolbarOwner toolbarOwner;
 
   /**
    * The distance when backgroundlayout is visible
@@ -45,12 +39,10 @@ public class BackgroundScrollListener extends DistanceScrollListener {
    */
   private final float fadeStop;
 
-  public BackgroundScrollListener(int orientation, @NonNull BackgroundLayout backgroundLayout,
-                                  @NonNull ToolbarOwner toolbarOwner, int backgroundHeight,
-                                  int toolbarHeight) {
+  private Controller controller;
+
+  public BackgroundScrollListener(int orientation, int backgroundHeight, int toolbarHeight) {
     super(orientation);
-    this.backgroundLayout = backgroundLayout;
-    this.toolbarOwner = toolbarOwner;
     this.visibleDistance = backgroundHeight - toolbarHeight;
     this.fadeStart = visibleDistance - toolbarHeight;
     this.fadeStop = visibleDistance - fadeStart;
@@ -58,28 +50,32 @@ public class BackgroundScrollListener extends DistanceScrollListener {
 
   @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
     super.onScrolled(recyclerView, dx, dy);
+    if (controller == null) {
+      return;
+    }
 
-    backgroundLayout.onScrolled(distance);
+    controller.onScrolled(distance);
 
-    ToolbarOwner.Config config = toolbarOwner.getConfig();
+    int titleAlpha = controller.getTitleAlpha();
 
     if (distance < fadeStart) {
-      if (config.titleAlpha() != TITLE_GONE) {
-        toolbarOwner.setConfig(config.toBuilder()
-            .background(false)
-            .titleAlpha(TITLE_GONE)
-            .build());
+      if (titleAlpha != TITLE_GONE) {
+        controller.setConfig(TITLE_GONE, false);
       }
     } else if (distance < visibleDistance) {
-      toolbarOwner.setConfig(config.toBuilder()
-          .background(false)
-          .titleAlpha((int) (((distance - fadeStart) / fadeStop) * ALPHA_MAX))
-          .build());
-    } else if (config.titleAlpha() != TITLE_VISIBLE) {
-      toolbarOwner.setConfig(config.toBuilder()
-          .background(true)
-          .titleAlpha(TITLE_VISIBLE)
-          .build());
+      controller.setConfig((int) (((distance - fadeStart) / fadeStop) * ALPHA_MAX), false);
+    } else if (titleAlpha != TITLE_VISIBLE) {
+      controller.setConfig(TITLE_VISIBLE, true);
     }
+  }
+
+  public void setController(Controller controller) {
+    this.controller = controller;
+  }
+
+  public interface Controller {
+    void onScrolled(int distance);
+    int getTitleAlpha();
+    void setConfig(int titleAlpha, boolean background);
   }
 }

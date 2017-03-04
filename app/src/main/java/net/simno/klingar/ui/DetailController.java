@@ -71,7 +71,7 @@ import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 
 public class DetailController extends BaseController implements
-    MusicAdapter.OnPlexItemClickListener {
+    MusicAdapter.OnPlexItemClickListener, BackgroundScrollListener.Controller {
 
   private final MusicAdapter adapter;
   @BindView(R.id.recycler_view) RecyclerView recyclerView;
@@ -89,6 +89,7 @@ public class DetailController extends BaseController implements
   @Inject QueueManager queueManager;
   @Inject MusicController musicController;
   @Inject Rx rx;
+  private BackgroundLayout backgroundLayout;
   private DistanceScrollListener scrollListener;
   private PlexItem plexItem;
   private boolean itemsLoaded;
@@ -207,6 +208,11 @@ public class DetailController extends BaseController implements
     recyclerView.setAdapter(null);
   }
 
+  @Override protected void onDestroyView(@NonNull View view) {
+    super.onDestroyView(view);
+    backgroundLayout = null;
+  }
+
   @Override public void onPlexItemClicked(PlexItem plexItem) {
     if (plexItem instanceof Album) {
       goToDetails(plexItem);
@@ -219,6 +225,23 @@ public class DetailController extends BaseController implements
     getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
   }
 
+  @Override public void onScrolled(int distance) {
+    if (backgroundLayout != null) {
+      backgroundLayout.onScrolled(distance);
+    }
+  }
+
+  @Override public int getTitleAlpha() {
+    return toolbarOwner.getConfig().titleAlpha();
+  }
+
+  @Override public void setConfig(int titleAlpha, boolean background) {
+    toolbarOwner.setConfig(toolbarOwner.getConfig().toBuilder()
+        .background(background)
+        .titleAlpha(titleAlpha)
+        .build());
+  }
+
   private void showBackgroundImage(String imageTranscodeUri, int viewType) {
     // Add background image and layout programmatically
     ImageView background = new SquareImageView(getActivity());
@@ -226,7 +249,7 @@ public class DetailController extends BaseController implements
     params.addRule(RelativeLayout.CENTER_IN_PARENT);
     background.setLayoutParams(params);
 
-    BackgroundLayout backgroundLayout = new BackgroundLayout(getActivity(), background,
+    backgroundLayout = new BackgroundLayout(getActivity(), background,
         backgroundHeight - toolbarHeight);
     backgroundLayout.setBackgroundColor(primaryColor);
 
@@ -252,8 +275,10 @@ public class DetailController extends BaseController implements
         recyclerView.getPaddingEnd(), recyclerView.getPaddingBottom());
 
     // Add scroll listener that handles toolbar fading and background parallax effects
-    scrollListener = new BackgroundScrollListener(ORIENTATION_PORTRAIT, backgroundLayout,
-        toolbarOwner, backgroundHeight, toolbarHeight);
+    BackgroundScrollListener backgroundScrollListener =
+        new BackgroundScrollListener(ORIENTATION_PORTRAIT, backgroundHeight, toolbarHeight);
+    backgroundScrollListener.setController(this);
+    scrollListener = backgroundScrollListener;
     recyclerView.addOnScrollListener(scrollListener);
   }
 
