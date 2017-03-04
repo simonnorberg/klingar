@@ -125,7 +125,6 @@ public class DetailController extends BaseController implements
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     recyclerView.setHasFixedSize(true);
     recyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
-    recyclerView.setAdapter(adapter);
 
     contentLoading.hide();
 
@@ -184,6 +183,7 @@ public class DetailController extends BaseController implements
 
   @Override protected void onAttach(@NonNull View view) {
     super.onAttach(view);
+    recyclerView.setAdapter(adapter);
     if (!itemsLoaded) {
       if (plexItem instanceof Artist) {
         getArtistItems((Artist) plexItem);
@@ -204,6 +204,7 @@ public class DetailController extends BaseController implements
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
     recyclerView.clearOnScrollListeners();
+    recyclerView.setAdapter(null);
   }
 
   @Override public void onPlexItemClicked(PlexItem plexItem) {

@@ -127,7 +127,6 @@ public class BrowserController extends BaseController implements
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     recyclerView.setHasFixedSize(true);
     recyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
-    recyclerView.setAdapter(adapter);
 
     contentLoading.hide();
 
@@ -136,6 +135,7 @@ public class BrowserController extends BaseController implements
 
   @Override protected void onAttach(@NonNull View view) {
     super.onAttach(view);
+    recyclerView.setAdapter(adapter);
     if (mediaType == null) {
       if (!serverRefreshed) {
         serverRefreshed = true;
@@ -156,6 +156,7 @@ public class BrowserController extends BaseController implements
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
     recyclerView.clearOnScrollListeners();
+    recyclerView.setAdapter(null);
   }
 
   @Override public void endReached() {

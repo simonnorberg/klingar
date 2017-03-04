@@ -131,7 +131,6 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
     queueRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     queueRecyclerView.setHasFixedSize(true);
     queueRecyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
-    queueRecyclerView.setAdapter(queueAdapter);
 
     queueRecyclerView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     if (isQueueVisible) {
@@ -162,7 +161,13 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
 
   @Override protected void onAttach(@NonNull View view) {
     super.onAttach(view);
+    queueRecyclerView.setAdapter(queueAdapter);
     observePlaybackState();
+  }
+
+  @Override protected void onDetach(@NonNull View view) {
+    super.onDetach(view);
+    queueRecyclerView.setAdapter(null);
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
