@@ -22,8 +22,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bluelinelabs.conductor.ControllerChangeHandler;
+import com.bluelinelabs.conductor.ControllerChangeType;
 import com.bluelinelabs.conductor.rxlifecycle2.RxController;
 
+import net.simno.klingar.KlingarApp;
 import net.simno.klingar.util.Rx;
 
 import butterknife.ButterKnife;
@@ -34,6 +37,7 @@ abstract class BaseController extends RxController {
 
   CompositeDisposable disposables;
   private Unbinder unbinder;
+  private boolean hasExited;
 
   public BaseController(Bundle args) {
     super(args);
@@ -64,6 +68,23 @@ abstract class BaseController extends RxController {
     super.onDestroyView(view);
     unbinder.unbind();
     unbinder = null;
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    if (hasExited) {
+      KlingarApp.get(getActivity()).refWatcher().watch(this);
+    }
+  }
+
+  @Override
+  protected void onChangeEnded(@NonNull ControllerChangeHandler changeHandler,
+                               @NonNull ControllerChangeType changeType) {
+    super.onChangeEnded(changeHandler, changeType);
+    hasExited = !changeType.isEnter;
+    if (isDestroyed()) {
+      KlingarApp.get(getActivity()).refWatcher().watch(this);
+    }
   }
 
   void showToast(int resId) {

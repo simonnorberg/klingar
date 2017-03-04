@@ -64,6 +64,12 @@ limitations under the License.
     <license>BSD 3-Clause License</license>
   </notice>
   <notice>
+    <name>LeakCanary</name>
+    <url>https://github.com/square/leakcanary</url>
+    <copyright>Copyright 2015 Square, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
     <name>Moshi</name>
     <url>https://github.com/square/moshi</url>
     <copyright>Copyright 2015 Square, Inc.</copyright>
@@ -79,6 +85,12 @@ limitations under the License.
     <name>Retrofit</name>
     <url>https://github.com/square/retrofit</url>
     <copyright>Copyright 2013 Square, Inc.</copyright>
+    <license>Apache Software License 2.0</license>
+  </notice>
+  <notice>
+    <name>Retrolambda</name>
+    <url>https://github.com/evant/gradle-retrolambda</url>
+    <copyright>Copyright 2013 Evan Tatarka</copyright>
     <license>Apache Software License 2.0</license>
   </notice>
   <notice>
