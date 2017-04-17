@@ -15,7 +15,6 @@
  */
 package net.simno.klingar.ui;
 
-import android.animation.ObjectAnimator;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -32,7 +31,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -60,6 +58,8 @@ import butterknife.OnClick;
 
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
+import static net.simno.klingar.util.Views.gone;
+import static net.simno.klingar.util.Views.visible;
 
 public class PlayerController extends BaseController implements QueueAdapter.OnTrackClickListener {
 
@@ -127,18 +127,16 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
         .build());
 
     setHasOptionsMenu(true);
-
     queueRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     queueRecyclerView.setHasFixedSize(true);
     queueRecyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
 
-    queueRecyclerView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
     if (isQueueVisible) {
-      queueRecyclerView.animate().alpha(1).setDuration(0).withLayer();
-      background.setImageAlpha(0);
+      gone(background);
+      visible(queueRecyclerView);
     } else {
-      queueRecyclerView.animate().alpha(0).setDuration(0).withLayer();
-      background.setImageAlpha(255);
+      visible(background);
+      gone(queueRecyclerView);
     }
 
     seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -183,23 +181,15 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
     actionView.setOnClickListener(view -> {
       actionView.setImageState(isQueueVisible ? QUEUE : TRACK, true);
       actionView.setContentDescription(isQueueVisible ? descQueue : descTrack);
-      toggleQueue();
+      if (isQueueVisible) {
+        visible(background);
+        gone(queueRecyclerView);
+      } else {
+        gone(background);
+        visible(queueRecyclerView);
+      }
+      isQueueVisible = !isQueueVisible;
     });
-  }
-
-  private void toggleQueue() {
-    if (isQueueVisible) {
-      queueRecyclerView.animate().alpha(0).setDuration(200).withLayer();
-      background.setImageAlpha(255);
-      int width = background.getWidth();
-      ViewAnimationUtils.createCircularReveal(background, width, 0, 100, width).start();
-    } else {
-      ObjectAnimator.ofInt(background, "imageAlpha", 0).setDuration(200).start();
-      queueRecyclerView.animate().alpha(1).setDuration(0).withLayer();
-      int height = queueRecyclerView.getHeight();
-      ViewAnimationUtils.createCircularReveal(queueRecyclerView, 0, height, 100, height).start();
-    }
-    isQueueVisible = !isQueueVisible;
   }
 
   @OnClick(R.id.player_shuffle) void onClickShuffle() {
