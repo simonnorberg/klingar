@@ -88,12 +88,6 @@ limitations under the License.
     <license>Apache Software License 2.0</license>
   </notice>
   <notice>
-    <name>Retrolambda</name>
-    <url>https://github.com/evant/gradle-retrolambda</url>
-    <copyright>Copyright 2013 Evan Tatarka</copyright>
-    <license>Apache Software License 2.0</license>
-  </notice>
-  <notice>
     <name>RxAndroid</name>
     <url>https://github.com/ReactiveX/RxAndroid</url>
     <copyright>Copyright 2015 The RxAndroid authors</copyright>
