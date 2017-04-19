@@ -37,7 +37,7 @@ afterEvaluate {
 }
 
 def versionMajor = 0
-def versionMinor = 6
+def versionMinor = 7
 def versionPatch = 0
 
 def gitSha() {

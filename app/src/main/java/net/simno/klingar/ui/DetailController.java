@@ -20,22 +20,22 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
-import com.bumptech.glide.Glide;
+import com.google.android.gms.cast.framework.CastButtonFactory;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
-import net.simno.klingar.data.Type;
 import net.simno.klingar.data.model.Album;
 import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.PlexItem;
@@ -44,53 +44,31 @@ import net.simno.klingar.data.repository.MusicRepository;
 import net.simno.klingar.playback.MusicController;
 import net.simno.klingar.playback.QueueManager;
 import net.simno.klingar.ui.adapter.MusicAdapter;
-import net.simno.klingar.ui.widget.BackgroundLayout;
-import net.simno.klingar.ui.widget.BackgroundScrollListener;
-import net.simno.klingar.ui.widget.CircleImageViewTarget;
-import net.simno.klingar.ui.widget.DistanceScrollListener;
 import net.simno.klingar.ui.widget.DividerItemDecoration;
-import net.simno.klingar.ui.widget.SquareImageView;
 import net.simno.klingar.util.Rx;
-import net.simno.klingar.util.Urls;
 
 import javax.inject.Inject;
 
-import butterknife.BindColor;
-import butterknife.BindDimen;
 import butterknife.BindDrawable;
 import butterknife.BindView;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.data.Key.PLEX_ITEM;
-import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
-import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
 
 public class DetailController extends BaseController implements
-    MusicAdapter.OnPlexItemClickListener, BackgroundScrollListener.Controller {
+    MusicAdapter.OnPlexItemClickListener {
 
   private final MusicAdapter adapter;
   @BindView(R.id.recycler_view) RecyclerView recyclerView;
   @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
-  @BindView(R.id.detail_container) RelativeLayout detailContainer;
   @BindView(R.id.miniplayer_container) FrameLayout miniplayerContainer;
-  @BindColor(R.color.primary) int primaryColor;
-  @BindDimen(R.dimen.background_height) int backgroundHeight;
-  @BindDimen(R.dimen.background_image_width) int imageWidth;
-  @BindDimen(R.dimen.background_image_height) int imageHeight;
-  @BindDimen(R.dimen.toolbar_height) int toolbarHeight;
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
-  @Inject ToolbarOwner toolbarOwner;
   @Inject MusicRepository musicRepository;
   @Inject QueueManager queueManager;
   @Inject MusicController musicController;
   @Inject Rx rx;
-  private BackgroundLayout backgroundLayout;
-  private DistanceScrollListener scrollListener;
   private PlexItem plexItem;
   private boolean itemsLoaded;
 
@@ -115,11 +93,18 @@ public class DetailController extends BaseController implements
 
     plexItem = getArgs().getParcelable(PLEX_ITEM);
 
-    if (getResources() != null) {
-      if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
-        createPortraitView();
-      } else {
-        createLandscapeView();
+    ActionBar actionBar = null;
+    if (getActivity() != null) {
+      actionBar = ((KlingarActivity) getActivity()).getSupportActionBar();
+    }
+    if (actionBar != null) {
+      setHasOptionsMenu(true);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+      actionBar.setDisplayShowTitleEnabled(true);
+      if (plexItem instanceof Artist) {
+        actionBar.setTitle(((Artist) plexItem).title());
+      } else if (plexItem instanceof Album) {
+        actionBar.setTitle(((Album) plexItem).title());
       }
     }
 
@@ -130,56 +115,6 @@ public class DetailController extends BaseController implements
     contentLoading.hide();
 
     return view;
-  }
-
-  private void createPortraitView() {
-    ToolbarOwner.Config.Builder builder = ToolbarOwner.Config.builder()
-        .background(false)
-        .backNavigation(true)
-        .titleAlpha(TITLE_GONE);
-
-    if (plexItem instanceof Artist) {
-      Artist artist = (Artist) plexItem;
-      toolbarOwner.setConfig(builder
-          .title(artist.title())
-          .build());
-      showBackgroundImage(artist.art(), Type.ARTIST);
-    } else if (plexItem instanceof Album) {
-      Album album = (Album) plexItem;
-      toolbarOwner.setConfig(builder
-          .title(album.title())
-          .build());
-      showBackgroundImage(album.thumb(), Type.ALBUM);
-    }
-  }
-
-  private void createLandscapeView() {
-    ToolbarOwner.Config.Builder builder = ToolbarOwner.Config.builder()
-        .background(true)
-        .backNavigation(true)
-        .titleAlpha(TITLE_VISIBLE);
-
-    if (plexItem instanceof Artist) {
-      Artist artist = (Artist) plexItem;
-      toolbarOwner.setConfig(builder
-          .title(artist.title())
-          .build());
-    } else if (plexItem instanceof Album) {
-      Album album = (Album) plexItem;
-      toolbarOwner.setConfig(builder
-          .title(album.title())
-          .build());
-    }
-
-    scrollListener = new DistanceScrollListener(ORIENTATION_LANDSCAPE);
-    recyclerView.addOnScrollListener(scrollListener);
-  }
-
-  @Override protected void onRestoreViewState(@NonNull View view, @NonNull Bundle savedViewState) {
-    super.onRestoreViewState(view, savedViewState);
-    if (scrollListener != null) {
-      scrollListener.onRestoreViewState(savedViewState);
-    }
   }
 
   @Override protected void onAttach(@NonNull View view) {
@@ -195,22 +130,17 @@ public class DetailController extends BaseController implements
     observePlayback();
   }
 
-  @Override protected void onSaveViewState(@NonNull View view, @NonNull Bundle outState) {
-    super.onSaveViewState(view, outState);
-    if (scrollListener != null) {
-      scrollListener.onSaveViewState(outState);
-    }
-  }
-
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
     recyclerView.clearOnScrollListeners();
     recyclerView.setAdapter(null);
   }
 
-  @Override protected void onDestroyView(@NonNull View view) {
-    super.onDestroyView(view);
-    backgroundLayout = null;
+  @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+    super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.menu_main, menu);
+    CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+        R.id.media_route_menu_item);
   }
 
   @Override public void onPlexItemClicked(PlexItem plexItem) {
@@ -223,63 +153,6 @@ public class DetailController extends BaseController implements
 
   @OnClick(R.id.miniplayer_container) void onMiniplayerClicked() {
     getRouter().pushController(RouterTransaction.with(new PlayerController(null)));
-  }
-
-  @Override public void onScrolled(int distance) {
-    if (backgroundLayout != null) {
-      backgroundLayout.onScrolled(distance);
-    }
-  }
-
-  @Override public int getTitleAlpha() {
-    return toolbarOwner.getConfig().titleAlpha();
-  }
-
-  @Override public void setConfig(int titleAlpha, boolean background) {
-    toolbarOwner.setConfig(toolbarOwner.getConfig().toBuilder()
-        .background(background)
-        .titleAlpha(titleAlpha)
-        .build());
-  }
-
-  private void showBackgroundImage(String imageTranscodeUri, int viewType) {
-    // Add background image and layout programmatically
-    ImageView background = new SquareImageView(getActivity());
-    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(imageWidth, imageHeight);
-    params.addRule(RelativeLayout.CENTER_IN_PARENT);
-    background.setLayoutParams(params);
-
-    backgroundLayout = new BackgroundLayout(getActivity(), background,
-        backgroundHeight - toolbarHeight);
-    backgroundLayout.setBackgroundColor(primaryColor);
-
-    detailContainer.addView(backgroundLayout, 0,
-        new RelativeLayout.LayoutParams(MATCH_PARENT, backgroundHeight));
-
-    // Load background image into image view
-    if (viewType == Type.ARTIST) {
-      Glide.with(getActivity())
-          .load(Urls.addTranscodeParams(imageTranscodeUri, imageWidth, imageHeight))
-          .asBitmap()
-          .centerCrop()
-          .into(new CircleImageViewTarget(background));
-    } else {
-      Glide.with(getActivity())
-          .load(Urls.addTranscodeParams(imageTranscodeUri, imageWidth, imageHeight))
-          .centerCrop()
-          .into(background);
-    }
-
-    // Set recyclerview top padding to background height
-    recyclerView.setPadding(recyclerView.getPaddingStart(), backgroundHeight,
-        recyclerView.getPaddingEnd(), recyclerView.getPaddingBottom());
-
-    // Add scroll listener that handles toolbar fading and background parallax effects
-    BackgroundScrollListener backgroundScrollListener =
-        new BackgroundScrollListener(ORIENTATION_PORTRAIT, backgroundHeight, toolbarHeight);
-    backgroundScrollListener.setController(this);
-    scrollListener = backgroundScrollListener;
-    recyclerView.addOnScrollListener(scrollListener);
   }
 
   private void getArtistItems(Artist artist) {

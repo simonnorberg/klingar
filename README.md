@@ -11,4 +11,4 @@ Note: Using Klingar requires a Plex account. Local server discovery is not suppo
 ![Screenshot](https://raw.github.com/simonnorberg/klingar/master/screenshots/klingar-player-small.png)
 
 ![Screenshot](https://raw.github.com/simonnorberg/klingar/master/screenshots/klingar-queue-small.png)
-![Screenshot](https://raw.github.com/simonnorberg/klingar/master/screenshots/klingar-album-small.png)
+![Screenshot](https://raw.github.com/simonnorberg/klingar/master/screenshots/klingar-artist-small.png)

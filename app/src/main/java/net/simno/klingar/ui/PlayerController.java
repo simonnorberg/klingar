@@ -23,6 +23,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -37,6 +38,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.cast.framework.CastButtonFactory;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
@@ -57,7 +59,6 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
-import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.util.Views.gone;
 import static net.simno.klingar.util.Views.visible;
 
@@ -94,7 +95,6 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   @BindString(R.string.description_repeat_one) String descRepeatOne;
   @BindString(R.string.description_queue) String descQueue;
   @BindString(R.string.description_track) String descTrack;
-  @Inject ToolbarOwner toolbarOwner;
   @Inject QueueManager queueManager;
   @Inject MusicController musicController;
   @Inject Rx rx;
@@ -120,13 +120,16 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
     View view = super.onCreateView(inflater, container);
 
-    toolbarOwner.setConfig(ToolbarOwner.Config.builder()
-        .background(false)
-        .backNavigation(true)
-        .titleAlpha(TITLE_GONE)
-        .build());
+    ActionBar actionBar = null;
+    if (getActivity() != null) {
+      actionBar = ((KlingarActivity) getActivity()).getSupportActionBar();
+    }
+    if (actionBar != null) {
+      setHasOptionsMenu(true);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+      actionBar.setDisplayShowTitleEnabled(false);
+    }
 
-    setHasOptionsMenu(true);
     queueRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     queueRecyclerView.setHasFixedSize(true);
     queueRecyclerView.addItemDecoration(new DividerItemDecoration(itemDivider));
@@ -169,8 +172,11 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
   }
 
   @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-    inflater.inflate(R.menu.menu_player, menu);
     super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.menu_main, menu);
+    inflater.inflate(R.menu.menu_player, menu);
+    CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+        R.id.media_route_menu_item);
   }
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {

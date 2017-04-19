@@ -47,7 +47,6 @@ import butterknife.BindView;
 import butterknife.OnEditorAction;
 
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
-import static net.simno.klingar.ui.ToolbarOwner.TITLE_GONE;
 import static net.simno.klingar.util.Views.invisible;
 import static net.simno.klingar.util.Views.visible;
 
@@ -61,7 +60,6 @@ public class LoginController extends BaseController {
   @BindString(R.string.invalid_username) String invalidUsername;
   @BindString(R.string.invalid_password) String invalidPassword;
 
-  @Inject ToolbarOwner toolbarOwner;
   @Inject PlexService plex;
   @Inject LoginManager loginManager;
   @Inject InputMethodManager imm;
@@ -84,11 +82,6 @@ public class LoginController extends BaseController {
   @NonNull @Override
   protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
     View view = super.onCreateView(inflater, container);
-    toolbarOwner.setConfig(ToolbarOwner.Config.builder()
-        .background(false)
-        .backNavigation(false)
-        .titleAlpha(TITLE_GONE)
-        .build());
     usernameEdit.requestFocus();
     contentLoading.hide();
     return view;

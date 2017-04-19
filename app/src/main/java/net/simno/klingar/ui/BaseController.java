@@ -17,6 +17,8 @@ package net.simno.klingar.ui;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,17 +27,24 @@ import android.widget.Toast;
 import com.bluelinelabs.conductor.ControllerChangeHandler;
 import com.bluelinelabs.conductor.ControllerChangeType;
 import com.bluelinelabs.conductor.rxlifecycle2.RxController;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastStateListener;
 
 import net.simno.klingar.KlingarApp;
+import net.simno.klingar.R;
 import net.simno.klingar.util.Rx;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
 
 abstract class BaseController extends RxController {
 
+  private final CastStateListener castStateListener = newState -> { };
+  @Nullable @BindView(R.id.toolbar) Toolbar toolbar;
   CompositeDisposable disposables;
+  private CastContext castContext;
   private Unbinder unbinder;
   private boolean hasExited;
 
@@ -51,21 +60,28 @@ abstract class BaseController extends RxController {
     injectDependencies();
     View view = inflater.inflate(getLayoutResource(), container, false);
     unbinder = ButterKnife.bind(this, view);
+    if (getActivity() != null && toolbar != null) {
+      ((KlingarActivity) getActivity()).setSupportActionBar(toolbar);
+    }
+    castContext = CastContext.getSharedInstance(getActivity());
     return view;
   }
 
   @Override protected void onAttach(@NonNull View view) {
     super.onAttach(view);
     disposables = new CompositeDisposable();
+    castContext.addCastStateListener(castStateListener);
   }
 
   @Override protected void onDetach(@NonNull View view) {
     super.onDetach(view);
     Rx.dispose(disposables);
+    castContext.removeCastStateListener(castStateListener);
   }
 
   @Override protected void onDestroyView(@NonNull View view) {
     super.onDestroyView(view);
+    castContext = null;
     unbinder.unbind();
     unbinder = null;
   }

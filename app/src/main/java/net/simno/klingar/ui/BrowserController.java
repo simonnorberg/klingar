@@ -20,15 +20,22 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.Spinner;
 
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
+import com.google.android.gms.cast.framework.CastButtonFactory;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
@@ -60,18 +67,19 @@ import timber.log.Timber;
 
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.data.Key.PLEX_ITEM;
-import static net.simno.klingar.ui.ToolbarOwner.TITLE_VISIBLE;
+import static net.simno.klingar.util.Views.visible;
 
 public class BrowserController extends BaseController implements
-    MusicAdapter.OnPlexItemClickListener, EndScrollListener.EndListener {
+    MusicAdapter.OnPlexItemClickListener, EndScrollListener.EndListener,
+    AdapterView.OnItemSelectedListener {
 
   private static final int PAGE_SIZE = 50;
   private final MusicAdapter adapter;
+  @BindView(R.id.toolbar_libs_spinner) Spinner toolbarSpinner;
   @BindView(R.id.content_loading) ContentLoadingProgressBar contentLoading;
   @BindView(R.id.recycler_view) RecyclerView recyclerView;
   @BindView(R.id.miniplayer_container) FrameLayout miniplayerContainer;
   @BindDrawable(R.drawable.item_divider) Drawable itemDivider;
-  @Inject ToolbarOwner toolbarOwner;
   @Inject ServerManager serverManager;
   @Inject MusicRepository musicRepository;
   @Inject QueueManager queueManager;
@@ -109,19 +117,20 @@ public class BrowserController extends BaseController implements
       mediaType = (MediaType) plexItem;
     }
 
-    ToolbarOwner.Config.Builder builder = ToolbarOwner.Config.builder()
-        .background(true)
-        .titleAlpha(TITLE_VISIBLE);
-
-    if (mediaType == null) {
-      toolbarOwner.setConfig(builder
-          .backNavigation(false)
-          .build());
-    } else {
-      toolbarOwner.setConfig(builder
-          .backNavigation(true)
-          .title(mediaType.title())
-          .build());
+    ActionBar actionBar = null;
+    if (getActivity() != null) {
+      actionBar = ((KlingarActivity) getActivity()).getSupportActionBar();
+    }
+    if (actionBar != null) {
+      setHasOptionsMenu(true);
+      if (mediaType == null) {
+        actionBar.setDisplayHomeAsUpEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+      } else {
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mediaType.title());
+      }
     }
 
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -141,7 +150,6 @@ public class BrowserController extends BaseController implements
         serverRefreshed = true;
         serverManager.refresh();
       }
-      observeSpinner();
       observeLibs();
     } else {
       startEndlessScrolling();
@@ -157,6 +165,13 @@ public class BrowserController extends BaseController implements
     super.onDetach(view);
     recyclerView.clearOnScrollListeners();
     recyclerView.setAdapter(null);
+  }
+
+  @Override public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+    super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.menu_main, menu);
+    CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+        R.id.media_route_menu_item);
   }
 
   @Override public void endReached() {
@@ -197,21 +212,14 @@ public class BrowserController extends BaseController implements
               currentPosition = i;
             }
           }
-          toolbarOwner.setConfig(toolbarOwner.getConfig().toBuilder()
-              .title(null)
-              .options(libNames)
-              .selection(currentPosition)
-              .build());
-        }, Rx::onError));
-  }
 
-  private void observeSpinner() {
-    disposables.add(toolbarOwner.spinnerSelection()
-        .compose(bindUntilEvent(DETACH))
-        .compose(rx.flowableSchedulers())
-        .subscribe(position -> {
-          if (position < libs.size()) {
-            browseLibrary(libs.get(position));
+          if (getActivity() != null) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.item_spinner,
+                libNames);
+            toolbarSpinner.setAdapter(adapter);
+            toolbarSpinner.setSelection(currentPosition);
+            toolbarSpinner.setOnItemSelectedListener(this);
+            visible(toolbarSpinner);
           }
         }, Rx::onError));
   }
@@ -299,5 +307,14 @@ public class BrowserController extends BaseController implements
           queueManager.setQueue(pair.first, pair.second);
           musicController.play();
         }, Rx::onError));
+  }
+
+  @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    if (position < libs.size()) {
+      browseLibrary(libs.get(position));
+    }
+  }
+
+  @Override public void onNothingSelected(AdapterView<?> parent) {
   }
 }
