@@ -94,6 +94,20 @@ public class QueueManagerTest {
     assertThat(queueManager.currentTrack(), is(expectedTrack));
   }
 
+  @Test public void setNewQueueShouldSetShuffleOff() {
+    TestSubscriber<Pair<Integer, Integer>> test = queueManager.mode().take(3).test();
+
+    queueManager.shuffle();
+    queueManager.setQueue(new ArrayList<>(queue), 2000);
+
+    test.awaitTerminalEvent();
+    List<Pair<Integer, Integer>> modes = test.values();
+
+    assertThat(modes.get(0).first, is(SHUFFLE_OFF));
+    assertThat(modes.get(1).first, is(SHUFFLE_ALL));
+    assertThat(modes.get(2).first, is(SHUFFLE_OFF));
+  }
+
   @Test public void shuffleModes() {
     TestSubscriber<Pair<Integer, Integer>> test = queueManager.mode().take(3).test();
 

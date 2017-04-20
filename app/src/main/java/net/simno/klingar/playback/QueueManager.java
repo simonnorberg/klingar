@@ -77,6 +77,11 @@ public class QueueManager {
     this.queue = queue;
     setQueuePosition(queueItemId);
     notifyQueue();
+
+    if (shuffleMode != SHUFFLE_OFF) {
+      shuffleMode = SHUFFLE_OFF;
+      notifyMode();
+    }
   }
 
   public Track currentTrack() {
