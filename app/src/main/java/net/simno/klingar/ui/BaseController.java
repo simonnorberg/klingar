@@ -48,7 +48,7 @@ abstract class BaseController extends RxController {
   private Unbinder unbinder;
   private boolean hasExited;
 
-  public BaseController(Bundle args) {
+  BaseController(Bundle args) {
     super(args);
   }
 

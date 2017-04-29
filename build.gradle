@@ -19,7 +19,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.4.0-alpha6'
+    classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
   }
 }
