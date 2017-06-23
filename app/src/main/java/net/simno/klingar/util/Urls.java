@@ -52,7 +52,11 @@ public final class Urls {
     if (Strings.isBlank(transcodeUrl)) {
       return null;
     }
-    return HttpUrl.parse(transcodeUrl).newBuilder()
+    HttpUrl parsedUrl = HttpUrl.parse(transcodeUrl);
+    if (parsedUrl == null) {
+      return null;
+    }
+    return parsedUrl.newBuilder()
         .addQueryParameter("width", String.valueOf(width))
         .addQueryParameter("height", String.valueOf(height))
         .build()

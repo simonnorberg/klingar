@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -181,7 +180,7 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
 
   @Override public void onPrepareOptionsMenu(@NonNull Menu menu) {
     MenuItem item = menu.findItem(R.id.action_queue_track);
-    ImageView actionView = (ImageView) MenuItemCompat.getActionView(item);
+    ImageView actionView = (ImageView) item.getActionView();
     actionView.setImageState(isQueueVisible ? TRACK : QUEUE, true);
     actionView.setContentDescription(isQueueVisible ? descTrack : descQueue);
     actionView.setOnClickListener(view -> {

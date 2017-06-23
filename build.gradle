@@ -16,16 +16,18 @@
 
 buildscript {
   repositories {
+    google()
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
+    classpath 'com.android.tools.build:gradle:3.0.0-alpha4'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.7.1'
   }
 }
 
 allprojects {
   repositories {
+    google()
     jcenter()
   }
 }

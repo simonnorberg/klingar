@@ -28,7 +28,6 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -41,7 +40,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Module
 public class ApiModule {
 
-  private static final HttpUrl PLEX_URL = HttpUrl.parse("https://plex.tv");
+  private static final String PLEX_URL = "https://plex.tv";
 
   @Provides @Singleton AuthInterceptor provideAuthInterceptor() {
     return new AuthInterceptor();

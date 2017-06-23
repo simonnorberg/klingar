@@ -74,11 +74,13 @@ public class ServerManager {
 
     for (Device.Connection connection : device.connections) {
       if (connection.local == 0) {
-        HttpUrl uri = HttpUrl.parse(connection.uri).newBuilder()
-            .addQueryParameter("X-Plex-Token", device.accessToken)
-            .build();
-        builder.uri(uri);
-        break;
+        HttpUrl parsedUrl = HttpUrl.parse(connection.uri);
+        if (parsedUrl != null) {
+          builder.uri(parsedUrl.newBuilder()
+              .addQueryParameter("X-Plex-Token", device.accessToken)
+              .build());
+          break;
+        }
       }
     }
 

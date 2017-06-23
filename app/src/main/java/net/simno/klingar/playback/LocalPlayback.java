@@ -26,7 +26,6 @@ import android.net.wifi.WifiManager;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -391,8 +390,7 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
   private void createExoPlayerIfNeeded() {
     Timber.d("createExoPlayerIfNeeded %s", exoPlayer == null);
     if (exoPlayer == null) {
-      exoPlayer = ExoPlayerFactory.newSimpleInstance(context, new DefaultTrackSelector(),
-          new DefaultLoadControl());
+      exoPlayer = ExoPlayerFactory.newSimpleInstance(context, new DefaultTrackSelector());
       exoPlayer.addListener(this);
     }
   }

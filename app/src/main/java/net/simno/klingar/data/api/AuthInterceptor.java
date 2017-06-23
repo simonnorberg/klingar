@@ -15,6 +15,8 @@
  */
 package net.simno.klingar.data.api;
 
+import android.support.annotation.NonNull;
+
 import java.io.IOException;
 
 import okhttp3.HttpUrl;
@@ -33,7 +35,7 @@ public class AuthInterceptor implements Interceptor {
     this.authToken = authToken;
   }
 
-  @Override public Response intercept(Chain chain) throws IOException {
+  @Override public Response intercept(@NonNull Chain chain) throws IOException {
     Request request = chain.request();
 
     String authToken = this.authToken;

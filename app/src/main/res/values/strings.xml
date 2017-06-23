@@ -30,6 +30,7 @@ limitations under the License.
 
   <string name="action_queue_track">Queue</string>
 
+  <string name="description_logo">Klingar logo</string>
   <string name="description_queue">Show playing queue</string>
   <string name="description_track">Show album cover</string>
   <string name="description_shuffle_off">Shuffle off</string>

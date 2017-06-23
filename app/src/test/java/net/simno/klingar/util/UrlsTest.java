@@ -22,6 +22,7 @@ import okhttp3.HttpUrl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+@SuppressWarnings("ConstantConditions")
 public class UrlsTest {
 
   @Test public void addPathToUrl() {
