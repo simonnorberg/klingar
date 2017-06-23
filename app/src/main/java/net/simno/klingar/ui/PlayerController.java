@@ -58,6 +58,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 import static net.simno.klingar.util.Views.gone;
 import static net.simno.klingar.util.Views.visible;
 
@@ -287,10 +288,13 @@ public class PlayerController extends BaseController implements QueueAdapter.OnT
 
   private void updateTrackInfo(@NonNull Track track) {
     contentLoading.hide();
-    Glide.with(getActivity())
-        .load(track.thumb())
-        .crossFade()
-        .into(background);
+
+    if (getActivity() != null) {
+      Glide.with(getActivity())
+          .load(track.thumb())
+          .transition(withCrossFade())
+          .into(background);
+    }
 
     seekBar.setMax((int) track.duration() / 1000);
     totalTime.setText(DateUtils.formatElapsedTime(track.duration() / 1000));

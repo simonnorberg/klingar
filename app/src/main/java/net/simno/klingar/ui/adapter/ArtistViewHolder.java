@@ -21,14 +21,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Artist;
-import net.simno.klingar.ui.widget.CircleImageViewTarget;
 import net.simno.klingar.util.Urls;
 
 import butterknife.BindDimen;
 import butterknife.BindView;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 final class ArtistViewHolder extends ClickableViewHolder<Artist> {
 
@@ -46,8 +48,8 @@ final class ArtistViewHolder extends ClickableViewHolder<Artist> {
     //noinspection SuspiciousNameCombination
     Glide.with(itemView.getContext())
         .load(Urls.addTranscodeParams(artist.thumb(), height, height))
-        .asBitmap()
-        .centerCrop()
-        .into(new CircleImageViewTarget(thumb));
+        .apply(RequestOptions.circleCropTransform())
+        .transition(withCrossFade())
+        .into(thumb);
   }
 }

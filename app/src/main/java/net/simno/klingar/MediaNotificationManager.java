@@ -32,8 +32,9 @@ import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import net.simno.klingar.data.model.Track;
 import net.simno.klingar.playback.MusicController;
@@ -296,12 +297,12 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
   private void loadImage(final String url, final NotificationCompat.Builder builder) {
     Glide.with(service)
-        .load(url)
         .asBitmap()
-        .override(iconWidth, iconHeight)
+        .load(url)
+        .apply(RequestOptions.overrideOf(iconWidth, iconHeight))
         .into(new SimpleTarget<Bitmap>() {
           @Override
-          public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> animation) {
+          public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
             if (TextUtils.equals(currentTrack.thumb(), url)) {
               builder.setLargeIcon(resource);
               notificationManager.notify(NOTIFICATION_ID, builder.build());

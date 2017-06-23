@@ -146,8 +146,8 @@ dependencies {
   compile "com.bluelinelabs:conductor:${conductorVersion}"
   compile "com.bluelinelabs:conductor-rxlifecycle2:${conductorVersion}"
 
-  compile 'com.github.bumptech.glide:glide:3.8.0'
-  compile 'com.github.bumptech.glide:okhttp-integration:1.5.0'
+  compile "com.github.bumptech.glide:glide:${glideVersion}"
+  compile "com.github.bumptech.glide:okhttp-integration:${glideVersion}"
 
   compile "com.google.android.exoplayer:exoplayer-core:${exoPlayerVersion}"
   compile "com.google.android.gms:play-services-cast-framework:${playServicesVersion}"

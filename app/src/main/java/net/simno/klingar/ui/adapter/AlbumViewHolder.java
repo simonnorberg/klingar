@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Album;
@@ -28,6 +29,8 @@ import net.simno.klingar.util.Urls;
 
 import butterknife.BindDimen;
 import butterknife.BindView;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 final class AlbumViewHolder extends ClickableViewHolder<Album> {
 
@@ -46,8 +49,8 @@ final class AlbumViewHolder extends ClickableViewHolder<Album> {
     //noinspection SuspiciousNameCombination
     Glide.with(itemView.getContext())
         .load(Urls.addTranscodeParams(album.thumb(), height, height))
-        .centerCrop()
-        .crossFade()
+        .apply(RequestOptions.centerCropTransform())
+        .transition(withCrossFade())
         .into(thumb);
 
     subtitle.setText(album.artistTitle());
