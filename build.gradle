@@ -20,8 +20,9 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.0.0-alpha9'
+    classpath 'com.android.tools.build:gradle:3.0.0-beta6'
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.7.3'
+    classpath 'com.google.gms:oss-licenses:0.9.0'
   }
 }
 
@@ -29,6 +30,7 @@ allprojects {
   repositories {
     google()
     jcenter()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   }
 }
 

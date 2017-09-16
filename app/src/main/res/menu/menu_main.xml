@@ -27,8 +27,8 @@ limitations under the License.
       tools:ignore="AlwaysShowAction"/>
 
   <item
-      android:id="@+id/credits"
-      android:title="@string/menu_credits"
+      android:id="@+id/licenses"
+      android:title="@string/menu_licenses"
       app:showAsAction="never"/>
 
   <item

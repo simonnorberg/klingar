@@ -19,7 +19,7 @@ limitations under the License.
   <string name="app_name">Klingar</string>
 
   <string name="menu_media_route">Play on…</string>
-  <string name="menu_credits">Credits</string>
+  <string name="menu_licenses">Open source licenses</string>
   <string name="menu_sign_out">Sign out</string>
 
   <string name="hint_username">Plex Username</string>

@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import com.bluelinelabs.conductor.Conductor;
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
@@ -40,7 +41,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import de.psdev.licensesdialog.LicensesDialog;
 
 public class KlingarActivity extends AppCompatActivity {
 
@@ -95,7 +95,7 @@ public class KlingarActivity extends AppCompatActivity {
       case android.R.id.home:
         onBackPressed();
         return true;
-      case R.id.credits:
+      case R.id.licenses:
         showCredits();
         return true;
       case R.id.sign_out:
@@ -113,13 +113,7 @@ public class KlingarActivity extends AppCompatActivity {
   }
 
   private void showCredits() {
-    new LicensesDialog.Builder(this)
-        .setIncludeOwnLicense(true)
-        .setShowFullLicenseText(false)
-        .setNotices(R.raw.notices)
-        .setNoticesCssStyle(R.string.notices_style)
-        .build()
-        .show();
+    startActivity(new Intent(this, OssLicensesMenuActivity.class));
   }
 
   private void logout() {
