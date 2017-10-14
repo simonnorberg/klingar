@@ -149,9 +149,9 @@ class PlaybackManager implements Playback.Callback {
     updatePlaybackState();
   }
 
-  @Override public void setTrackFromRemote(Track remoteTrack) {
-    Timber.d("setTrackFromRemote %s", remoteTrack);
-    queueManager.setTrackFromRemote(remoteTrack);
+  @Override public void setCurrentTrack(Track track) {
+    Timber.d("setCurrentTrack %s", track);
+    queueManager.setCurrentTrack(track);
   }
 
   /**
@@ -168,8 +168,8 @@ class PlaybackManager implements Playback.Callback {
     Track currentMediaId = playback.getCurrentTrack();
     playback.stop(false);
     newPlayback.setCallback(this);
-    newPlayback.setCurrentStreamPosition(position < 0 ? 0 : position);
     newPlayback.setCurrentTrack(currentMediaId);
+    newPlayback.seekTo(position < 0 ? 0 : position);
     newPlayback.start();
     // Finally swap the instance
     playback = newPlayback;

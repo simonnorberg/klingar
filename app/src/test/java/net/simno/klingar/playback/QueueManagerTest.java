@@ -83,14 +83,14 @@ public class QueueManagerTest {
     assertThat(actualPosition, is(3));
   }
 
-  @Test public void setExistingTrackFromRemote() {
-    queueManager.setTrackFromRemote(queue.get(3));
+  @Test public void setExistingTrack() {
+    queueManager.setCurrentTrack(queue.get(3));
     assertThat(queueManager.currentTrack(), is(queue.get(3)));
   }
 
-  @Test public void setNewTrackFromRemote() {
+  @Test public void setNewTrack() {
     Track expectedTrack = createTrack(20);
-    queueManager.setTrackFromRemote(expectedTrack);
+    queueManager.setCurrentTrack(expectedTrack);
     assertThat(queueManager.currentTrack(), is(expectedTrack));
   }
 

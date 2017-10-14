@@ -63,13 +63,6 @@ interface Playback {
   int getCurrentStreamPosition();
 
   /**
-   * Set the current position. Typically used when switching players that are in paused state.
-   *
-   * @param position position in the stream
-   */
-  void setCurrentStreamPosition(int position);
-
-  /**
    * Query the underlying stream and update the internal last known stream position.
    */
   void updateLastKnownStreamPosition();
@@ -120,8 +113,8 @@ interface Playback {
     void onPlaybackStatusChanged();
 
     /**
-     * @param remoteTrack being currently played
+     * @param track being currently played
      */
-    void setTrackFromRemote(Track remoteTrack);
+    void setCurrentTrack(Track track);
   }
 }

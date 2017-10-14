@@ -17,18 +17,22 @@
 package net.simno.klingar;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.support.v4.app.NotificationManagerCompat;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.media.app.NotificationCompat.MediaStyle;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 import android.support.v4.util.Pair;
-import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 
 import com.bumptech.glide.Glide;
@@ -58,7 +62,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   private static final String ACTION_NEXT = "net.simno.klingar.ACTION_NEXT";
   private static final String ACTION_PREVIOUS = "net.simno.klingar.ACTION_PREVIOUS";
   private static final String ACTION_STOP_CAST = "net.simno.klingar.ACTION_STOP_CAST";
-
+  private static final String CHANNEL_ID = "net.simno.klingar.CHANNEL_ID";
   private static final int NOTIFICATION_ID = 412;
   private static final int REQUEST_CODE = 100;
 
@@ -66,7 +70,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
   private final MusicController musicController;
   private final QueueManager queueManager;
   private final Rx rx;
-  private final NotificationManagerCompat notificationManager;
+  private final NotificationManager notificationManager;
   private final PendingIntent playIntent;
   private final PendingIntent pauseIntent;
   private final PendingIntent nextIntent;
@@ -88,7 +92,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
     this.rx = rx;
 
     notificationColor = ContextCompat.getColor(service, R.color.primary);
-    notificationManager = NotificationManagerCompat.from(service);
+    notificationManager = (NotificationManager) service.getSystemService(
+        Context.NOTIFICATION_SERVICE);
 
     String p = service.getPackageName();
     playIntent = PendingIntent.getBroadcast(service, REQUEST_CODE,
@@ -109,7 +114,9 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
     // Cancel all notifications to handle the case where the Service was killed and
     // restarted by the system.
-    notificationManager.cancelAll();
+    if (notificationManager != null) {
+      notificationManager.cancelAll();
+    }
   }
 
   /**
@@ -194,6 +201,9 @@ public class MediaNotificationManager extends BroadcastReceiver {
   }
 
   @Override public void onReceive(Context context, Intent intent) {
+    if (intent.getAction() == null) {
+      return;
+    }
     switch (intent.getAction()) {
       case ACTION_PAUSE:
       case ACTION_PLAY:
@@ -220,7 +230,13 @@ public class MediaNotificationManager extends BroadcastReceiver {
       return null;
     }
 
-    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(service);
+    // Notification channels are only supported on Android O+.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      createNotificationChannel();
+    }
+
+    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(service,
+        CHANNEL_ID);
 
     notificationBuilder.addAction(R.drawable.ic_notification_previous,
         service.getString(R.string.label_previous), previousIntent);
@@ -231,13 +247,16 @@ public class MediaNotificationManager extends BroadcastReceiver {
         service.getString(R.string.label_next), nextIntent);
 
     notificationBuilder
-        .setStyle(new NotificationCompat.MediaStyle()
-            .setShowActionsInCompactView(new int[]{1}) // show only play/pause in compact view
+        .setStyle(new MediaStyle()
+            .setShowActionsInCompactView(1) // show only play/pause in compact view
+            .setShowCancelButton(true)
+            .setCancelButtonIntent(stopCastIntent)
             .setMediaSession(musicController.getSessionToken()))
+        .setDeleteIntent(stopCastIntent)
         .setColor(notificationColor)
         .setSmallIcon(R.drawable.ic_notification)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        .setUsesChronometer(true)
+        .setOnlyAlertOnce(true)
         .setContentIntent(createContentIntent())
         .setContentTitle(currentTrack.title())
         .setContentText(currentTrack.artistTitle());
@@ -309,5 +328,18 @@ public class MediaNotificationManager extends BroadcastReceiver {
             }
           }
         });
+  }
+
+  /**
+   * Creates Notification Channel. This is required in Android O+ to display notifications.
+   */
+  @RequiresApi(Build.VERSION_CODES.O)
+  private void createNotificationChannel() {
+    if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+      NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+          service.getString(R.string.notification_channel), NotificationManager.IMPORTANCE_LOW);
+      channel.setDescription(service.getString(R.string.notification_channel_description));
+      notificationManager.createNotificationChannel(channel);
+    }
   }
 }

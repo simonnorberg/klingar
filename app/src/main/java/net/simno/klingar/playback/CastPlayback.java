@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -139,10 +140,6 @@ class CastPlayback implements Playback {
       return currentPosition;
     }
     return (int) remoteMediaClient.getApproximateStreamPosition();
-  }
-
-  @Override public void setCurrentStreamPosition(int position) {
-    this.currentPosition = position;
   }
 
   @Override public void updateLastKnownStreamPosition() {
@@ -259,10 +256,10 @@ class CastPlayback implements Playback {
       if (customData != null && customData.has(CUSTOM_DATA_TRACK)) {
         Track remoteTrack = jsonAdapter.fromJson(customData.getString(CUSTOM_DATA_TRACK));
         Timber.d("setMetadataFromRemote %s", remoteTrack);
-        if (!remoteTrack.equals(currentTrack)) {
+        if (!Objects.equals(remoteTrack, currentTrack)) {
           currentTrack = remoteTrack;
           if (callback != null) {
-            callback.setTrackFromRemote(remoteTrack);
+            callback.setCurrentTrack(remoteTrack);
           }
           updateLastKnownStreamPosition();
         }

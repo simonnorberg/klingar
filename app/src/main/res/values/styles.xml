@@ -60,21 +60,4 @@ limitations under the License.
     <item name="android:textSize">14.0dp</item>
   </style>
 
-  <string name="notices_style" translatable="false">
-    a {
-      color: #999;
-    }
-    body {
-      color: white;
-      background-color: #222326;
-      font-family: sans-serif;
-      overflow-wrap: break-word;
-    }
-    pre {
-      background: #333;
-      padding: 1em;
-      white-space: pre-wrap;
-    }
-  </string>
-
 </resources>

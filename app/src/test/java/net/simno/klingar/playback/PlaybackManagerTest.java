@@ -168,10 +168,10 @@ public class PlaybackManagerTest {
     verify(mockQueueManager, never()).next();
   }
 
-  @Test public void setTrackFromRemote() {
-    Track remoteTrack = createTrack();
-    playbackManager.setTrackFromRemote(remoteTrack);
-    verify(mockQueueManager, times(1)).setTrackFromRemote(remoteTrack);
+  @Test public void setCurrentTrack() {
+    Track currentTrack = createTrack();
+    playbackManager.setCurrentTrack(currentTrack);
+    verify(mockQueueManager, times(1)).setCurrentTrack(currentTrack);
   }
 
   @Test public void switchPlayback() {

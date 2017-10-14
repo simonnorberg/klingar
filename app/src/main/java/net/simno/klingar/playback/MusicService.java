@@ -49,7 +49,9 @@ import net.simno.klingar.util.Rx;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
+import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -69,6 +71,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
   @Inject WifiManager wifiManager;
   @Inject MediaService media;
   @Inject Rx rx;
+  @Inject @Named("default") OkHttpClient client;
   private PlaybackManager playbackManager;
   private MediaSessionCompat session;
   private MediaNotificationManager mediaNotificationManager;
@@ -87,7 +90,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
     KlingarApp.get(this).component().inject(this);
 
     Playback playback = new LocalPlayback(getApplicationContext(), musicController, audioManager,
-        wifiManager);
+        wifiManager, client);
     playbackManager = new PlaybackManager(queueManager, this, AndroidClock.DEFAULT, playback);
 
     session = new MediaSessionCompat(this, "MusicService");
@@ -215,7 +218,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
       Timber.d("onSessionEnded");
       musicController.setCastName(null);
       Playback playback = new LocalPlayback(getApplicationContext(), musicController, audioManager,
-          wifiManager);
+          wifiManager, client);
       mediaRouter.setMediaSessionCompat(null);
       playbackManager.switchToPlayback(playback, false);
     }

@@ -27,11 +27,13 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.audio.AudioAttributes;
+import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -43,16 +45,19 @@ import com.google.android.exoplayer2.util.Util;
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
 
+import okhttp3.Call;
 import timber.log.Timber;
 
 import static android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY;
+import static com.google.android.exoplayer2.C.CONTENT_TYPE_MUSIC;
 import static com.google.android.exoplayer2.C.TIME_UNSET;
+import static com.google.android.exoplayer2.C.USAGE_MEDIA;
 
 /**
  * A class that implements local media playback using
  * {@link com.google.android.exoplayer2.ExoPlayer}
  */
-class LocalPlayback implements Playback, ExoPlayer.EventListener,
+class LocalPlayback implements Playback, Player.EventListener,
     AudioManager.OnAudioFocusChangeListener {
 
   private static final float VOLUME_DUCK = 0.2f;
@@ -71,13 +76,11 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
   private SimpleExoPlayer exoPlayer;
   private Callback callback;
   private int audioFocus = AUDIO_NO_FOCUS_NO_DUCK;
-  @State private int state;
-  private int exoPlayerState;
   private boolean playOnFocusGain;
-  private boolean configWhenReady;
-  private volatile boolean audioNoisyReceiverRegistered;
-  private volatile long currentPosition;
-  private volatile Track currentTrack;
+  private boolean audioNoisyReceiverRegistered;
+  private Track currentTrack;
+  // Whether to return STATE_NONE or STATE_STOPPED when exoPlayer is null;
+  private boolean exoPlayerNullIsStopped;
 
   private final BroadcastReceiver audioNoisyReceiver = new BroadcastReceiver() {
     @Override public void onReceive(Context context, Intent intent) {
@@ -90,26 +93,26 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
   };
 
   LocalPlayback(Context context, MusicController musicController, AudioManager audioManager,
-                WifiManager wifiManager) {
+                WifiManager wifiManager, Call.Factory callFactory) {
     this.context = context;
     this.musicController = musicController;
     this.audioManager = audioManager;
     this.wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "klingar_lock");
-    this.state = PlaybackStateCompat.STATE_NONE;
     String agent = Util.getUserAgent(context, context.getResources().getString(R.string.app_name));
-    this.dataSourceFactory = new DefaultDataSourceFactory(context, agent, null);
+    this.dataSourceFactory = new DefaultDataSourceFactory(context, null,
+        new OkHttpDataSourceFactory(callFactory, agent, null));
     this.extractorsFactory = new DefaultExtractorsFactory();
   }
 
   private static String getExoPlayerState(int state) {
     switch (state) {
-      case ExoPlayer.STATE_IDLE:
+      case Player.STATE_IDLE:
         return "STATE_IDLE";
-      case ExoPlayer.STATE_BUFFERING:
+      case Player.STATE_BUFFERING:
         return "STATE_BUFFERING";
-      case ExoPlayer.STATE_READY:
+      case Player.STATE_READY:
         return "STATE_READY";
-      case ExoPlayer.STATE_ENDED:
+      case Player.STATE_ENDED:
         return "STATE_ENDED";
       default:
         return "UNKNOWN";
@@ -120,18 +123,29 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
   }
 
   @Override public void stop(boolean notifyListeners) {
-    state = PlaybackStateCompat.STATE_STOPPED;
-    if (notifyListeners && callback != null) {
-      callback.onPlaybackStatusChanged();
-    }
-    currentPosition = getCurrentStreamPosition();
     giveUpAudioFocus();
     unregisterAudioNoisyReceiver();
-    relaxResources(true);
+    releaseResources(true);
   }
 
   @Override @State public int getState() {
-    return state;
+    if (exoPlayer == null) {
+      return exoPlayerNullIsStopped ? PlaybackStateCompat.STATE_STOPPED
+          : PlaybackStateCompat.STATE_NONE;
+    }
+    switch (exoPlayer.getPlaybackState()) {
+      case Player.STATE_IDLE:
+        return PlaybackStateCompat.STATE_PAUSED;
+      case Player.STATE_BUFFERING:
+        return PlaybackStateCompat.STATE_BUFFERING;
+      case Player.STATE_READY:
+        return exoPlayer.getPlayWhenReady() ? PlaybackStateCompat.STATE_PLAYING
+            : PlaybackStateCompat.STATE_PAUSED;
+      case Player.STATE_ENDED:
+        return PlaybackStateCompat.STATE_PAUSED;
+      default:
+        return PlaybackStateCompat.STATE_NONE;
+    }
   }
 
   @Override public boolean isConnected() {
@@ -143,17 +157,11 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
   }
 
   @Override public int getCurrentStreamPosition() {
-    return exoPlayer != null ? (int) exoPlayer.getCurrentPosition() : (int) currentPosition;
-  }
-
-  @Override public void setCurrentStreamPosition(int position) {
-    this.currentPosition = position;
+    return exoPlayer != null ? (int) exoPlayer.getCurrentPosition() : 0;
   }
 
   @Override public void updateLastKnownStreamPosition() {
-    if (exoPlayer != null) {
-      currentPosition = exoPlayer.getCurrentPosition();
-    }
+    // Nothing to do. Position maintained by ExoPlayer.
   }
 
   @Override public void play(Track track) {
@@ -163,66 +171,50 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
     registerAudioNoisyReceiver();
     boolean mediaHasChanged = !track.equals(currentTrack);
     if (mediaHasChanged) {
-      currentPosition = 0;
       currentTrack = track;
     }
 
-    if (state == PlaybackStateCompat.STATE_PAUSED && !mediaHasChanged && exoPlayer != null) {
-      configExoPlayerState();
-    } else {
-      state = PlaybackStateCompat.STATE_STOPPED;
-      relaxResources(false); // release everything except ExoPlayer
+    if (mediaHasChanged || exoPlayer == null) {
+      releaseResources(false); // release everything except the player
 
-      createExoPlayerIfNeeded();
-
-      state = PlaybackStateCompat.STATE_BUFFERING;
-      if (callback != null) {
-        callback.onPlaybackStatusChanged();
+      if (exoPlayer == null) {
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(context, new DefaultTrackSelector());
+        exoPlayer.addListener(this);
       }
+      AudioAttributes audioAttributes = new AudioAttributes.Builder()
+          .setContentType(CONTENT_TYPE_MUSIC)
+          .setUsage(USAGE_MEDIA)
+          .build();
+      exoPlayer.setAudioAttributes(audioAttributes);
 
       Uri uri = Uri.parse(track.source());
       ExtractorMediaSource source = new ExtractorMediaSource(uri, dataSourceFactory,
           extractorsFactory, null, null);
-      configWhenReady = true;
-      exoPlayer.setPlayWhenReady(false);
       exoPlayer.prepare(source);
 
       // If we are streaming from the internet, we want to hold a Wifi lock, which prevents the
       // Wifi radio from going to sleep while the song is playing.
       wifiLock.acquire();
     }
+
+    configurePlayerState();
   }
 
   @Override public void pause() {
     Timber.d("pause");
-    if (state == PlaybackStateCompat.STATE_PLAYING) {
-      // Pause ExoPlayer and cancel the 'foreground service' state.
-      if (exoPlayer != null && exoPlayer.getPlayWhenReady()) {
-        exoPlayer.setPlayWhenReady(false);
-        currentPosition = exoPlayer.getCurrentPosition();
-      }
-      // while paused, retain ExoPlayer but give up audio focus
-      relaxResources(false);
+
+    // Pause player and cancel the 'foreground service' state.
+    if (exoPlayer != null) {
+      exoPlayer.setPlayWhenReady(false);
     }
-    state = PlaybackStateCompat.STATE_PAUSED;
-    if (callback != null) {
-      callback.onPlaybackStatusChanged();
-    }
+    // While paused, retain the player instance, but give up audio focus.
+    releaseResources(false);
     unregisterAudioNoisyReceiver();
   }
 
   @Override public void seekTo(int position) {
     Timber.d("seekTo %s", position);
-    if (exoPlayer == null) {
-      // If we do not have a current ExoPlayer, simply update the current position
-      currentPosition = position;
-    } else {
-      if (exoPlayer.getPlayWhenReady()) {
-        state = PlaybackStateCompat.STATE_BUFFERING;
-        if (callback != null) {
-          callback.onPlaybackStatusChanged();
-        }
-      }
+    if (exoPlayer != null) {
       registerAudioNoisyReceiver();
       long duration = exoPlayer.getDuration();
       long seekPosition = duration == TIME_UNSET ? 0 : Math.min(Math.max(0, position), duration);
@@ -243,34 +235,28 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
   }
 
   @Override public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-    boolean playerStateChanged = exoPlayerState != playbackState;
-    exoPlayerState = playbackState;
-
-    Timber.d("onPlayerStateChanged %s playWhenReady %s playerStateChanged %s configWhenReady %s",
-        getExoPlayerState(playbackState), playWhenReady, playerStateChanged, configWhenReady);
+    Timber.d("onPlayerStateChanged %s playWhenReady %s", getExoPlayerState(playbackState),
+        playWhenReady);
 
     switch (playbackState) {
-      case ExoPlayer.STATE_READY:
-        if (configWhenReady) {
-          configWhenReady = false;
-          configExoPlayerState();
-        } else if (playWhenReady) { // seek complete
-          currentPosition = exoPlayer.getCurrentPosition();
-          state = PlaybackStateCompat.STATE_PLAYING;
-          if (callback != null) {
-            callback.onPlaybackStatusChanged();
-          }
+      case Player.STATE_IDLE:
+      case Player.STATE_BUFFERING:
+      case Player.STATE_READY:
+        if (callback != null) {
+          callback.onPlaybackStatusChanged();
         }
         break;
-      case ExoPlayer.STATE_ENDED:
-        if (playerStateChanged) { // only call onCompletion once
-          currentPosition = 0;
+      case Player.STATE_ENDED:
+        if (callback != null) {
           callback.onCompletion();
         }
         break;
       default:
         break;
     }
+  }
+
+  @Override public void onRepeatModeChanged(int repeatMode) {
   }
 
   @Override public void onTimelineChanged(Timeline timeline, Object manifest) {
@@ -285,7 +271,6 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
 
   @Override public void onPlayerError(ExoPlaybackException error) {
     Timber.e(error, "Exception playing song");
-    state = PlaybackStateCompat.STATE_ERROR;
     if (callback != null) {
       callback.onPlaybackStatusChanged();
     }
@@ -315,48 +300,25 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
     }
   }
 
-  /**
-   * Reconfigures ExoPlayer according to audio focus settings and starts/restarts it.
-   * This method starts/restarts the ExoPlayer respecting the current audio focus state.
-   * So if we have focus, it will play normally; if we don't have focus, it will either leave
-   * ExoPlayer paused or set it to a low volume, depending on what is  allowed by the current
-   * focus settings. This method assumes exoPlayer != null, so if you are calling it,
-   * you have to do so from a context where you are sure this is the case.
-   */
-  private void configExoPlayerState() {
-    Timber.d("configExoPlayerState audioFocus %s", audioFocus);
+  private void configurePlayerState() {
+    Timber.d("configurePlayerState audioFocus %s", audioFocus);
+
     if (audioFocus == AUDIO_NO_FOCUS_NO_DUCK) {
-      // If we don't have audio focus and can't duck, we have to pause,
-      if (state == PlaybackStateCompat.STATE_PLAYING) {
-        pause();
-      }
-    } else { // we have audio focus
+      // We don't have audio focus and can't duck, so we have to pause
+      pause();
+    } else {
       registerAudioNoisyReceiver();
+
       if (audioFocus == AUDIO_NO_FOCUS_CAN_DUCK) {
-        if (exoPlayer != null) {
-          exoPlayer.setVolume(VOLUME_DUCK); // we'll be relatively quiet
-        }
+        // We're permitted to play, but only if we 'duck', ie: play softly
+        exoPlayer.setVolume(VOLUME_DUCK);
       } else {
-        if (exoPlayer != null) {
-          exoPlayer.setVolume(VOLUME_NORMAL); // we can be loud again
-        }
+        exoPlayer.setVolume(VOLUME_NORMAL);
       }
+
       // If we were playing when we lost focus, we need to resume playing.
       if (playOnFocusGain) {
-        if (exoPlayer != null && !exoPlayer.getPlayWhenReady()) {
-          Timber.d("configExoPlayerState seeking to %s", currentPosition);
-          if (currentPosition == exoPlayer.getCurrentPosition()) {
-            state = PlaybackStateCompat.STATE_PLAYING;
-            exoPlayer.setPlayWhenReady(true);
-          } else {
-            state = PlaybackStateCompat.STATE_BUFFERING;
-            seekTo((int) currentPosition);
-            exoPlayer.setPlayWhenReady(true);
-          }
-          if (callback != null) {
-            callback.onPlaybackStatusChanged();
-          }
-        }
+        exoPlayer.setPlayWhenReady(true);
         playOnFocusGain = false;
       }
     }
@@ -364,53 +326,52 @@ class LocalPlayback implements Playback, ExoPlayer.EventListener,
 
   @Override public void onAudioFocusChange(int focusChange) {
     Timber.d("onAudioFocusChange focusChange %s", focusChange);
-    if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
-      audioFocus = AUDIO_FOCUSED; // We have gained focus
-    } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS
-        || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
-        || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-      // We have lost focus. If we can duck (low playback volume), we can keep playing.
-      // Otherwise, we need to pause the playback.
-      boolean canDuck = focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK;
-      audioFocus = canDuck ? AUDIO_NO_FOCUS_CAN_DUCK : AUDIO_NO_FOCUS_NO_DUCK;
 
-      // If we are playing, we need to reset ExoPlayer by calling configExoPlayerState
-      // with audioFocus properly set.
-      if (state == PlaybackStateCompat.STATE_PLAYING && !canDuck) {
-        // If we don't have audio focus and can't duck, we save the information that
-        // we were playing, so that we can resume playback once we get the focus back.
-        playOnFocusGain = true;
-      }
-    } else {
-      Timber.e("onAudioFocusChange: Ignoring unsupported focusChange: %s", focusChange);
+    switch (focusChange) {
+      case AudioManager.AUDIOFOCUS_GAIN:
+        audioFocus = AUDIO_FOCUSED;
+        break;
+      case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+        // Audio focus was lost, but it's possible to duck (i.e.: play quietly)
+        audioFocus = AUDIO_NO_FOCUS_CAN_DUCK;
+        break;
+      case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+        // Lost audio focus, but will gain it back (shortly), so note whether
+        // playback should resume
+        audioFocus = AUDIO_NO_FOCUS_NO_DUCK;
+        playOnFocusGain = exoPlayer != null && exoPlayer.getPlayWhenReady();
+        break;
+      case AudioManager.AUDIOFOCUS_LOSS:
+        // Lost audio focus, probably "permanently"
+        audioFocus = AUDIO_NO_FOCUS_NO_DUCK;
+        break;
+      default:
+        break;
     }
-    configExoPlayerState();
-  }
 
-  private void createExoPlayerIfNeeded() {
-    Timber.d("createExoPlayerIfNeeded %s", exoPlayer == null);
-    if (exoPlayer == null) {
-      exoPlayer = ExoPlayerFactory.newSimpleInstance(context, new DefaultTrackSelector());
-      exoPlayer.addListener(this);
+    if (exoPlayer != null) {
+      // Update the player state based on the change
+      configurePlayerState();
     }
   }
 
   /**
-   * Releases resources used by the service for playback. This includes the
-   * "foreground service" status, the wake locks and possibly the ExoPlayer.
+   * Releases resources used by the service for playback, which is mostly just the WiFi lock for
+   * local playback. If requested, the ExoPlayer instance is also released.
    *
-   * @param releaseExoPlayer Indicates whether ExoPlayer should also be released or not
+   * @param releasePlayer Indicates whether the player should also be released
    */
-  private void relaxResources(boolean releaseExoPlayer) {
-    Timber.d("relaxResources releaseExoPlayer %s", releaseExoPlayer);
+  private void releaseResources(boolean releasePlayer) {
+    Timber.d("releaseResources releasePlayer %s", releasePlayer);
     // stop and release the ExoPlayer, if it's available
-    if (releaseExoPlayer && exoPlayer != null) {
-      exoPlayer.removeListener(this);
+    if (releasePlayer && exoPlayer != null) {
       exoPlayer.release();
+      exoPlayer.removeListener(this);
       exoPlayer = null;
+      exoPlayerNullIsStopped = true;
+      playOnFocusGain = false;
     }
 
-    // we can also release the Wifi lock, if we're holding it
     if (wifiLock.isHeld()) {
       wifiLock.release();
     }
