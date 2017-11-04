@@ -15,10 +15,12 @@
  */
 package net.simno.klingar.util;
 
+import android.support.annotation.NonNull;
+
 import timber.log.Timber;
 
 public class DebugTree extends Timber.DebugTree {
-  @Override protected String createStackElementTag(StackTraceElement element) {
+  @Override protected String createStackElementTag(@NonNull StackTraceElement element) {
     return super.createStackElementTag(element) + ":" + element.getLineNumber();
   }
 }
