@@ -17,12 +17,7 @@ package net.simno.klingar.ui;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v4.widget.ContentLoadingProgressBar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +27,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.core.widget.ContentLoadingProgressBar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
@@ -113,7 +114,7 @@ public class BrowserController extends BaseController implements
     View view = super.onCreateView(inflater, container);
 
     PlexItem plexItem = getArgs().getParcelable(PLEX_ITEM);
-    if (plexItem != null && plexItem instanceof MediaType) {
+    if (plexItem instanceof MediaType) {
       mediaType = (MediaType) plexItem;
     }
 

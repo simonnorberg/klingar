@@ -18,12 +18,15 @@ package net.simno.klingar.playback;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaLoadOptions;
 import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.cast.MediaSeekOptions;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
@@ -53,7 +56,7 @@ class CastPlayback implements Playback {
   private final JsonAdapter<Track> jsonAdapter = Track.jsonAdapter(new Moshi.Builder().build());
   private final Context appContext;
   private final RemoteMediaClient remoteMediaClient;
-  private final RemoteMediaClient.Listener remoteMediaClientListener;
+  private final RemoteMediaClient.Callback remoteMediaClientCallback;
   private Callback callback;
   @State private int state;
   private volatile int playerState;
@@ -65,7 +68,7 @@ class CastPlayback implements Playback {
     CastSession castSession = CastContext.getSharedInstance(appContext).getSessionManager()
         .getCurrentCastSession();
     remoteMediaClient = castSession.getRemoteMediaClient();
-    remoteMediaClientListener = new CastMediaClientListener();
+    remoteMediaClientCallback = new CastMediaClientCallback();
   }
 
   private static MediaInfo toCastMediaMetadata(Track track, JSONObject customData) {
@@ -124,11 +127,11 @@ class CastPlayback implements Playback {
   }
 
   @Override public void start() {
-    remoteMediaClient.addListener(remoteMediaClientListener);
+    remoteMediaClient.registerCallback(remoteMediaClientCallback);
   }
 
   @Override public void stop(boolean notifyListeners) {
-    remoteMediaClient.removeListener(remoteMediaClientListener);
+    remoteMediaClient.unregisterCallback(remoteMediaClientCallback);
     state = PlaybackStateCompat.STATE_STOPPED;
     if (notifyListeners && callback != null) {
       callback.onPlaybackStatusChanged();
@@ -189,7 +192,7 @@ class CastPlayback implements Playback {
     }
     try {
       if (remoteMediaClient.hasMediaSession()) {
-        remoteMediaClient.seek(position);
+        remoteMediaClient.seek(new MediaSeekOptions.Builder().setPosition(position).build());
         currentPosition = position;
       } else {
         currentPosition = position;
@@ -239,7 +242,12 @@ class CastPlayback implements Playback {
     JSONObject customData = new JSONObject();
     customData.put(CUSTOM_DATA_TRACK, jsonAdapter.toJson(track));
     MediaInfo media = toCastMediaMetadata(track, customData);
-    remoteMediaClient.load(media, autoPlay, currentPosition, customData);
+    MediaLoadOptions loadOptions = new MediaLoadOptions.Builder()
+        .setAutoplay(autoPlay)
+        .setPlayPosition(currentPosition)
+        .setCustomData(customData)
+        .build();
+    remoteMediaClient.load(media, loadOptions);
   }
 
   private void setMetadataFromRemote() {
@@ -313,7 +321,7 @@ class CastPlayback implements Playback {
     }
   }
 
-  private class CastMediaClientListener implements RemoteMediaClient.Listener {
+  private class CastMediaClientCallback extends RemoteMediaClient.Callback {
     @Override public void onMetadataUpdated() {
       Timber.d("onMetadataUpdated");
       setMetadataFromRemote();
@@ -322,22 +330,6 @@ class CastPlayback implements Playback {
     @Override public void onStatusUpdated() {
       Timber.d("onStatusUpdated");
       updatePlaybackState();
-    }
-
-    @Override public void onSendingRemoteMediaRequest() {
-      Timber.d("onSendingRemoteMediaRequest");
-    }
-
-    @Override public void onAdBreakStatusUpdated() {
-      Timber.d("onAdBreakStatusUpdated");
-    }
-
-    @Override public void onQueueStatusUpdated() {
-      Timber.d("onQueueStatusUpdated");
-    }
-
-    @Override public void onPreloadStatusUpdated() {
-      Timber.d("onPreloadStatusUpdated");
     }
   }
 }

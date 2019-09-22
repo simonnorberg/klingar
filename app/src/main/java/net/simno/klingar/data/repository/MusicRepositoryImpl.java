@@ -15,9 +15,9 @@
  */
 package net.simno.klingar.data.repository;
 
-import android.support.annotation.NonNull;
-import android.support.v4.util.SimpleArrayMap;
-import android.util.Pair;
+import androidx.annotation.NonNull;
+import androidx.collection.SimpleArrayMap;
+import androidx.core.util.Pair;
 
 import net.simno.klingar.data.Type;
 import net.simno.klingar.data.api.MediaService;

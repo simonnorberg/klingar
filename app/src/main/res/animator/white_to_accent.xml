@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<objectAnimator
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
     android:duration="150"
     android:propertyName="fillColor"
     android:valueFrom="@android:color/white"
-    android:valueTo="@color/accent"/>
+    android:valueTo="@color/accent" />

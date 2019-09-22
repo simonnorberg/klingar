@@ -1,170 +1,136 @@
-/*
- * Copyright (C) 2016 Simon Norberg
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.oss.licenses.plugin'
-apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'com.github.triplet.play'
 apply plugin: 'checkstyle'
 
+play {
+    track = 'internal'
+    resolutionStrategy = 'ignore'
+    defaultToAppBundles = true
+    serviceAccountCredentials = rootProject.file('signing/play-account.json')
+}
+
 checkstyle {
-  toolVersion = '8.4'
+    toolVersion = '8.24'
 }
 
 task checkstyle(type: Checkstyle) {
-  group 'verification'
-  configFile rootProject.file('checkstyle.xml')
-  source 'src/main/java'
-  ignoreFailures false
-  showViolations true
-  include '**/*.java'
-  exclude '**/gen/**'
+    group 'verification'
+    configFile rootProject.file('checkstyle.xml')
+    source 'src/main/java'
+    ignoreFailures false
+    showViolations true
+    include '**/*.java'
+    exclude '**/gen/**'
 
-  classpath = files()
+    classpath = files()
 }
 
 afterEvaluate {
-  if (project.tasks.findByName('check')) {
-    check.dependsOn('checkstyle')
-  }
-}
-
-def versionMajor = 0
-def versionMinor = 11
-def versionPatch = 0
-
-def gitSha() {
-  def p = 'git rev-parse --short HEAD'.execute([], project.rootDir)
-  p.waitFor()
-  if (p.exitValue() != 0) {
-    throw new RuntimeException(p.errorStream.text)
-  }
-
-  return p.text.trim()
-}
-
-def gitTimestamp() {
-  def p = 'git log -n 1 --format=%at'.execute([], rootDir)
-  p.waitFor()
-  if (p.exitValue() != 0) {
-    throw new RuntimeException(p.errorStream.text)
-  }
-
-  return p.text.trim()
+    if (project.tasks.findByName('check')) {
+        check.dependsOn('checkstyle')
+    }
 }
 
 android {
-  compileSdkVersion versions.compileSdk
-  buildToolsVersion versions.buildTools
-
-  defaultConfig {
-    applicationId "net.simno.klingar"
-    testApplicationId "net.simno.klingar.test"
-    minSdkVersion versions.minSdk
-    targetSdkVersion versions.targetSdk
-
-    versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
-    versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-
-    buildConfigField 'String', 'GIT_SHA', "\"${gitSha()}\""
-    buildConfigField 'long', 'GIT_TIMESTAMP', "${gitTimestamp()}L"
-    buildConfigField "String", "CAST_APP_ID", "\"631E34EA\""
-    buildConfigField 'String', 'DEBUG_USER', "\"${project.findProperty('debugUser') ?: 'null'}\""
-    buildConfigField 'String', 'DEBUG_PWD', "\"${project.findProperty('debugPwd') ?: 'null'}\""
-
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-  }
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
-  }
-  lintOptions {
-    abortOnError false
-  }
-  buildTypes {
-    debug {
-      debuggable true
-      minifyEnabled false
+    compileSdkVersion versions.compile_sdk
+    buildToolsVersion versions.build_tools
+    defaultConfig {
+        applicationId 'net.simno.klingar'
+        minSdkVersion versions.min_sdk
+        targetSdkVersion versions.target_sdk
+        versionCode 1104
+        versionName '0.12'
+        buildConfigField 'String', 'CAST_APP_ID', '\"631E34EA\"'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
-    release {
-      debuggable false
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    signingConfigs {
+        release {
+            storeFile rootProject.file('signing/app-upload.jks')
+            storePassword System.getenv('STORE_PASSWORD')
+            keyAlias System.getenv('KEY_ALIAS')
+            keyPassword System.getenv('KEY_PASSWORD')
+        }
     }
-  }
-  testOptions {
-    unitTests.returnDefaultValues = true
-  }
+    buildTypes {
+        debug {
+            minifyEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lintOptions {
+        abortOnError false
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
-  implementation "com.android.support:appcompat-v7:${versions.supportLibrary}"
-  implementation "com.android.support:mediarouter-v7:${versions.supportLibrary}"
-  implementation "com.android.support:recyclerview-v7:${versions.supportLibrary}"
-  implementation "com.android.support:design:${versions.supportLibrary}"
+    implementation "androidx.appcompat:appcompat:${versions.androidx.appcompat}"
+    implementation "androidx.mediarouter:mediarouter:${versions.androidx.mediarouter}"
+    implementation "androidx.recyclerview:recyclerview:${versions.androidx.recyclerview}"
 
-  implementation "com.bluelinelabs:conductor:${versions.conductor}"
-  implementation "com.bluelinelabs:conductor-rxlifecycle2:${versions.conductor}"
+    implementation "com.bluelinelabs:conductor:${versions.conductor}"
+    implementation "com.bluelinelabs:conductor-rxlifecycle2:${versions.conductor}"
 
-  implementation "com.github.bumptech.glide:glide:${versions.glide}"
-  annotationProcessor "com.github.bumptech.glide:compiler:${versions.glide}"
-  implementation "com.github.bumptech.glide:okhttp-integration:${versions.glide}"
+    implementation "com.github.bumptech.glide:glide:${versions.glide}"
+    annotationProcessor "com.github.bumptech.glide:compiler:${versions.glide}"
+    implementation "com.github.bumptech.glide:okhttp3-integration:${versions.glide}@aar"
 
-  implementation "com.google.android.exoplayer:exoplayer-core:${versions.exoPlayer}"
-  implementation "com.google.android.exoplayer:extension-okhttp:${versions.exoPlayer}"
-  implementation "com.google.android.gms:play-services-cast-framework:${versions.playServices}"
-  implementation "com.google.android.gms:play-services-oss-licenses:${versions.playServices}"
+    implementation "com.google.android.exoplayer:exoplayer-core:${versions.exoplayer}"
+    implementation "com.google.android.exoplayer:extension-okhttp:${versions.exoplayer}"
+    implementation "com.google.android.gms:play-services-cast-framework:${versions.play_services.cast}"
+    implementation "com.google.android.gms:play-services-oss-licenses:${versions.play_services.oss}"
+    implementation "com.google.android.material:material:${versions.androidx.material}"
 
-  compileOnly "com.google.auto.value:auto-value:${versions.autoValue}"
-  annotationProcessor "com.google.auto.value:auto-value:${versions.autoValue}"
-  testAnnotationProcessor "com.google.auto.value:auto-value:${versions.autoValue}"
-  annotationProcessor "com.ryanharter.auto.value:auto-value-moshi:${versions.autoMoshi}"
-  annotationProcessor "com.ryanharter.auto.value:auto-value-parcel:${versions.autoParcel}"
-  implementation "com.ryanharter.auto.value:auto-value-parcel-adapter:${versions.autoParcel}"
+    implementation "com.google.auto.value:auto-value-annotations:${versions.autovalue}"
+    annotationProcessor "com.google.auto.value:auto-value:${versions.autovalue}"
+    testAnnotationProcessor "com.google.auto.value:auto-value:${versions.autovalue}"
+    annotationProcessor "com.ryanharter.auto.value:auto-value-moshi:${versions.automoshi}"
+    annotationProcessor "com.ryanharter.auto.value:auto-value-parcel:${versions.autoparcel}"
+    implementation "com.ryanharter.auto.value:auto-value-parcel-adapter:${versions.autoparcel}"
 
-  implementation "com.google.dagger:dagger:${versions.dagger}"
-  annotationProcessor "com.google.dagger:dagger-compiler:${versions.dagger}"
+    implementation "com.google.dagger:dagger:${versions.dagger}"
+    annotationProcessor "com.google.dagger:dagger-compiler:${versions.dagger}"
 
-  implementation "com.jakewharton:butterknife:${versions.butterknife}"
-  annotationProcessor "com.jakewharton:butterknife-compiler:${versions.butterknife}"
-  implementation "com.jakewharton.timber:timber:${versions.timber}"
-  implementation "com.jakewharton.rxrelay2:rxrelay:${versions.rxRelay}"
+    implementation "com.jakewharton:butterknife:${versions.butterknife}"
+    annotationProcessor "com.jakewharton:butterknife-compiler:${versions.butterknife}"
+    implementation "com.jakewharton.timber:timber:${versions.timber}"
+    implementation "com.jakewharton.rxrelay2:rxrelay:${versions.rxrelay}"
 
-  debugImplementation "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}"
-  releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanary}"
-  testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanary}"
-  implementation "com.squareup.moshi:moshi:${versions.moshi}"
-  implementation "com.squareup.okhttp3:okhttp:${versions.okhttp}"
-  implementation "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}"
-  implementation "com.squareup.retrofit2:retrofit:${versions.retrofit}"
-  implementation "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofit}"
-  implementation("com.squareup.retrofit2:converter-simplexml:${versions.retrofit}") {
-    exclude group: 'stax', module: 'stax-api'
-    exclude group: 'stax', module: 'stax'
-    exclude group: 'xpp3', module: 'xpp3'
-  }
+    implementation "com.squareup.moshi:moshi:${versions.moshi}"
+    implementation "com.squareup.okhttp3:okhttp:${versions.okhttp}"
+    implementation "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}"
+    implementation "com.squareup.retrofit2:retrofit:${versions.retrofit}"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofit}"
+    implementation("com.squareup.retrofit2:converter-simplexml:${versions.retrofit}") {
+        exclude group: 'stax', module: 'stax-api'
+        exclude group: 'stax', module: 'stax'
+        exclude group: 'xpp3', module: 'xpp3'
+    }
 
-  implementation "com.trello.rxlifecycle2:rxlifecycle:${versions.rxLifecycle}"
-  implementation "com.trello.rxlifecycle2:rxlifecycle-android:${versions.rxLifecycle}"
+    implementation "com.trello.rxlifecycle2:rxlifecycle:${versions.rxlifecycle}"
+    implementation "com.trello.rxlifecycle2:rxlifecycle-android:${versions.rxlifecycle}"
 
-  implementation "io.reactivex.rxjava2:rxandroid:${versions.rxAndroid}"
-  implementation "io.reactivex.rxjava2:rxjava:${versions.rxJava}"
+    implementation "io.reactivex.rxjava2:rxandroid:${versions.rxandroid}"
+    implementation "io.reactivex.rxjava2:rxjava:${versions.rxjava}"
 
-  compileOnly "javax.annotation:jsr250-api:${versions.jsr250}"
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:${versions.leakcanary}"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-object-watcher-android:${versions.leakcanary}"
 
-  testImplementation "junit:junit:${versions.junit}"
-  testImplementation "org.hamcrest:hamcrest-library:${versions.hamcrest}"
-  testImplementation "org.mockito:mockito-core:${versions.mockito}"
+    testImplementation "junit:junit:${versions.junit}"
+    testImplementation "org.hamcrest:hamcrest-library:${versions.hamcrest}"
+    testImplementation "org.mockito:mockito-core:${versions.mockito}"
 }

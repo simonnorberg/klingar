@@ -15,9 +15,11 @@
  */
 package net.simno.klingar.ui.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Album;
@@ -46,26 +48,24 @@ public class MusicAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     this.listener = listener;
   }
 
-  @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  @Override @NonNull
+  public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-    switch (viewType) {
-      case ARTIST:
-        return new ArtistViewHolder(inflater.inflate(R.layout.item_artist, parent, false), this);
-      case ALBUM:
-        return new AlbumViewHolder(inflater.inflate(R.layout.item_album, parent, false), this);
-      case TRACK:
-        return new TrackViewHolder(inflater.inflate(R.layout.item_track, parent, false), this);
-      case MEDIA_TYPE:
-        return new MediaTypeViewHolder(inflater.inflate(R.layout.item_media_type, parent, false),
-            this);
-      case HEADER:
-        return new HeaderViewHolder(inflater.inflate(R.layout.item_header, parent, false));
-      default:
-        return null;
+    if (viewType == ARTIST) {
+      return new ArtistViewHolder(inflater.inflate(R.layout.item_artist, parent, false), this);
+    } else if (viewType == ALBUM) {
+      return new AlbumViewHolder(inflater.inflate(R.layout.item_album, parent, false), this);
+    } else if (viewType == TRACK) {
+      return new TrackViewHolder(inflater.inflate(R.layout.item_track, parent, false), this);
+    } else if (viewType == MEDIA_TYPE) {
+      return new MediaTypeViewHolder(inflater.inflate(R.layout.item_media_type, parent, false),
+          this);
+    } else {
+      return new HeaderViewHolder(inflater.inflate(R.layout.item_header, parent, false));
     }
   }
 
-  @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+  @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
     Object item = items.get(position);
     switch (getItemViewType(position)) {
       case ARTIST:

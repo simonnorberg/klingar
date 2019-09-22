@@ -16,13 +16,13 @@
 package net.simno.klingar.ui;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bluelinelabs.conductor.ControllerChangeHandler;
 import com.bluelinelabs.conductor.ControllerChangeType;
@@ -30,7 +30,6 @@ import com.bluelinelabs.conductor.rxlifecycle2.RxController;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastStateListener;
 
-import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.util.Rx;
 
@@ -38,6 +37,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
+import leakcanary.AppWatcher;
 
 abstract class BaseController extends RxController {
 
@@ -60,10 +60,12 @@ abstract class BaseController extends RxController {
     injectDependencies();
     View view = inflater.inflate(getLayoutResource(), container, false);
     unbinder = ButterKnife.bind(this, view);
-    if (getActivity() != null && toolbar != null) {
-      ((KlingarActivity) getActivity()).setSupportActionBar(toolbar);
+    if (getActivity() != null) {
+      if (toolbar != null) {
+        ((KlingarActivity) getActivity()).setSupportActionBar(toolbar);
+      }
+      castContext = CastContext.getSharedInstance(getActivity());
     }
-    castContext = CastContext.getSharedInstance(getActivity());
     return view;
   }
 
@@ -89,7 +91,7 @@ abstract class BaseController extends RxController {
   @Override protected void onDestroy() {
     super.onDestroy();
     if (hasExited) {
-      KlingarApp.get(getActivity()).refWatcher().watch(this);
+      AppWatcher.INSTANCE.getObjectWatcher().watch(this);
     }
   }
 
@@ -99,13 +101,7 @@ abstract class BaseController extends RxController {
     super.onChangeEnded(changeHandler, changeType);
     hasExited = !changeType.isEnter;
     if (isDestroyed()) {
-      KlingarApp.get(getActivity()).refWatcher().watch(this);
-    }
-  }
-
-  void showToast(int resId) {
-    if (getActivity() != null) {
-      Toast.makeText(getActivity(), resId, Toast.LENGTH_SHORT).show();
+      AppWatcher.INSTANCE.getObjectWatcher().watch(this);
     }
   }
 }

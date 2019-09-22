@@ -1,76 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-Copyright (C) 2016 Simon Norberg
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-  <ImageView
-      android:id="@+id/logo"
-      android:layout_width="match_parent"
-      android:layout_height="56dp"
-      android:layout_alignParentTop="true"
-      android:layout_marginTop="48dp"
-      android:scaleType="fitCenter"
-      app:srcCompat="@drawable/logo"
-      android:contentDescription="@string/description_logo"/>
-
-  <LinearLayout
-      android:id="@+id/login_form"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/logo"
-      android:layout_margin="48dp"
-      android:orientation="vertical">
-
-    <android.support.design.widget.TextInputLayout
+    <ImageView
+        android:id="@+id/logo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="56dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="48dp"
+        android:contentDescription="@string/description_logo"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/logo" />
 
-      <android.support.design.widget.TextInputEditText
-          android:id="@+id/username_edit"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:ems="10"
-          android:hint="@string/hint_username"
-          android:inputType="textEmailAddress"
-          android:maxLength="100"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
+    <LinearLayout
+        android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:passwordToggleEnabled="true">
+        android:layout_below="@+id/logo"
+        android:layout_margin="48dp"
+        android:orientation="vertical">
 
-      <android.support.design.widget.TextInputEditText
-          android:id="@+id/password_edit"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:ems="10"
-          android:hint="@string/hint_password"
-          android:inputType="textPassword"
-          android:maxLength="100"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    </android.support.design.widget.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/username_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/hint_username"
+                android:inputType="textEmailAddress"
+                android:maxLength="100" />
 
-  </LinearLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-  <include layout="@layout/include_content_loading"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/password_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/hint_password"
+                android:inputType="textPassword"
+                android:maxLength="100" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <include layout="@layout/include_content_loading" />
 
 </RelativeLayout>

@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress AndroidDomInspection -->
-<animated-vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:drawable="@drawable/ic_track">
-
-  <target android:name="track">
-    <aapt:attr name="android:animation">
-      <objectAnimator
-          android:duration="200"
-          android:interpolator="@android:interpolator/linear"
-          android:propertyName="pathData"
-          android:repeatCount="0"
-          android:repeatMode="reverse"
-          android:valueFrom="@string/path_queue"
-          android:valueTo="@string/path_track"
-          android:valueType="pathType"/>
-    </aapt:attr>
-  </target>
-
+    <target android:name="track">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="200"
+                android:interpolator="@android:interpolator/linear"
+                android:propertyName="pathData"
+                android:repeatCount="0"
+                android:repeatMode="reverse"
+                android:valueFrom="@string/path_queue"
+                android:valueTo="@string/path_track"
+                android:valueType="pathType" />
+        </aapt:attr>
+    </target>
 </animated-vector>

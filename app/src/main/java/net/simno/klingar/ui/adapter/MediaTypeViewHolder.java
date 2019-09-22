@@ -15,9 +15,10 @@
  */
 package net.simno.klingar.ui.adapter;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.MediaType;

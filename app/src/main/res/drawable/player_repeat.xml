@@ -1,37 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<animated-selector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-  <item
-      android:id="@+id/repeat_all"
-      android:drawable="@drawable/ic_repeat_all"
-      app:state_repeat_all="true"
-      app:state_repeat_one="false"/>
-
-  <item
-      android:id="@+id/repeat_one"
-      android:drawable="@drawable/ic_repeat_one"
-      app:state_repeat_all="false"
-      app:state_repeat_one="true"/>
-
-  <item
-      android:id="@+id/repeat_off"
-      android:drawable="@drawable/ic_repeat_off"/>
-
-  <transition
-      android:drawable="@drawable/transition_repeat_off_to_all"
-      android:fromId="@id/repeat_off"
-      android:toId="@id/repeat_all"/>
-
-  <transition
-      android:drawable="@drawable/transition_repeat_all_to_one"
-      android:fromId="@id/repeat_all"
-      android:toId="@id/repeat_one"/>
-
-  <transition
-      android:drawable="@drawable/transition_repeat_one_to_off"
-      android:fromId="@id/repeat_one"
-      android:toId="@id/repeat_off"/>
-
+    <item
+        android:id="@+id/repeat_all"
+        android:drawable="@drawable/ic_repeat_all"
+        app:state_repeat_all="true"
+        app:state_repeat_one="false" />
+    <item
+        android:id="@+id/repeat_one"
+        android:drawable="@drawable/ic_repeat_one"
+        app:state_repeat_all="false"
+        app:state_repeat_one="true" />
+    <item
+        android:id="@+id/repeat_off"
+        android:drawable="@drawable/ic_repeat_off" />
+    <transition
+        android:drawable="@drawable/transition_repeat_off_to_all"
+        android:fromId="@id/repeat_off"
+        android:toId="@id/repeat_all" />
+    <transition
+        android:drawable="@drawable/transition_repeat_all_to_one"
+        android:fromId="@id/repeat_all"
+        android:toId="@id/repeat_one" />
+    <transition
+        android:drawable="@drawable/transition_repeat_one_to_off"
+        android:fromId="@id/repeat_one"
+        android:toId="@id/repeat_off" />
 </animated-selector>

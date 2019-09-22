@@ -1,4 +1,4 @@
-Klingar [![Build Status](https://travis-ci.org/simonnorberg/klingar.svg?branch=master)](https://travis-ci.org/simonnorberg/klingar)
+Klingar [![CircleCI](https://circleci.com/gh/simonnorberg/klingar.svg?style=svg)](https://circleci.com/gh/simonnorberg/klingar)
 =======
 
 Klingar is an Android music player for Plex Media Server with Google Cast support. Work in progress!

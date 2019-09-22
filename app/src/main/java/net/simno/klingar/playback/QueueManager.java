@@ -15,8 +15,8 @@
  */
 package net.simno.klingar.playback;
 
-import android.support.annotation.IntDef;
-import android.support.v4.util.Pair;
+import androidx.annotation.IntDef;
+import androidx.core.util.Pair;
 
 import com.jakewharton.rxrelay2.BehaviorRelay;
 

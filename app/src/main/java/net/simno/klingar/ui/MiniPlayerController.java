@@ -16,12 +16,13 @@
 package net.simno.klingar.ui;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;

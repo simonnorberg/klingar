@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<animated-selector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-  <item
-      android:id="@+id/shuffle_all"
-      android:drawable="@drawable/ic_shuffle_all"
-      app:state_shuffle_all="true"/>
-
-  <item
-      android:id="@+id/shuffle_off"
-      android:drawable="@drawable/ic_shuffle_off"
-      app:state_shuffle_all="false"/>
-
-  <transition
-      android:drawable="@drawable/transition_shuffle_off_to_all"
-      android:fromId="@id/shuffle_off"
-      android:toId="@id/shuffle_all"/>
-
-  <transition
-      android:drawable="@drawable/transition_shuffle_all_to_off"
-      android:fromId="@id/shuffle_all"
-      android:toId="@id/shuffle_off"/>
-
+    <item
+        android:id="@+id/shuffle_all"
+        android:drawable="@drawable/ic_shuffle_all"
+        app:state_shuffle_all="true" />
+    <item
+        android:id="@+id/shuffle_off"
+        android:drawable="@drawable/ic_shuffle_off"
+        app:state_shuffle_all="false" />
+    <transition
+        android:drawable="@drawable/transition_shuffle_off_to_all"
+        android:fromId="@id/shuffle_off"
+        android:toId="@id/shuffle_all" />
+    <transition
+        android:drawable="@drawable/transition_shuffle_all_to_off"
+        android:fromId="@id/shuffle_all"
+        android:toId="@id/shuffle_off" />
 </animated-selector>

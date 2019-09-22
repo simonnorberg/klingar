@@ -1,56 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-Copyright (C) 2016 Simon Norberg
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 <resources>
 
-  <string name="app_name">Klingar</string>
+    <string name="app_name">Klingar</string>
 
-  <string name="menu_media_route">Play on…</string>
-  <string name="menu_licenses">Open source licenses</string>
-  <string name="menu_sign_out">Sign out</string>
+    <string name="menu_media_route">Play on…</string>
+    <string name="menu_licenses">Open source licenses</string>
+    <string name="menu_sign_out">Sign out</string>
 
-  <string name="hint_username">Plex Username</string>
-  <string name="hint_password">Plex Password</string>
-  <string name="invalid_username">Invalid username</string>
-  <string name="invalid_password">Minimum 8 characters</string>
-  <string name="sign_in_failed">Sign in failed</string>
+    <string name="hint_username">Plex Username</string>
+    <string name="hint_password">Plex Password</string>
+    <string name="invalid_username">Invalid username</string>
+    <string name="invalid_password">Minimum 8 characters</string>
+    <string name="sign_in_failed">Sign in failed</string>
 
-  <string name="action_queue_track">Queue</string>
+    <string name="action_queue_track">Queue</string>
 
-  <string name="description_logo">Klingar logo</string>
-  <string name="description_queue">Show playing queue</string>
-  <string name="description_track">Show album cover</string>
-  <string name="description_shuffle_off">Shuffle off</string>
-  <string name="description_shuffle_all">Shuffle all</string>
-  <string name="description_previous">Previous track</string>
-  <string name="description_play">Play</string>
-  <string name="description_pause">Pause</string>
-  <string name="description_next">Next track</string>
-  <string name="description_repeat_off">Repeat off</string>
-  <string name="description_repeat_all">Repeat all</string>
-  <string name="description_repeat_one">Repeat one</string>
+    <string name="description_logo">Klingar logo</string>
+    <string name="description_queue">Show playing queue</string>
+    <string name="description_track">Show album cover</string>
+    <string name="description_shuffle_off">Shuffle off</string>
+    <string name="description_shuffle_all">Shuffle all</string>
+    <string name="description_previous">Previous track</string>
+    <string name="description_play">Play</string>
+    <string name="description_pause">Pause</string>
+    <string name="description_next">Next track</string>
+    <string name="description_repeat_off">Repeat off</string>
+    <string name="description_repeat_all">Repeat all</string>
+    <string name="description_repeat_one">Repeat one</string>
 
-  <string name="label_previous">Previous</string>
-  <string name="label_pause">Pause</string>
-  <string name="label_play">Play</string>
-  <string name="label_next">Next</string>
-  <string name="casting_to_device">Casting to %1$s</string>
-  <string name="stop_casting">Stop Casting</string>
+    <string name="label_previous">Previous</string>
+    <string name="label_pause">Pause</string>
+    <string name="label_play">Play</string>
+    <string name="label_next">Next</string>
+    <string name="casting_to_device">Casting to %1$s</string>
+    <string name="stop_casting">Stop Casting</string>
 
-  <string name="notification_channel">Klingar_Channel_ID</string>
-  <string name="notification_channel_description">Channel ID for Klingar</string>
+    <string name="notification_channel">Klingar_Channel_ID</string>
+    <string name="notification_channel_description">Channel ID for Klingar</string>
 
 </resources>

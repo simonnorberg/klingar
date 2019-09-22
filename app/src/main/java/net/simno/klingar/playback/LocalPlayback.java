@@ -31,11 +31,9 @@ import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -71,8 +69,7 @@ class LocalPlayback implements Playback, Player.EventListener,
   private final WifiManager.WifiLock wifiLock;
   private final AudioManager audioManager;
   private final MusicController musicController;
-  private final DefaultDataSourceFactory dataSourceFactory;
-  private final DefaultExtractorsFactory extractorsFactory;
+  private final ProgressiveMediaSource.Factory mediaSourceFactory;
   private SimpleExoPlayer exoPlayer;
   private Callback callback;
   private int audioFocus = AUDIO_NO_FOCUS_NO_DUCK;
@@ -99,9 +96,8 @@ class LocalPlayback implements Playback, Player.EventListener,
     this.audioManager = audioManager;
     this.wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "klingar_lock");
     String agent = Util.getUserAgent(context, context.getResources().getString(R.string.app_name));
-    this.dataSourceFactory = new DefaultDataSourceFactory(context, null,
-        new OkHttpDataSourceFactory(callFactory, agent, null));
-    this.extractorsFactory = new DefaultExtractorsFactory();
+    this.mediaSourceFactory = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(
+        context, null, new OkHttpDataSourceFactory(callFactory, agent)));
   }
 
   private static String getExoPlayerState(int state) {
@@ -135,14 +131,13 @@ class LocalPlayback implements Playback, Player.EventListener,
     }
     switch (exoPlayer.getPlaybackState()) {
       case Player.STATE_IDLE:
+      case Player.STATE_ENDED:
         return PlaybackStateCompat.STATE_PAUSED;
       case Player.STATE_BUFFERING:
         return PlaybackStateCompat.STATE_BUFFERING;
       case Player.STATE_READY:
         return exoPlayer.getPlayWhenReady() ? PlaybackStateCompat.STATE_PLAYING
             : PlaybackStateCompat.STATE_PAUSED;
-      case Player.STATE_ENDED:
-        return PlaybackStateCompat.STATE_PAUSED;
       default:
         return PlaybackStateCompat.STATE_NONE;
     }
@@ -188,8 +183,7 @@ class LocalPlayback implements Playback, Player.EventListener,
       exoPlayer.setAudioAttributes(audioAttributes);
 
       Uri uri = Uri.parse(track.source());
-      ExtractorMediaSource source = new ExtractorMediaSource(uri, dataSourceFactory,
-          extractorsFactory, null, null);
+      ProgressiveMediaSource source = mediaSourceFactory.createMediaSource(uri);
       exoPlayer.prepare(source);
 
       // If we are streaming from the internet, we want to hold a Wifi lock, which prevents the
@@ -259,9 +253,6 @@ class LocalPlayback implements Playback, Player.EventListener,
   @Override public void onRepeatModeChanged(int repeatMode) {
   }
 
-  @Override public void onTimelineChanged(Timeline timeline, Object manifest) {
-  }
-
   @Override
   public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
   }
@@ -274,9 +265,6 @@ class LocalPlayback implements Playback, Player.EventListener,
     if (callback != null) {
       callback.onPlaybackStatusChanged();
     }
-  }
-
-  @Override public void onPositionDiscontinuity() {
   }
 
   @Override public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {

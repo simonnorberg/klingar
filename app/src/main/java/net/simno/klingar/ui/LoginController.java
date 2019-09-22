@@ -16,9 +16,6 @@
 package net.simno.klingar.ui;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.widget.ContentLoadingProgressBar;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,11 +25,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.widget.ContentLoadingProgressBar;
 
 import com.bluelinelabs.conductor.RouterTransaction;
-import com.squareup.okhttp.Credentials;
 
-import net.simno.klingar.BuildConfig;
 import net.simno.klingar.KlingarApp;
 import net.simno.klingar.R;
 import net.simno.klingar.data.LoginManager;
@@ -45,6 +44,7 @@ import javax.inject.Inject;
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.OnEditorAction;
+import okhttp3.Credentials;
 
 import static com.bluelinelabs.conductor.rxlifecycle2.ControllerEvent.DETACH;
 import static net.simno.klingar.util.Views.invisible;
@@ -87,22 +87,7 @@ public class LoginController extends BaseController {
     return view;
   }
 
-  @Override protected void onAttach(@NonNull View view) {
-    super.onAttach(view);
-    debugLogin();
-  }
-
-  private void debugLogin() {
-    if (BuildConfig.DEBUG) {
-      if (!TextUtils.equals(BuildConfig.DEBUG_USER, "null")
-          && !TextUtils.equals(BuildConfig.DEBUG_PWD, "null")) {
-        usernameEdit.setText(BuildConfig.DEBUG_USER);
-        passwordEdit.setText(BuildConfig.DEBUG_PWD);
-        login();
-      }
-    }
-  }
-
+  @SuppressWarnings("unused")
   @OnEditorAction(R.id.password_edit)
   boolean onPasswordEditorAction(TextView view, int actionId, KeyEvent event) {
     if ((event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
@@ -147,7 +132,7 @@ public class LoginController extends BaseController {
           loginManager.logout();
           contentLoading.hide();
           visible(loginForm);
-          showToast(R.string.sign_in_failed);
+          Toast.makeText(getActivity(), R.string.sign_in_failed, Toast.LENGTH_SHORT).show();
           enableInput();
         }));
   }

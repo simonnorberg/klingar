@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress AndroidDomInspection -->
-<animated-vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:drawable="@drawable/ic_repeat_one">
-
-  <target android:name="one_group">
-    <aapt:attr name="android:animation">
-      <set android:ordering="together">
-        <objectAnimator
-            android:duration="150"
-            android:interpolator="@android:anim/decelerate_interpolator"
-            android:propertyName="scaleX"
-            android:valueFrom="0.0"
-            android:valueTo="1.0"/>
-        <objectAnimator
-            android:duration="150"
-            android:interpolator="@android:anim/decelerate_interpolator"
-            android:propertyName="scaleY"
-            android:valueFrom="0.0"
-            android:valueTo="1.0"/>
-      </set>
-    </aapt:attr>
-  </target>
-
+    <target android:name="one_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:duration="150"
+                    android:interpolator="@android:anim/decelerate_interpolator"
+                    android:propertyName="scaleX"
+                    android:valueFrom="0.0"
+                    android:valueTo="1.0" />
+                <objectAnimator
+                    android:duration="150"
+                    android:interpolator="@android:anim/decelerate_interpolator"
+                    android:propertyName="scaleY"
+                    android:valueFrom="0.0"
+                    android:valueTo="1.0" />
+            </set>
+        </aapt:attr>
+    </target>
 </animated-vector>

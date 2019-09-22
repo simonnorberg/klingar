@@ -27,12 +27,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.support.annotation.Nullable;
-import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.media.MediaRouter;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.media.session.MediaButtonReceiver;
+import androidx.mediarouter.media.MediaRouter;
 
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
@@ -55,8 +58,6 @@ import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static android.support.v4.media.session.MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS;
-import static android.support.v4.media.session.MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS;
 
 public class MusicService extends Service implements PlaybackManager.PlaybackServiceCallback {
 
@@ -105,7 +106,6 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
     }
 
     session.setCallback(playbackManager.getMediaSessionCallback());
-    session.setFlags(FLAG_HANDLES_MEDIA_BUTTONS | FLAG_HANDLES_TRANSPORT_CONTROLS);
 
     Context context = getApplicationContext();
     Intent intent = new Intent(context, KlingarActivity.class);
@@ -166,7 +166,8 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
     // The service needs to continue running even after the bound client (usually a
     // MediaController) disconnects, otherwise the music playback will stop.
     // Calling startService(Intent) will keep the service running until it is explicitly killed.
-    startService(new Intent(getApplicationContext(), MusicService.class));
+    ContextCompat.startForegroundService(getApplicationContext(),
+        new Intent(getApplicationContext(), MusicService.class));
   }
 
   @Override public void onPlaybackStop() {
@@ -196,7 +197,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
       weakReference = new WeakReference<>(service);
     }
 
-    @Override public void handleMessage(Message msg) {
+    @Override public void handleMessage(@NonNull Message msg) {
       MusicService service = weakReference.get();
       if (service != null && service.playbackManager.getPlayback() != null) {
         if (!service.playbackManager.getPlayback().isPlaying()) {

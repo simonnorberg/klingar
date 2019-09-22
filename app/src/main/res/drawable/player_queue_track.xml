@@ -1,25 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<animated-selector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-  <item
-      android:id="@+id/track"
-      android:drawable="@drawable/ic_track"
-      app:state_track="true"/>
-
-  <item
-      android:id="@+id/queue"
-      android:drawable="@drawable/ic_queue"/>
-
-  <transition
-      android:drawable="@drawable/transition_queue_to_track"
-      android:fromId="@id/queue"
-      android:toId="@id/track"/>
-
-  <transition
-      android:drawable="@drawable/transition_track_to_queue"
-      android:fromId="@id/track"
-      android:toId="@id/queue"/>
-
+    <item
+        android:id="@+id/track"
+        android:drawable="@drawable/ic_track"
+        app:state_track="true" />
+    <item
+        android:id="@+id/queue"
+        android:drawable="@drawable/ic_queue" />
+    <transition
+        android:drawable="@drawable/transition_queue_to_track"
+        android:fromId="@id/queue"
+        android:toId="@id/track" />
+    <transition
+        android:drawable="@drawable/transition_track_to_queue"
+        android:fromId="@id/track"
+        android:toId="@id/queue" />
 </animated-selector>

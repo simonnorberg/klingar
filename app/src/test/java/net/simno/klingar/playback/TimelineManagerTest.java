@@ -16,7 +16,8 @@
 package net.simno.klingar.playback;
 
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v4.util.Pair;
+
+import androidx.core.util.Pair;
 
 import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.data.model.Track;

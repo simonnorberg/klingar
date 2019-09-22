@@ -16,7 +16,8 @@
 package net.simno.klingar.data.api;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import net.simno.klingar.BuildConfig;
 
@@ -35,7 +36,7 @@ class PlexHeaders implements Interceptor {
     this.appName = appName;
   }
 
-  @Override public Response intercept(@NonNull Chain chain) throws IOException {
+  @Override @NonNull public Response intercept(@NonNull Chain chain) throws IOException {
     return chain.proceed(chain.request().newBuilder()
         .header("X-Plex-Platform", "Android")
         .header("X-Plex-Provides", "player")

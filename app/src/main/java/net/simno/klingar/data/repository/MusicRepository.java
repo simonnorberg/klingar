@@ -15,7 +15,7 @@
  */
 package net.simno.klingar.data.repository;
 
-import android.util.Pair;
+import androidx.core.util.Pair;
 
 import net.simno.klingar.data.model.Album;
 import net.simno.klingar.data.model.Artist;

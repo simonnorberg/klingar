@@ -18,8 +18,10 @@ package net.simno.klingar.ui.widget;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -30,7 +32,11 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     this.divider = divider;
   }
 
-  @Override public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+  @Override public void onDraw(
+      @NonNull Canvas c,
+      RecyclerView parent,
+      @NonNull RecyclerView.State state
+  ) {
     if (parent.getLayoutManager() == null) {
       return;
     }
@@ -55,8 +61,13 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     canvas.restore();
   }
 
-  @Override public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
-                                       RecyclerView.State state) {
+  @Override
+  public void getItemOffsets(
+      Rect outRect,
+      @NonNull View view,
+      @NonNull RecyclerView parent,
+      @NonNull RecyclerView.State state
+  ) {
     outRect.set(0, 0, 0, divider.getIntrinsicHeight());
   }
 }

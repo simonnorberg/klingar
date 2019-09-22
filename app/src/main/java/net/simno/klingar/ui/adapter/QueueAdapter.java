@@ -15,9 +15,11 @@
  */
 package net.simno.klingar.ui.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
@@ -39,7 +41,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueViewHolder>
     this.listener = listener;
   }
 
-  @Override public QueueViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  @Override @NonNull public QueueViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
     if (viewType == STATE_PLAYING) {
       return new PlayingViewHolder(inflater.inflate(R.layout.item_playing, parent, false), this);

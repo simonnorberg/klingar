@@ -15,10 +15,14 @@
  */
 package net.simno.klingar.data.api;
 
+import androidx.annotation.NonNull;
+
 import net.simno.klingar.data.api.model.MediaContainer;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -30,7 +34,8 @@ import static org.hamcrest.core.Is.is;
 
 public class MediaServiceTest {
 
-  private static final HttpUrl URL = HttpUrl.parse("https://plex.tv?X-Plex-Token=token");
+  @NonNull private static final HttpUrl URL =
+      Objects.requireNonNull(HttpUrl.parse("https://plex.tv?X-Plex-Token=token"));
 
   private TestApi api;
   private MediaService media;
@@ -90,7 +95,7 @@ public class MediaServiceTest {
   @Test public void playQueue() {
     media.playQueue(URL, "trackKey", "trackParentKey", "libraryId");
     assertThat(api.actual, is("https://plex.tv/playQueues?repeat=0&shuffle=0&type=audio" +
-        "&continuous=0&key=trackKey&uri=library://libraryId/item/trackParentKey" +
+        "&continuous=0&key=trackKey&uri=library%3A%2F%2FlibraryId%2Fitem%2FtrackParentKey" +
         "&X-Plex-Token=token"));
   }
 

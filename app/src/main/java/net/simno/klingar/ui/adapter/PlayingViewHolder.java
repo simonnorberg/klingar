@@ -19,9 +19,10 @@ import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import net.simno.klingar.R;
 import net.simno.klingar.data.model.Track;
@@ -37,12 +38,14 @@ final class PlayingViewHolder extends QueueViewHolder {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       AnimatedVectorDrawable avd = (AnimatedVectorDrawable) ContextCompat.getDrawable(
           itemView.getContext(), R.drawable.equalizer);
-      avd.registerAnimationCallback(new Animatable2.AnimationCallback() {
-        @Override public void onAnimationEnd(Drawable drawable) {
-          avd.start();
-        }
-      });
-      avd.start();
+      if (avd != null) {
+        avd.registerAnimationCallback(new Animatable2.AnimationCallback() {
+          @Override public void onAnimationEnd(Drawable drawable) {
+            avd.start();
+          }
+        });
+        avd.start();
+      }
       title.setCompoundDrawablesWithIntrinsicBounds(avd, null, null, null);
     }
   }

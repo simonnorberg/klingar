@@ -15,7 +15,7 @@
  */
 package net.simno.klingar.data.api;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class AuthInterceptor implements Interceptor {
     this.authToken = authToken;
   }
 
-  @Override public Response intercept(@NonNull Chain chain) throws IOException {
+  @NonNull @Override public Response intercept(@NonNull Chain chain) throws IOException {
     Request request = chain.request();
 
     String authToken = this.authToken;

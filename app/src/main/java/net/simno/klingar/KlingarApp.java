@@ -18,9 +18,6 @@ package net.simno.klingar;
 import android.app.Application;
 import android.content.Context;
 
-import com.squareup.leakcanary.LeakCanary;
-import com.squareup.leakcanary.RefWatcher;
-
 import net.simno.klingar.util.DebugTree;
 
 import timber.log.Timber;
@@ -28,7 +25,6 @@ import timber.log.Timber;
 public class KlingarApp extends Application {
 
   private final AppComponent appComponent = createComponent();
-  private RefWatcher refWatcher;
 
   public static KlingarApp get(Context context) {
     return (KlingarApp) context.getApplicationContext();
@@ -36,20 +32,12 @@ public class KlingarApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
-
-    if (LeakCanary.isInAnalyzerProcess(this)) {
-      // This process is dedicated to LeakCanary for heap analysis.
-      // You should not init your app in this process.
-      return;
-    }
-    refWatcher = LeakCanary.install(this);
-
     if (BuildConfig.DEBUG) {
       Timber.plant(new DebugTree());
     }
   }
 
-  protected AppComponent createComponent() {
+  private AppComponent createComponent() {
     return DaggerKlingarComponent.builder()
         .klingarModule(new KlingarModule(this))
         .build();
@@ -57,9 +45,5 @@ public class KlingarApp extends Application {
 
   public AppComponent component() {
     return appComponent;
-  }
-
-  public RefWatcher refWatcher() {
-    return refWatcher;
   }
 }

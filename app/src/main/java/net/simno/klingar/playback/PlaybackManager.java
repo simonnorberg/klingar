@@ -17,10 +17,11 @@
 package net.simno.klingar.playback;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.media.session.PlaybackStateCompat.State;
+
+import androidx.annotation.NonNull;
 
 import net.simno.klingar.AndroidClock;
 import net.simno.klingar.R;

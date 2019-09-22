@@ -15,7 +15,7 @@
  */
 package net.simno.klingar.util;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import timber.log.Timber;
 
