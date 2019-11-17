@@ -17,7 +17,6 @@ package net.simno.klingar.data.repository;
 
 import androidx.annotation.NonNull;
 import androidx.collection.SimpleArrayMap;
-import androidx.core.util.Pair;
 
 import net.simno.klingar.data.Type;
 import net.simno.klingar.data.api.MediaService;
@@ -31,6 +30,7 @@ import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.MediaType;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
+import net.simno.klingar.util.Pair;
 import net.simno.klingar.util.Strings;
 
 import java.util.ArrayList;

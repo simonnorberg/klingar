@@ -31,6 +31,19 @@ import net.simno.klingar.playback.QueueManager.ShuffleMode;
 
 import timber.log.Timber;
 
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_BUFFERING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_CONNECTING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_ERROR;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_FAST_FORWARDING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_NONE;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_REWINDING;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED;
+
 class PlaybackManager implements Playback.Callback {
 
   static final String CUSTOM_ACTION_REPEAT = "net.simno.klingar.REPEAT";
@@ -97,7 +110,7 @@ class PlaybackManager implements Playback.Callback {
 
     serviceCallback.onPlaybackStateUpdated(stateBuilder.build());
 
-    if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
+    if (state == STATE_PLAYING || state == STATE_PAUSED) {
       serviceCallback.onNotificationRequired();
     }
   }
@@ -170,17 +183,17 @@ class PlaybackManager implements Playback.Callback {
     playback.stop(false);
     newPlayback.setCallback(this);
     newPlayback.setCurrentTrack(currentMediaId);
-    newPlayback.seekTo(position < 0 ? 0 : position);
+    newPlayback.seekTo(Math.max(position, 0));
     newPlayback.start();
     // Finally swap the instance
     playback = newPlayback;
     switch (oldState) {
-      case PlaybackStateCompat.STATE_BUFFERING:
-      case PlaybackStateCompat.STATE_CONNECTING:
-      case PlaybackStateCompat.STATE_PAUSED:
+      case STATE_BUFFERING:
+      case STATE_CONNECTING:
+      case STATE_PAUSED:
         playback.pause();
         break;
-      case PlaybackStateCompat.STATE_PLAYING:
+      case STATE_PLAYING:
         Track currentQueueItem = queueManager.currentTrack();
         if (resumePlaying && currentQueueItem != null) {
           playback.play(currentQueueItem);
@@ -190,6 +203,15 @@ class PlaybackManager implements Playback.Callback {
           playback.stop(true);
         }
         break;
+
+      case STATE_ERROR:
+      case STATE_FAST_FORWARDING:
+      case STATE_NONE:
+      case STATE_REWINDING:
+      case STATE_SKIPPING_TO_NEXT:
+      case STATE_SKIPPING_TO_PREVIOUS:
+      case STATE_SKIPPING_TO_QUEUE_ITEM:
+      case STATE_STOPPED:
       default:
     }
   }

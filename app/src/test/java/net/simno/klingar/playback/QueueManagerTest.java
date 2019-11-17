@@ -15,9 +15,8 @@
  */
 package net.simno.klingar.playback;
 
-import androidx.core.util.Pair;
-
 import net.simno.klingar.data.model.Track;
+import net.simno.klingar.util.Pair;
 
 import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Before;

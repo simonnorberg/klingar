@@ -6,10 +6,10 @@ buildscript {
             'target_sdk'   : 29,
             'androidx'     : [
                     'appcompat'   : '1.1.0',
-                    'core'        : '1.1.0',
+                    'core'        : '1.2.0-beta02',
                     'mediarouter' : '1.1.0',
-                    'material'    : '1.0.0',
-                    'recyclerview': '1.0.0'
+                    'material'    : '1.2.0-alpha01',
+                    'recyclerview': '1.1.0-rc01'
             ],
             'play_services': [
                     'cast': '17.1.0',
@@ -17,21 +17,21 @@ buildscript {
             ],
             'automoshi'    : '0.4.7',
             'autoparcel'   : '0.2.8',
-            'autovalue'    : '1.6.6',
+            'autovalue'    : '1.7',
             'butterknife'  : '10.2.0',
             'conductor'    : '3.0.0-rc2',
-            'dagger'       : '2.24',
-            'exoplayer'    : '2.10.5',
+            'dagger'       : '2.25.2',
+            'exoplayer'    : '2.10.7',
             'glide'        : '4.10.0',
-            'hamcrest'     : '2.2-rc1',
-            'junit'        : '4.13-beta-3',
+            'hamcrest'     : '2.2',
+            'junit'        : '4.13-rc-1',
             'leakcanary'   : '2.0-beta-3',
-            'mockito'      : '3.0.0',
+            'mockito'      : '3.1.0',
             'moshi'        : '1.8.0',
-            'okhttp'       : '4.2.0',
-            'retrofit'     : '2.6.1',
+            'okhttp'       : '4.2.2',
+            'retrofit'     : '2.6.2',
             'rxandroid'    : '2.1.1',
-            'rxjava'       : '2.2.12',
+            'rxjava'       : '2.2.14',
             'rxlifecycle'  : '2.2.2',
             'rxrelay'      : '2.1.1',
             'timber'       : '4.7.1'
@@ -41,14 +41,14 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
-        classpath 'com.google.gms:oss-licenses:0.9.2'
-        classpath 'com.github.triplet.gradle:play-publisher:2.4.1'
+        classpath 'com.android.tools.build:gradle:3.6.0-beta04'
+        classpath 'com.google.android.gms:oss-licenses-plugin:0.9.5'
+        classpath 'com.github.triplet.gradle:play-publisher:2.6.0'
     }
 }
 
 plugins {
-    id 'com.github.ben-manes.versions' version '0.25.0'
+    id 'com.github.ben-manes.versions' version '0.27.0'
 }
 
 allprojects {

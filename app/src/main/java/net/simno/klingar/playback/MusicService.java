@@ -207,7 +207,7 @@ public class MusicService extends Service implements PlaybackManager.PlaybackSer
     }
   }
 
-  private class LocalBinder extends Binder {
+  private static class LocalBinder extends Binder {
   }
 
   /**

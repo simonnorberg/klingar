@@ -15,14 +15,13 @@
  */
 package net.simno.klingar.data.repository;
 
-import androidx.core.util.Pair;
-
 import net.simno.klingar.data.model.Album;
 import net.simno.klingar.data.model.Artist;
 import net.simno.klingar.data.model.Library;
 import net.simno.klingar.data.model.MediaType;
 import net.simno.klingar.data.model.PlexItem;
 import net.simno.klingar.data.model.Track;
+import net.simno.klingar.util.Pair;
 
 import java.util.List;
 

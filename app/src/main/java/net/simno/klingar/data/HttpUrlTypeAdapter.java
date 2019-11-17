@@ -19,12 +19,14 @@ import android.os.Parcel;
 
 import com.ryanharter.auto.value.parcel.TypeAdapter;
 
+import java.util.Objects;
+
 import okhttp3.HttpUrl;
 
 public class HttpUrlTypeAdapter implements TypeAdapter<HttpUrl> {
 
   @Override public HttpUrl fromParcel(Parcel in) {
-    return HttpUrl.parse(in.readString());
+    return HttpUrl.parse(Objects.requireNonNull(in.readString()));
   }
 
   @Override public void toParcel(HttpUrl value, Parcel dest) {

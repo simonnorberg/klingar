@@ -28,6 +28,7 @@ public abstract class Server {
   public abstract HttpUrl uri();
 
   @AutoValue.Builder public abstract static class Builder {
+    @SuppressWarnings("UnusedReturnValue")
     public abstract Builder uri(HttpUrl uri);
     public abstract Server build();
   }

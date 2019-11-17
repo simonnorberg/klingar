@@ -37,6 +37,7 @@ import timber.log.Timber;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+@SuppressWarnings("deprecation")
 @Module
 public class ApiModule {
 

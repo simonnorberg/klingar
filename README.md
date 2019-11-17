@@ -3,10 +3,6 @@ Klingar [![CircleCI](https://circleci.com/gh/simonnorberg/klingar.svg?style=svg)
 
 Klingar is an Android music player for Plex Media Server with Google Cast support. Work in progress!
 
-Note: Using Klingar requires a Plex account. Local server discovery is not supported at the moment.
-
-<a href="https://play.google.com/store/apps/details?id=net.simno.klingar"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" width=185 /></a>
-
 ![Screenshot](https://raw.github.com/simonnorberg/klingar/master/screenshots/klingar-browser-small.png)
 ![Screenshot](https://raw.github.com/simonnorberg/klingar/master/screenshots/klingar-player-small.png)
 

@@ -94,7 +94,7 @@ class LocalPlayback implements Playback, Player.EventListener,
     this.context = context;
     this.musicController = musicController;
     this.audioManager = audioManager;
-    this.wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "klingar_lock");
+    this.wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "klingar");
     String agent = Util.getUserAgent(context, context.getResources().getString(R.string.app_name));
     this.mediaSourceFactory = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(
         context, null, new OkHttpDataSourceFactory(callFactory, agent)));

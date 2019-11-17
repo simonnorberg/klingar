@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.oss.licenses.plugin'
+apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 apply plugin: 'com.github.triplet.play'
 apply plugin: 'checkstyle'
 
@@ -11,7 +11,7 @@ play {
 }
 
 checkstyle {
-    toolVersion = '8.24'
+    toolVersion = '8.26'
 }
 
 task checkstyle(type: Checkstyle) {
@@ -39,8 +39,8 @@ android {
         applicationId 'net.simno.klingar'
         minSdkVersion versions.min_sdk
         targetSdkVersion versions.target_sdk
-        versionCode 1104
-        versionName '0.12'
+        versionCode 1105
+        versionName '0.13'
         buildConfigField 'String', 'CAST_APP_ID', '\"631E34EA\"'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }

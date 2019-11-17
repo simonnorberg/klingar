@@ -176,6 +176,14 @@ public class MusicController {
         case STATE_STOPPED:
           play();
           break;
+        case STATE_CONNECTING:
+        case STATE_ERROR:
+        case STATE_FAST_FORWARDING:
+        case STATE_NONE:
+        case STATE_REWINDING:
+        case STATE_SKIPPING_TO_NEXT:
+        case STATE_SKIPPING_TO_PREVIOUS:
+        case STATE_SKIPPING_TO_QUEUE_ITEM:
         default:
       }
     }

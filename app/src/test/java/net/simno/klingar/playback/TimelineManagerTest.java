@@ -17,10 +17,11 @@ package net.simno.klingar.playback;
 
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import androidx.core.util.Pair;
+import androidx.annotation.NonNull;
 
 import net.simno.klingar.data.api.MediaService;
 import net.simno.klingar.data.model.Track;
+import net.simno.klingar.util.Pair;
 import net.simno.klingar.util.Rx;
 
 import org.junit.Before;
@@ -32,6 +33,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -47,7 +49,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class TimelineManagerTest {
 
-  private static final HttpUrl TEST_URL = HttpUrl.parse("https://plex.tv");
+  @NonNull private static final HttpUrl TEST_URL =
+      Objects.requireNonNull(HttpUrl.parse("https://plex.tv"));
 
   @Mock MusicController mockMusicController;
   @Mock QueueManager mockQueueManager;

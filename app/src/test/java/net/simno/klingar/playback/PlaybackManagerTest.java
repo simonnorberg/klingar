@@ -40,8 +40,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -94,7 +94,7 @@ public class PlaybackManagerTest {
     mediaSessionCallback.onPause();
 
     verify(mockPlayback, never()).pause();
-    verifyZeroInteractions(mockServiceCallback);
+    verifyNoInteractions(mockServiceCallback);
   }
 
   @Test public void onSkipToNextEvent() {
@@ -117,7 +117,7 @@ public class PlaybackManagerTest {
     mediaSessionCallback.onSkipToPrevious();
 
     verify(mockPlayback, times(1)).seekTo(0);
-    verifyZeroInteractions(mockQueueManager);
+    verifyNoInteractions(mockQueueManager);
   }
 
   @Test public void onStopEvent() {

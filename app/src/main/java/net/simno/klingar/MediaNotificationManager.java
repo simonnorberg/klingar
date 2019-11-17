@@ -36,7 +36,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.util.Pair;
 import androidx.media.app.NotificationCompat.MediaStyle;
 
 import com.bumptech.glide.Glide;
@@ -49,6 +48,7 @@ import net.simno.klingar.playback.MusicController;
 import net.simno.klingar.playback.MusicService;
 import net.simno.klingar.playback.QueueManager;
 import net.simno.klingar.ui.KlingarActivity;
+import net.simno.klingar.util.Pair;
 import net.simno.klingar.util.Rx;
 
 import io.reactivex.Flowable;
